@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 96" role="img" aria-labelledby="title">
+  <title id="title">Peptivanta Biosciences</title>
+  <defs>
+    <linearGradient id="pv" x1="8" y1="8" x2="78" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#86FFE7"/>
+      <stop offset=".52" stop-color="#19D8AA"/>
+      <stop offset="1" stop-color="#327CFF"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="88" height="88" rx="27" fill="#071A1D"/>
+  <path d="M29 70V25h23.8C64.3 25 72 31.4 72 41.8c0 10.8-8 17.7-20.2 17.7H41.7V70H29Zm12.7-21h9.6c5.3 0 8.6-2.5 8.6-6.7s-3.3-6.5-8.6-6.5h-9.6V49Z" fill="url(#pv)"/>
+  <path d="m48 60.5 9.7 10.7 15-19.5" fill="none" stroke="#86FFE7" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="72.8" cy="51.4" r="3.5" fill="#86FFE7"/>
+  <circle cx="57.6" cy="71.2" r="3.1" fill="#19D8AA"/>
+  <text x="118" y="45" fill="#071A1D" font-family="Segoe UI, Arial, sans-serif" font-size="31" font-weight="700" letter-spacing="4">PEPTIVANTA</text>
+  <text x="120" y="68" fill="#53706F" font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="600" letter-spacing="7">BIOSCIENCES</text>
+</svg>
