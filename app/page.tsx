@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { createWhatsAppUrl, siteConfig } from "../site.config";
@@ -233,7 +232,7 @@ const products = [
 function Brand() {
   return (
     <Link className="brand" href="#top" aria-label="Peptivanta home">
-      <Image src="/logo-mark.svg" alt="" width={44} height={44} priority />
+      <img src="/logo-mark.svg" alt="" width={44} height={44} />
       <span>
         <strong>{siteConfig.brandName}</strong>
         <small>Biosciences</small>
@@ -341,12 +340,9 @@ export default function Home() {
           <div className="orbit orbit-one" />
           <div className="orbit orbit-two" />
           <div className="hero-image-frame">
-            <Image
+            <img
               src="/images/facility.jpg"
               alt="Controlled packaging facility"
-              fill
-              sizes="(max-width: 900px) 100vw, 48vw"
-              priority
             />
             <div className="image-scan" aria-hidden="true" />
           </div>
@@ -501,16 +497,16 @@ export default function Home() {
           </div>
         </div>
         <figure className="facility-photo">
-          <Image src="/images/inventory.jpg" alt={t.inventoryCaption} fill sizes="(max-width: 800px) 100vw, 46vw" />
+          <img src="/images/inventory.jpg" alt={t.inventoryCaption} />
           <figcaption>{t.inventoryCaption}</figcaption>
         </figure>
       </section>
 
       <section className="private-label section-shell" id="private-label">
         <div className="private-image">
-          <Image src="/images/vials.png" alt="Unlabelled vials prepared for packaging" fill sizes="(max-width: 800px) 100vw, 42vw" />
+          <img src="/images/vials.png" alt="Unlabelled vials prepared for packaging" />
           <div className="label-sample">
-            <Image src="/logo-mark.svg" alt="" width={30} height={30} />
+            <img src="/logo-mark.svg" alt="" width={30} height={30} />
             <div><strong>PEPTIVANTA</strong><small>CUSTOM LABEL SYSTEM</small></div>
           </div>
         </div>
