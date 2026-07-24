@@ -31,6 +31,7 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Peptivanta Biosciences/i);
   assert.match(html, /Evidence first/i);
   assert.match(html, /Qualified B2B peptide supply/i);
+  assert.match(html, /Watch the workflow/i);
   assert.match(html, /Professional-use and compliance notice/i);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });

@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createWhatsAppUrl, siteConfig } from "../site.config";
 
 type Locale = "en" | "pt";
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
+type IntroState = "hidden" | "visible" | "closing";
+
+const INTRO_SESSION_KEY = "peptivanta-factory-intro-seen";
 
 const copy = {
   en: {
@@ -18,6 +21,13 @@ const copy = {
       "Documented catalogue peptides, flexible private-label support, and responsive export coordination for qualified professional customers.",
     primaryCta: "Start an inquiry",
     secondaryCta: "Explore catalogue",
+    introReplay: "Watch the workflow",
+    introSkip: "Skip intro",
+    introKicker: "Peptivanta · Operations",
+    introLead: "Precision",
+    introFinish: "in motion.",
+    introStatement: "A controlled path from handling and verification to export-ready dispatch.",
+    introStages: ["Prepare", "Verify", "Pack", "Dispatch"],
     heroNote: "No online checkout · Every inquiry is reviewed",
     imageLabel: "Controlled packaging environment",
     imageSub: "Authentic operational facility image",
@@ -120,6 +130,13 @@ const copy = {
       "Peptídeos de catálogo documentados, suporte flexível de marca própria e coordenação ágil de exportação para clientes profissionais qualificados.",
     primaryCta: "Iniciar consulta",
     secondaryCta: "Ver catálogo",
+    introReplay: "Ver o fluxo",
+    introSkip: "Pular abertura",
+    introKicker: "Peptivanta · Operações",
+    introLead: "Precisão",
+    introFinish: "em movimento.",
+    introStatement: "Um percurso controlado do manuseio e verificação à expedição para exportação.",
+    introStages: ["Preparar", "Verificar", "Embalar", "Expedir"],
     heroNote: "Sem checkout online · Toda consulta é revisada",
     imageLabel: "Ambiente controlado de embalagem",
     imageSub: "Imagem autêntica do ambiente operacional",
@@ -247,7 +264,47 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState("");
+  const [introState, setIntroState] = useState<IntroState>("hidden");
   const t = copy[locale];
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    let hasSeenIntro = false;
+
+    try {
+      hasSeenIntro = window.sessionStorage.getItem(INTRO_SESSION_KEY) === "1";
+    } catch {
+      hasSeenIntro = false;
+    }
+
+    if (reducedMotion || connection?.saveData || hasSeenIntro) return;
+
+    const revealTimer = window.setTimeout(() => {
+      setIntroState("visible");
+      try {
+        window.sessionStorage.setItem(INTRO_SESSION_KEY, "1");
+      } catch {
+        // The intro can still run when browser storage is unavailable.
+      }
+    }, 180);
+
+    return () => window.clearTimeout(revealTimer);
+  }, []);
+
+  useEffect(() => {
+    if (introState === "hidden") return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const fallbackTimer =
+      introState === "visible" ? window.setTimeout(() => closeIntro(), 9000) : undefined;
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      if (fallbackTimer) window.clearTimeout(fallbackTimer);
+    };
+  }, [introState]);
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -264,6 +321,15 @@ export default function Home() {
     return locale === "en"
       ? `Hello, I represent a professional organization and am interested in ${name} (${formats}). Please share available configurations, MOQ, documentation, and destination eligibility.`
       : `Olá, represento uma organização profissional e tenho interesse em ${name} (${formats}). Por favor, envie configurações disponíveis, MOQ, documentação e elegibilidade para o destino.`;
+  }
+
+  function closeIntro() {
+    setIntroState((current) => (current === "hidden" ? current : "closing"));
+    window.setTimeout(() => setIntroState("hidden"), 700);
+  }
+
+  function openIntro() {
+    setIntroState("visible");
   }
 
   function handleInquiry(event: FormEvent<HTMLFormElement>) {
@@ -288,6 +354,63 @@ export default function Home() {
 
   return (
     <main id="top">
+      {introState !== "hidden" && (
+        <section
+          className={`site-intro site-intro-${introState}`}
+          aria-label="Peptivanta facility workflow introduction"
+        >
+          <video
+            className="site-intro-video"
+            autoPlay
+            muted
+            playsInline
+            preload="metadata"
+            poster="/media/factory-flow-poster.webp"
+            onEnded={closeIntro}
+            aria-hidden="true"
+          >
+            <source
+              src="/media/factory-flow-mobile.mp4"
+              type="video/mp4"
+              media="(max-width: 720px)"
+            />
+            <source src="/media/factory-flow-desktop.mp4" type="video/mp4" />
+          </video>
+          <div className="site-intro-shade" aria-hidden="true" />
+          <div className="site-intro-grid" aria-hidden="true" />
+          <div className="site-intro-frame" aria-hidden="true" />
+
+          <div className="site-intro-brand">
+            <img src="/logo-mark.svg" alt="" width={46} height={46} />
+            <span><strong>PEPTIVANTA</strong><small>BIOSCIENCES</small></span>
+          </div>
+
+          <button className="site-intro-skip" type="button" onClick={closeIntro}>
+            {t.introSkip}<span aria-hidden="true">↗</span>
+          </button>
+
+          <div className="site-intro-copy">
+            <p>{t.introKicker}</p>
+            <h2><span>{t.introLead}</span><em>{t.introFinish}</em></h2>
+            <div className="site-intro-statement">
+              <span aria-hidden="true">01—04</span>
+              <p>{t.introStatement}</p>
+            </div>
+          </div>
+
+          <div className="site-intro-timeline">
+            <div className="site-intro-progress" aria-hidden="true" />
+            <ol>
+              {t.introStages.map((stage, index) => (
+                <li key={stage}><span>0{index + 1}</span>{stage}</li>
+              ))}
+            </ol>
+          </div>
+
+          <p className="site-intro-meta">AUTHENTIC WORKFLOW FOOTAGE · MUTED · 08 SEC</p>
+        </section>
+      )}
+
       <div className="noise" aria-hidden="true" />
       <header className="site-header">
         <Brand />
@@ -334,6 +457,11 @@ export default function Home() {
             <a className="button" href="#inquiry">{t.primaryCta}<span>↗</span></a>
             <a className="text-link" href="#products">{t.secondaryCta}<span>↓</span></a>
           </div>
+          <button className="workflow-replay" type="button" onClick={openIntro}>
+            <span className="workflow-replay-icon" aria-hidden="true">▶</span>
+            {t.introReplay}
+            <small>08 SEC</small>
+          </button>
           <p className="micro-note">{t.heroNote}</p>
         </div>
         <div className="hero-visual">
