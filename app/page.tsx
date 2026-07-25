@@ -4,11 +4,12 @@ import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createWhatsAppUrl, siteConfig } from "../site.config";
 
-type Locale = "en" | "pt";
+type Locale = "en" | "pt" | "zh";
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
 type IntroState = "hidden" | "visible" | "closing";
 
 const INTRO_SESSION_KEY = "peptivanta-factory-intro-seen";
+const LOCALE_STORAGE_KEY = "peptivanta-locale";
 
 const copy = {
   en: {
@@ -28,9 +29,12 @@ const copy = {
     introFinish: "in motion.",
     introStatement: "A controlled path from handling and verification to export-ready dispatch.",
     introStages: ["Prepare", "Verify", "Pack", "Dispatch"],
+    introAria: "Peptivanta facility workflow introduction",
+    introMeta: "AUTHENTIC WORKFLOW FOOTAGE · MUTED · 08 SEC",
     heroNote: "No online checkout · Every inquiry is reviewed",
     imageLabel: "Controlled packaging environment",
     imageSub: "Authentic operational facility image",
+    heroImageAlt: "Controlled packaging facility",
     proof: [
       ["Batch-linked", "documentation"],
       ["B2B only", "customer review"],
@@ -66,6 +70,7 @@ const copy = {
     ask: "Ask on WhatsApp",
     docs: "Documentation review",
     noProducts: "No matching products.",
+    productGroupLabel: "Product categories",
     qualityTag: "Quality framework",
     qualityTitle: "Traceable by design.",
     qualityText:
@@ -81,6 +86,7 @@ const copy = {
     facilityText:
       "We use authentic supply-network photography and avoid stock-lab claims. Facility identity and certifications are disclosed only when documentary verification is available.",
     inventoryCaption: "Organized inventory and order allocation",
+    facilityMetrics: ["Availability review", "Analytical data where available"],
     privateTag: "Private-label support",
     privateTitle: "Your brand, with a more disciplined workflow.",
     privateText:
@@ -92,10 +98,16 @@ const copy = {
       "Confidential B2B communication",
     ],
     privateCta: "Discuss a private-label project",
+    vialsAlt: "Unlabelled vials prepared for packaging",
+    customLabelSystem: "CUSTOM LABEL SYSTEM",
     companyTag: "The brand",
     companyTitle: "Peptivanta Biosciences is designed around professional supply clarity.",
     companyText:
       "Peptivanta Biosciences is our product and service brand for professional customer communication, request qualification, documentation coordination, and export follow-through.",
+    companyDetails: ["Operating region", "Brand focus", "Response target", "Registered address"],
+    operatingRegion: "Hong Kong SAR · Sales & Export Coordination",
+    brandFocusValue: "Professional peptide supply inquiries",
+    responseTime: "Within one business day",
     inquiryTag: "Qualified inquiry",
     inquiryTitle: "Tell us what you need.",
     inquiryText:
@@ -118,7 +130,14 @@ const copy = {
     complianceText:
       "Products displayed are offered only for qualified research, analytical, formulation-development, or other lawful professional applications. They are not presented as medicines and are not for human or veterinary use. No medical claims, dosing advice, or consumer-use instructions are provided. Supply is subject to customer qualification, destination-country review, and applicable law.",
     footerNote: "Documented peptide supply for qualified professional customers.",
-    languageLabel: "Português",
+    footerLinks: ["Privacy", "Terms", "Compliance"],
+    contactLabels: ["WhatsApp", "Email"],
+    contactMissing: ["Add number in site.config.ts", "Add email in site.config.ts"],
+    whatsappCta: "Inquire",
+    whatsappAria: "WhatsApp inquiry",
+    servicePrinciplesLabel: "Service principles",
+    menuLabel: "Toggle navigation",
+    navLabel: "Primary navigation",
   },
   pt: {
     nav: ["Produtos", "Qualidade", "Marca própria", "Empresa"],
@@ -137,9 +156,12 @@ const copy = {
     introFinish: "em movimento.",
     introStatement: "Um percurso controlado do manuseio e verificação à expedição para exportação.",
     introStages: ["Preparar", "Verificar", "Embalar", "Expedir"],
+    introAria: "Introdução ao fluxo operacional da Peptivanta",
+    introMeta: "IMAGENS REAIS DO FLUXO · SEM ÁUDIO · 08 SEG",
     heroNote: "Sem checkout online · Toda consulta é revisada",
     imageLabel: "Ambiente controlado de embalagem",
     imageSub: "Imagem autêntica do ambiente operacional",
+    heroImageAlt: "Ambiente controlado de embalagem",
     proof: [
       ["Documentação", "vinculada ao lote"],
       ["Somente B2B", "análise do cliente"],
@@ -175,6 +197,7 @@ const copy = {
     ask: "Consultar no WhatsApp",
     docs: "Revisão de documentação",
     noProducts: "Nenhum produto encontrado.",
+    productGroupLabel: "Categorias de produtos",
     qualityTag: "Estrutura de qualidade",
     qualityTitle: "Rastreável por princípio.",
     qualityText:
@@ -190,6 +213,7 @@ const copy = {
     facilityText:
       "Utilizamos fotografias autênticas da rede de fornecimento. Identidade da instalação e certificações só são divulgadas com documentação verificável.",
     inventoryCaption: "Estoque organizado e alocação de pedidos",
+    facilityMetrics: ["Revisão de disponibilidade", "Dados analíticos quando disponíveis"],
     privateTag: "Suporte de marca própria",
     privateTitle: "Sua marca, com um processo mais disciplinado.",
     privateText:
@@ -201,10 +225,16 @@ const copy = {
       "Comunicação B2B confidencial",
     ],
     privateCta: "Discutir um projeto de marca própria",
+    vialsAlt: "Frascos sem rótulo preparados para embalagem",
+    customLabelSystem: "SISTEMA DE RÓTULO PERSONALIZADO",
     companyTag: "A marca",
     companyTitle: "Peptivanta Biosciences foi criada para dar clareza ao fornecimento profissional.",
     companyText:
       "Peptivanta Biosciences é nossa marca de produtos e serviços para comunicação profissional, qualificação, coordenação documental e acompanhamento de exportação.",
+    companyDetails: ["Região operacional", "Foco da marca", "Meta de resposta", "Endereço registrado"],
+    operatingRegion: "Hong Kong SAR · Coordenação de vendas e exportação",
+    brandFocusValue: "Consultas profissionais sobre fornecimento de peptídeos",
+    responseTime: "Em até um dia útil",
     inquiryTag: "Consulta qualificada",
     inquiryTitle: "Conte-nos o que você precisa.",
     inquiryText:
@@ -227,24 +257,222 @@ const copy = {
     complianceText:
       "Os produtos são oferecidos somente para pesquisa qualificada, análise, desenvolvimento de formulações ou outras aplicações profissionais lícitas. Não são apresentados como medicamentos e não se destinam ao uso humano ou veterinário. Não fornecemos alegações médicas, doses ou instruções de uso ao consumidor. O fornecimento depende da qualificação do cliente, análise do país de destino e legislação aplicável.",
     footerNote: "Fornecimento documentado para clientes profissionais qualificados.",
-    languageLabel: "English",
+    footerLinks: ["Privacidade", "Termos", "Conformidade"],
+    contactLabels: ["WhatsApp", "E-mail"],
+    contactMissing: ["Adicione o número em site.config.ts", "Adicione o e-mail em site.config.ts"],
+    whatsappCta: "Consultar",
+    whatsappAria: "Consulta pelo WhatsApp",
+    servicePrinciplesLabel: "Princípios do serviço",
+    menuLabel: "Alternar navegação",
+    navLabel: "Navegação principal",
+  },
+  zh: {
+    nav: ["产品目录", "质量体系", "贴牌服务", "品牌介绍"],
+    navIds: ["products", "quality", "private-label", "company"],
+    eyebrow: "面向专业客户的 B2B 多肽供应",
+    heroTitleA: "先看证据。",
+    heroTitleB: "每一批次。",
+    heroText:
+      "提供文件化的多肽产品目录、灵活的贴牌支持，以及面向合格专业客户的出口协调服务。",
+    primaryCta: "发起询盘",
+    secondaryCta: "浏览产品目录",
+    introReplay: "观看工厂流程",
+    introSkip: "跳过开场",
+    introKicker: "Peptivanta · 运营流程",
+    introLead: "精准把控",
+    introFinish: "贯穿全程。",
+    introStatement: "从操作、核验到出口发运，以清晰流程衔接每一个环节。",
+    introStages: ["准备", "核验", "包装", "发运"],
+    introAria: "Peptivanta 工厂流程开场",
+    introMeta: "真实流程影像 · 静音播放 · 08 秒",
+    heroNote: "不提供在线直接下单 · 每一份询盘均需审核",
+    imageLabel: "规范化包装环境",
+    imageSub: "真实运营场景照片",
+    heroImageAlt: "规范化包装作业环境",
+    proof: [
+      ["批次关联", "文件与信息"],
+      ["仅限 B2B", "客户资质审核"],
+      ["全球市场", "出口协调服务"],
+    ],
+    introTag: "更清晰的供应体验",
+    introTitle: "以文件为依据，而不是空泛承诺。",
+    introText:
+      "为经销商、科研机构、配方团队和合格商业采购方提供聚焦、清晰的对接流程。",
+    pillars: [
+      ["01", "明确产品规格", "报价前确认产品、规格、数量和所需文件。"],
+      ["02", "质量信息透明", "根据询盘核对可提供的 COA、分析数据和批次信息。"],
+      ["03", "专人跟进支持", "从资质确认到发运交接，由专人持续跟进。"],
+    ],
+    categoryTag: "产品分类 · Products Categories",
+    categoryTitle: "更快找到合适的产品入口。",
+    categoryText:
+      "可按供应形式和专业应用浏览。所有分类均进入资质审核型询盘流程，不面向消费者直接结账。",
+    categoryItems: [
+      ["01", "目录多肽", "覆盖多种目录多肽与既定规格。", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
+      ["02", "化妆品肽原料", "面向合格配方与采购团队的多肽原料。", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
+      ["03", "复配多肽", "针对多组分产品需求进行规格化沟通。", "规格审核 · 批次规划", "catalogue"],
+      ["04", "大货供应", "综合评估数量、规格、文件和目的地要求。", "商业数量 · 出口审核", "custom"],
+      ["05", "贴牌服务", "支持标签设计、瓶型呈现和包装协调。", "OEM · 包装 · 品牌支持", "custom"],
+      ["06", "定制询盘", "针对目录之外的要求提供引导式对接。", "序列 · 规格 · 文件", "custom"],
+    ],
+    productsTag: "精选产品目录",
+    productsTitle: "从这里开始筛选。",
+    productsText:
+      "以下为完整目录中的代表性产品。具体供应情况及目的地合规性需要逐项确认。",
+    search: "搜索产品名称",
+    categories: ["全部", "目录多肽", "化妆品肽原料", "定制与大货"],
+    ask: "通过 WhatsApp 询价",
+    docs: "批次文件审核",
+    noProducts: "未找到匹配的产品。",
+    productGroupLabel: "产品分类筛选",
+    qualityTag: "质量管理框架",
+    qualityTitle: "从流程开始建立可追溯性。",
+    qualityText:
+      "我们的流程重点关注规格一致性、文件可用性、包装控制和清晰交接。",
+    steps: [
+      ["01", "需求审核", "确认产品名称、规格、数量、目的地及专业用途。"],
+      ["02", "文件匹配", "将可提供的批次信息和分析文件与询盘要求进行匹配。"],
+      ["03", "包装控制", "发运前确认包装配置及相应操作要求。"],
+      ["04", "出口协调", "根据目的地要求与订单情况评估运输方案。"],
+    ],
+    facilityKicker: "真实现场影像",
+    facilityTitle: "专业、规范的运营环境。",
+    facilityText:
+      "网站采用真实供应链现场照片，避免使用与实际无关的库存实验室图片。设施身份和认证信息仅在具备可核验文件时披露。",
+    inventoryCaption: "规范化库存管理与订单分配",
+    facilityMetrics: ["根据批次确认可用性", "在可提供时匹配分析数据"],
+    privateTag: "贴牌服务支持",
+    privateTitle: "让你的品牌拥有更严谨的交付流程。",
+    privateText:
+      "面向合格经销商和品牌团队，我们支持标签设计协调、包装规格确认及按批次规划。",
+    privateBullets: [
+      "标签尺寸与设计稿审核",
+      "小批量试单沟通",
+      "批次与包装协调",
+      "保密的 B2B 商务沟通",
+    ],
+    privateCta: "沟通贴牌项目",
+    vialsAlt: "准备进行包装的无标签西林瓶",
+    customLabelSystem: "定制标签系统",
+    companyTag: "品牌介绍",
+    companyTitle: "Peptivanta Biosciences 专注于提升专业供应沟通的清晰度。",
+    companyText:
+      "Peptivanta Biosciences 是我们的产品与服务品牌，用于专业客户沟通、询盘资质确认、文件协调和出口跟进。",
+    companyDetails: ["运营区域", "品牌业务方向", "回复时效", "注册地址"],
+    operatingRegion: "中国香港特别行政区 · 销售与出口协调",
+    brandFocusValue: "专业多肽供应询盘",
+    responseTime: "一个工作日内",
+    inquiryTag: "专业询盘",
+    inquiryTitle: "告诉我们你的采购需求。",
+    inquiryText:
+      "请提供产品、规格、数量和目的地。我们将确认可依法供应的内容及可提供的文件。",
+    form: {
+      name: "姓名",
+      company: "公司 / 机构",
+      country: "目的国家或地区",
+      contact: "邮箱或 WhatsApp",
+      product: "产品或服务",
+      quantity: "预计数量",
+      use: "预期专业用途",
+      placeholderUse: "科研、分析、配方开发、经销等",
+      consent: "我确认这是专业用途询盘，并同意网站合规声明。",
+      submit: "前往 WhatsApp 继续沟通",
+      missing: "网站尚未配置 WhatsApp 号码，请先在 site.config.ts 中添加。",
+    },
+    complianceTitle: "专业用途与合规声明",
+    complianceText:
+      "网站展示的产品仅面向合格的科研、分析、配方开发或其他合法专业用途，不作为药品展示，也不面向人用或兽用。网站不提供医疗功效宣称、剂量建议或消费者使用指导。供应需经过客户资质审核、目的地法规评估，并遵守适用法律。",
+    footerNote: "为合格专业客户提供文件化的多肽供应服务。",
+    footerLinks: ["隐私政策", "网站条款", "合规声明"],
+    contactLabels: ["WhatsApp", "企业邮箱"],
+    contactMissing: ["请在 site.config.ts 中添加号码", "请在 site.config.ts 中添加邮箱"],
+    whatsappCta: "立即询盘",
+    whatsappAria: "通过 WhatsApp 发起询盘",
+    servicePrinciplesLabel: "服务原则",
+    menuLabel: "展开或收起导航",
+    navLabel: "主导航",
   },
 } as const;
 
 const products = [
-  { name: "Retatrutide", code: "RT", category: "catalogue", formats: "5–100 mg · 10 vials" },
-  { name: "Tirzepatide", code: "TR", category: "catalogue", formats: "5–60 mg · 10 vials" },
-  { name: "Semaglutide", code: "SM", category: "catalogue", formats: "Multiple configurations" },
-  { name: "BPC-157", code: "BC", category: "catalogue", formats: "2–10 mg · 10 vials" },
-  { name: "TB-500", code: "TB", category: "catalogue", formats: "2–10 mg · 10 vials" },
-  { name: "CJC-1295", code: "CJ", category: "catalogue", formats: "Multiple configurations" },
-  { name: "Ipamorelin", code: "IP", category: "catalogue", formats: "5–10 mg · 10 vials" },
-  { name: "MOTS-C", code: "MC", category: "catalogue", formats: "10–40 mg · 10 vials" },
-  { name: "GHK-Cu", code: "CU", category: "cosmetic", formats: "50–100 mg · Raw material" },
-  { name: "Acetyl Hexapeptide-8", code: "AH8", category: "cosmetic", formats: "Bulk inquiry" },
-  { name: "Custom configuration", code: "OEM", category: "custom", formats: "Private label · Packaging" },
-  { name: "Bulk peptide inquiry", code: "BLK", category: "custom", formats: "Specification-led review" },
-] satisfies Array<{ name: string; code: string; category: Exclude<Category, "all">; formats: string }>;
+  {
+    names: { en: "Retatrutide", pt: "Retatrutide", zh: "Retatrutide" },
+    code: "RT",
+    category: "catalogue",
+    formats: { en: "5–100 mg · 10 vials", pt: "5–100 mg · 10 frascos", zh: "5–100 mg · 10 瓶" },
+  },
+  {
+    names: { en: "Tirzepatide", pt: "Tirzepatide", zh: "Tirzepatide" },
+    code: "TR",
+    category: "catalogue",
+    formats: { en: "5–60 mg · 10 vials", pt: "5–60 mg · 10 frascos", zh: "5–60 mg · 10 瓶" },
+  },
+  {
+    names: { en: "Semaglutide", pt: "Semaglutide", zh: "Semaglutide" },
+    code: "SM",
+    category: "catalogue",
+    formats: { en: "Multiple configurations", pt: "Várias configurações", zh: "多种规格" },
+  },
+  {
+    names: { en: "BPC-157", pt: "BPC-157", zh: "BPC-157" },
+    code: "BC",
+    category: "catalogue",
+    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", zh: "2–10 mg · 10 瓶" },
+  },
+  {
+    names: { en: "TB-500", pt: "TB-500", zh: "TB-500" },
+    code: "TB",
+    category: "catalogue",
+    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", zh: "2–10 mg · 10 瓶" },
+  },
+  {
+    names: { en: "CJC-1295", pt: "CJC-1295", zh: "CJC-1295" },
+    code: "CJ",
+    category: "catalogue",
+    formats: { en: "Multiple configurations", pt: "Várias configurações", zh: "多种规格" },
+  },
+  {
+    names: { en: "Ipamorelin", pt: "Ipamorelin", zh: "Ipamorelin" },
+    code: "IP",
+    category: "catalogue",
+    formats: { en: "5–10 mg · 10 vials", pt: "5–10 mg · 10 frascos", zh: "5–10 mg · 10 瓶" },
+  },
+  {
+    names: { en: "MOTS-C", pt: "MOTS-C", zh: "MOTS-C" },
+    code: "MC",
+    category: "catalogue",
+    formats: { en: "10–40 mg · 10 vials", pt: "10–40 mg · 10 frascos", zh: "10–40 mg · 10 瓶" },
+  },
+  {
+    names: { en: "GHK-Cu", pt: "GHK-Cu", zh: "GHK-Cu" },
+    code: "CU",
+    category: "cosmetic",
+    formats: { en: "50–100 mg · Raw material", pt: "50–100 mg · Matéria-prima", zh: "50–100 mg · 原料" },
+  },
+  {
+    names: { en: "Acetyl Hexapeptide-8", pt: "Acetyl Hexapeptide-8", zh: "Acetyl Hexapeptide-8" },
+    code: "AH8",
+    category: "cosmetic",
+    formats: { en: "Bulk inquiry", pt: "Consulta a granel", zh: "大货询盘" },
+  },
+  {
+    names: { en: "Custom configuration", pt: "Configuração personalizada", zh: "自定义规格" },
+    code: "OEM",
+    category: "custom",
+    formats: { en: "Private label · Packaging", pt: "Marca própria · Embalagem", zh: "贴牌 · 包装" },
+  },
+  {
+    names: { en: "Bulk peptide inquiry", pt: "Consulta de peptídeos a granel", zh: "多肽大货询盘" },
+    code: "BLK",
+    category: "custom",
+    formats: { en: "Specification-led review", pt: "Revisão orientada por especificação", zh: "按规格审核" },
+  },
+] satisfies Array<{
+  names: Record<Locale, string>;
+  code: string;
+  category: Exclude<Category, "all">;
+  formats: Record<Locale, string>;
+}>;
 
 function Brand() {
   return (
@@ -266,6 +494,19 @@ export default function Home() {
   const [formStatus, setFormStatus] = useState("");
   const [introState, setIntroState] = useState<IntroState>("hidden");
   const t = copy[locale];
+
+  useEffect(() => {
+    try {
+      const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+      if (savedLocale === "en" || savedLocale === "pt" || savedLocale === "zh") {
+        setLocale(savedLocale);
+        document.documentElement.lang =
+          savedLocale === "zh" ? "zh-CN" : savedLocale === "pt" ? "pt-BR" : "en";
+      }
+    } catch {
+      // The language switcher still works when browser storage is unavailable.
+    }
+  }, []);
 
   useEffect(() => {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -312,15 +553,31 @@ export default function Home() {
       (product) =>
         (category === "all" || product.category === category) &&
         (!normalized ||
-          product.name.toLowerCase().includes(normalized) ||
+          product.names[locale].toLowerCase().includes(normalized) ||
           product.code.toLowerCase().includes(normalized)),
     );
-  }, [category, query]);
+  }, [category, locale, query]);
 
   function productMessage(name: string, formats: string) {
-    return locale === "en"
-      ? `Hello, I represent a professional organization and am interested in ${name} (${formats}). Please share available configurations, MOQ, documentation, and destination eligibility.`
-      : `Olá, represento uma organização profissional e tenho interesse em ${name} (${formats}). Por favor, envie configurações disponíveis, MOQ, documentação e elegibilidade para o destino.`;
+    if (locale === "zh") {
+      return `您好，我代表一家专业机构，希望了解 ${name}（${formats}）。请提供可选规格、起订量、相关文件以及目的地供应条件。`;
+    }
+    if (locale === "pt") {
+      return `Olá, represento uma organização profissional e tenho interesse em ${name} (${formats}). Por favor, envie configurações disponíveis, MOQ, documentação e elegibilidade para o destino.`;
+    }
+    return `Hello, I represent a professional organization and am interested in ${name} (${formats}). Please share available configurations, MOQ, documentation, and destination eligibility.`;
+  }
+
+  function changeLocale(nextLocale: Locale) {
+    setLocale(nextLocale);
+    setFormStatus("");
+    document.documentElement.lang =
+      nextLocale === "zh" ? "zh-CN" : nextLocale === "pt" ? "pt-BR" : "en";
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
+    } catch {
+      // Keep the selected language for the current page when storage is unavailable.
+    }
   }
 
   function closeIntro() {
@@ -339,25 +596,48 @@ export default function Home() {
       setFormStatus(t.form.missing);
       return;
     }
-    const message = [
-      locale === "en" ? "Qualified website inquiry" : "Consulta qualificada pelo site",
-      `Name: ${data.get("name")}`,
-      `Company: ${data.get("company")}`,
-      `Destination: ${data.get("country")}`,
-      `Contact: ${data.get("contact")}`,
-      `Product: ${data.get("product")}`,
-      `Quantity: ${data.get("quantity")}`,
-      `Professional use: ${data.get("intendedUse")}`,
-    ].join("\n");
+    const message =
+      locale === "zh"
+        ? [
+            "网站专业询盘",
+            `姓名：${data.get("name")}`,
+            `公司：${data.get("company")}`,
+            `目的地：${data.get("country")}`,
+            `联系方式：${data.get("contact")}`,
+            `产品：${data.get("product")}`,
+            `数量：${data.get("quantity")}`,
+            `专业用途：${data.get("intendedUse")}`,
+          ].join("\n")
+        : locale === "pt"
+          ? [
+              "Consulta qualificada pelo site",
+              `Nome: ${data.get("name")}`,
+              `Empresa: ${data.get("company")}`,
+              `Destino: ${data.get("country")}`,
+              `Contato: ${data.get("contact")}`,
+              `Produto: ${data.get("product")}`,
+              `Quantidade: ${data.get("quantity")}`,
+              `Uso profissional: ${data.get("intendedUse")}`,
+            ].join("\n")
+          : [
+              "Qualified website inquiry",
+              `Name: ${data.get("name")}`,
+              `Company: ${data.get("company")}`,
+              `Destination: ${data.get("country")}`,
+              `Contact: ${data.get("contact")}`,
+              `Product: ${data.get("product")}`,
+              `Quantity: ${data.get("quantity")}`,
+              `Professional use: ${data.get("intendedUse")}`,
+            ].join("\n");
     window.open(createWhatsAppUrl(message), "_blank", "noopener,noreferrer");
   }
 
   return (
-    <main id="top">
+    <main id="top" className={locale === "zh" ? "lang-zh" : undefined}>
       {introState !== "hidden" && (
         <section
           className={`site-intro site-intro-${introState}`}
-          aria-label="Peptivanta facility workflow introduction"
+          aria-label={t.introAria}
         >
           <video
             className="site-intro-video"
@@ -407,7 +687,7 @@ export default function Home() {
             </ol>
           </div>
 
-          <p className="site-intro-meta">AUTHENTIC WORKFLOW FOOTAGE · MUTED · 08 SEC</p>
+          <p className="site-intro-meta">{t.introMeta}</p>
         </section>
       )}
 
@@ -417,14 +697,14 @@ export default function Home() {
         <button
           className="menu-button"
           type="button"
-          aria-label="Toggle navigation"
+          aria-label={t.menuLabel}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
         >
           <span />
           <span />
         </button>
-        <nav className={menuOpen ? "nav nav-open" : "nav"} aria-label="Primary navigation">
+        <nav className={menuOpen ? "nav nav-open" : "nav"} aria-label={t.navLabel}>
           {t.nav.map((item, index) => (
             <a key={item} href={`#${t.navIds[index]}`} onClick={() => setMenuOpen(false)}>
               {item}
@@ -432,13 +712,23 @@ export default function Home() {
           ))}
         </nav>
         <div className="header-actions">
-          <button
-            className="language"
-            type="button"
-            onClick={() => setLocale(locale === "en" ? "pt" : "en")}
-          >
-            {t.languageLabel}
-          </button>
+          <div className="language-switcher" role="group" aria-label="Language / Idioma / 语言">
+            {([
+              ["en", "EN"],
+              ["pt", "PT"],
+              ["zh", "中文"],
+            ] as const).map(([code, label]) => (
+              <button
+                className={locale === code ? "active" : ""}
+                type="button"
+                key={code}
+                aria-pressed={locale === code}
+                onClick={() => changeLocale(code)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <a className="button button-small" href="#inquiry">
             {t.primaryCta}
           </a>
@@ -470,7 +760,7 @@ export default function Home() {
           <div className="hero-image-frame">
             <img
               src="/images/facility.jpg"
-              alt="Controlled packaging facility"
+              alt={t.heroImageAlt}
             />
             <div className="image-scan" aria-hidden="true" />
           </div>
@@ -486,11 +776,11 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="proof-strip section-shell" aria-label="Service principles">
+      <section className="proof-strip section-shell" aria-label={t.servicePrinciplesLabel}>
         {t.proof.map(([value, label]) => (
           <div key={value}><strong>{value}</strong><span>{label}</span></div>
         ))}
-        <p>{siteConfig.operatingRegion}</p>
+        <p>{t.operatingRegion}</p>
       </section>
 
       <section className="intro section-shell">
@@ -557,7 +847,7 @@ export default function Home() {
               aria-label={t.search}
             />
           </label>
-          <div className="filter-tabs" role="group" aria-label="Product categories">
+          <div className="filter-tabs" role="group" aria-label={t.productGroupLabel}>
             {(["all", "catalogue", "cosmetic", "custom"] as Category[]).map((item, index) => (
               <button
                 key={item}
@@ -571,24 +861,28 @@ export default function Home() {
           </div>
         </div>
         <div className="product-grid">
-          {filtered.map((product, index) => (
-            <article className="product-card" key={product.code}>
-              <div className="product-top">
-                <span>{product.code}</span>
-                <small>{String(index + 1).padStart(2, "0")}</small>
-              </div>
-              <h3>{product.name}</h3>
-              <p>{product.formats}</p>
-              <div className="product-meta"><i />{t.docs}</div>
-              <a
-                href={createWhatsAppUrl(productMessage(product.name, product.formats))}
-                target={siteConfig.whatsappNumber ? "_blank" : undefined}
-                rel="noreferrer"
-              >
-                {t.ask}<span>↗</span>
-              </a>
-            </article>
-          ))}
+          {filtered.map((product, index) => {
+            const productName = product.names[locale];
+            const productFormat = product.formats[locale];
+            return (
+              <article className="product-card" key={product.code}>
+                <div className="product-top">
+                  <span>{product.code}</span>
+                  <small>{String(index + 1).padStart(2, "0")}</small>
+                </div>
+                <h3>{productName}</h3>
+                <p>{productFormat}</p>
+                <div className="product-meta"><i />{t.docs}</div>
+                <a
+                  href={createWhatsAppUrl(productMessage(productName, productFormat))}
+                  target={siteConfig.whatsappNumber ? "_blank" : undefined}
+                  rel="noreferrer"
+                >
+                  {t.ask}<span>↗</span>
+                </a>
+              </article>
+            );
+          })}
         </div>
         {!filtered.length && <p className="empty-state">{t.noProducts}</p>}
         <div className="catalogue-disclaimer">
@@ -620,8 +914,8 @@ export default function Home() {
           <h2>{t.facilityTitle}</h2>
           <p>{t.facilityText}</p>
           <div className="facility-metrics">
-            <div><strong>COA</strong><span>Availability review</span></div>
-            <div><strong>HPLC / MS</strong><span>Analytical data where available</span></div>
+            <div><strong>COA</strong><span>{t.facilityMetrics[0]}</span></div>
+            <div><strong>HPLC / MS</strong><span>{t.facilityMetrics[1]}</span></div>
           </div>
         </div>
         <figure className="facility-photo">
@@ -632,10 +926,10 @@ export default function Home() {
 
       <section className="private-label section-shell" id="private-label">
         <div className="private-image">
-          <img src="/images/vials.png" alt="Unlabelled vials prepared for packaging" />
+          <img src="/images/vials.png" alt={t.vialsAlt} />
           <div className="label-sample">
             <img src="/logo-mark.svg" alt="" width={30} height={30} />
-            <div><strong>PEPTIVANTA</strong><small>CUSTOM LABEL SYSTEM</small></div>
+            <div><strong>PEPTIVANTA</strong><small>{t.customLabelSystem}</small></div>
           </div>
         </div>
         <div className="private-copy">
@@ -655,11 +949,11 @@ export default function Home() {
         <div className="company-content">
           <p>{t.companyText}</p>
           <dl>
-            <div><dt>Operating region</dt><dd>{siteConfig.operatingRegion}</dd></div>
-            <div><dt>Brand focus</dt><dd>Professional peptide supply inquiries</dd></div>
-            <div><dt>Response target</dt><dd>{siteConfig.responseTime}</dd></div>
+            <div><dt>{t.companyDetails[0]}</dt><dd>{t.operatingRegion}</dd></div>
+            <div><dt>{t.companyDetails[1]}</dt><dd>{t.brandFocusValue}</dd></div>
+            <div><dt>{t.companyDetails[2]}</dt><dd>{t.responseTime}</dd></div>
             {siteConfig.registeredAddress && (
-              <div><dt>Registered address</dt><dd>{siteConfig.registeredAddress}</dd></div>
+              <div><dt>{t.companyDetails[3]}</dt><dd>{siteConfig.registeredAddress}</dd></div>
             )}
           </dl>
         </div>
@@ -672,8 +966,8 @@ export default function Home() {
             <h2>{t.inquiryTitle}</h2>
             <p>{t.inquiryText}</p>
             <div className="contact-lines">
-              <span>WhatsApp</span><strong>{siteConfig.whatsappNumber || "Add number in site.config.ts"}</strong>
-              <span>Email</span><strong>{siteConfig.salesEmail || "Add email in site.config.ts"}</strong>
+              <span>{t.contactLabels[0]}</span><strong>{siteConfig.whatsappNumber || t.contactMissing[0]}</strong>
+              <span>{t.contactLabels[1]}</span><strong>{siteConfig.salesEmail || t.contactMissing[1]}</strong>
             </div>
           </div>
           <form className="inquiry-form" onSubmit={handleInquiry}>
@@ -707,21 +1001,27 @@ export default function Home() {
       <footer className="footer section-shell">
         <div><Brand /><p>{t.footerNote}</p></div>
         <div className="footer-links">
-          <Link href="/privacy">Privacy</Link>
-          <Link href="/terms">Terms</Link>
-          <Link href="/compliance">Compliance</Link>
+          <Link href="/privacy">{t.footerLinks[0]}</Link>
+          <Link href="/terms">{t.footerLinks[1]}</Link>
+          <Link href="/compliance">{t.footerLinks[2]}</Link>
         </div>
         <p>© {new Date().getFullYear()} {siteConfig.fullBrandName}</p>
       </footer>
 
       <a
         className="whatsapp-float"
-        href={createWhatsAppUrl(locale === "en" ? "Hello, I have a professional peptide supply inquiry." : "Olá, tenho uma consulta profissional sobre fornecimento de peptídeos.")}
+        href={createWhatsAppUrl(
+          locale === "zh"
+            ? "您好，我有一项专业多肽供应询盘。"
+            : locale === "pt"
+              ? "Olá, tenho uma consulta profissional sobre fornecimento de peptídeos."
+              : "Hello, I have a professional peptide supply inquiry.",
+        )}
         target={siteConfig.whatsappNumber ? "_blank" : undefined}
         rel="noreferrer"
-        aria-label="WhatsApp inquiry"
+        aria-label={t.whatsappAria}
       >
-        <span>WA</span><small>{locale === "en" ? "Inquire" : "Consultar"}</small>
+        <span>WA</span><small>{t.whatsappCta}</small>
       </a>
     </main>
   );

@@ -368,6 +368,52 @@ main {
   letter-spacing: 0.14em;
 }
 
+.lang-zh {
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+}
+
+.lang-zh .hero h1 {
+  line-height: 0.93;
+  letter-spacing: -0.055em;
+}
+
+.lang-zh .hero h1 em {
+  margin-top: 16px;
+}
+
+.lang-zh .site-intro-copy h2 {
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+}
+
+.lang-zh .site-intro-copy h2 em {
+  margin-top: 0.24em;
+}
+
+.lang-zh .section-heading h2,
+.lang-zh .quality-copy h2,
+.lang-zh .facility-copy h2,
+.lang-zh .private-copy h2,
+.lang-zh .company-heading h2,
+.lang-zh .inquiry-copy h2 {
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.lang-zh .category-card strong,
+.lang-zh .product-card h3 {
+  line-height: 1.16;
+  letter-spacing: -0.025em;
+}
+
+.lang-zh .eyebrow,
+.lang-zh .section-tag,
+.lang-zh .button,
+.lang-zh .text-link,
+.lang-zh .workflow-replay {
+  letter-spacing: 0.06em;
+}
+
 @keyframes intro-camera {
   from { transform: scale(1.07); }
   to { transform: scale(1.015); }
@@ -451,7 +497,7 @@ main {
 }
 
 .nav a,
-.language {
+.language-switcher button {
   position: relative;
   padding-block: 8px;
   border: 0;
@@ -460,6 +506,41 @@ main {
   font-weight: 650;
   letter-spacing: 0.04em;
   cursor: pointer;
+}
+
+.language-switcher {
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(255, 255, 255, 0.46);
+}
+
+.language-switcher button {
+  min-width: 31px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.language-switcher button:hover {
+  color: var(--ink);
+}
+
+.language-switcher button.active {
+  background: var(--ink);
+  color: white;
+}
+
+.language-switcher button:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
 }
 
 .nav a::after {
@@ -482,10 +563,6 @@ main {
   display: flex;
   align-items: center;
   gap: 18px;
-}
-
-.language {
-  color: var(--muted);
 }
 
 .menu-button {
@@ -1949,6 +2026,10 @@ main {
     line-height: 0.83;
   }
 
+  .lang-zh .site-intro-copy h2 {
+    font-size: clamp(50px, 16vw, 72px);
+  }
+
   .site-intro-statement {
     margin-top: 30px;
     gap: 13px;
@@ -1986,8 +2067,10 @@ main {
     right: 48px;
   }
 
-  .language {
-    font-size: 10px;
+  .language-switcher button {
+    min-width: 27px;
+    padding-inline: 6px;
+    font-size: 8px;
   }
 
   .hero {
@@ -1996,6 +2079,10 @@ main {
 
   .hero h1 {
     font-size: 57px;
+  }
+
+  .lang-zh .hero h1 {
+    font-size: clamp(48px, 15vw, 57px);
   }
 
   .hero-text {
@@ -2174,12 +2261,37 @@ main {
   padding: 70px 0 100px;
 }
 
+.legal-toolbar {
+  margin-bottom: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
 .legal-back {
   display: inline-block;
   margin-bottom: 86px;
   color: var(--muted);
   font-size: 11px;
   font-weight: 700;
+}
+
+.legal-toolbar .legal-back {
+  margin-bottom: 0;
+}
+
+.legal-page-zh {
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+}
+
+.legal-page-zh h1 {
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+}
+
+.legal-page-zh section h2 {
+  letter-spacing: -0.02em;
 }
 
 .legal-page h1 {
@@ -2221,4 +2333,36 @@ main {
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 10px;
+}
+
+@media (max-width: 560px) {
+  .legal-toolbar {
+    margin-bottom: 64px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .legal-page-zh h1 {
+    font-size: clamp(44px, 14vw, 70px);
+  }
+}
+
+@media (max-width: 380px) {
+  .brand {
+    gap: 7px;
+  }
+
+  .brand strong {
+    font-size: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .brand small {
+    display: none;
+  }
+
+  .language-switcher button {
+    min-width: 24px;
+    padding-inline: 5px;
+  }
 }
