@@ -3,11 +3,15 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { siteConfig } from "../site.config";
+import {
+  htmlLang,
+  isSiteLocale,
+  LANGUAGE_OPTIONS,
+  LOCALE_STORAGE_KEY,
+  type SiteLocale as Locale,
+} from "./i18n";
 
-type Locale = "en" | "pt" | "zh";
 type DocumentKind = "privacy" | "terms" | "compliance";
-
-const LOCALE_STORAGE_KEY = "peptivanta-locale";
 
 const shared = {
   en: {
@@ -17,6 +21,14 @@ const shared = {
   pt: {
     back: "← Voltar para Peptivanta",
     region: "Hong Kong SAR · Coordenação de vendas e exportação",
+  },
+  es: {
+    back: "← Volver a Peptivanta",
+    region: "RAE de Hong Kong · Coordinación comercial y de exportación",
+  },
+  fr: {
+    back: "← Retour à Peptivanta",
+    region: "R.A.S. de Hong Kong · Coordination commerciale et export",
   },
   zh: {
     back: "← 返回 Peptivanta 首页",
@@ -46,6 +58,28 @@ const documents = {
         ["Como usamos as informações", "As informações são usadas para avaliar a qualificação do cliente, elegibilidade do destino, disponibilidade documental, necessidades de cotação e coordenação de exportação. Não usamos os dados da consulta para fornecer orientação médica ou recomendações de uso ao consumidor."],
         ["WhatsApp e serviços externos", "Se você optar por continuar pelo WhatsApp ou e-mail, seus dados também estarão sujeitos aos termos de privacidade desse serviço. Não envie informações confidenciais de saúde pessoal pelo site."],
         ["Retenção e solicitações", "Registros de consultas comerciais podem ser mantidos para fins de conformidade, atendimento e registro comercial. Entre em contato pelo canal empresarial publicado para solicitar acesso, correção ou exclusão, quando aplicável."],
+      ],
+    },
+    es: {
+      tag: "Información legal",
+      title: "Política de Privacidad",
+      date: "Última actualización: 25 de julio de 2026",
+      sections: [
+        ["Información que recibimos", "Cuando envía o continúa una consulta, podemos recibir su nombre, organización, país de destino, datos de contacto, producto solicitado, cantidad estimada, uso profesional previsto y el contenido de su mensaje."],
+        ["Cómo utilizamos la información", "La información se utiliza para evaluar la cualificación del cliente, la elegibilidad del destino, la disponibilidad documental, las necesidades de cotización y la coordinación de exportación. No utilizamos los datos de la consulta para ofrecer asesoramiento médico ni recomendaciones de uso al consumidor."],
+        ["WhatsApp y servicios externos", "Si decide continuar por WhatsApp o correo electrónico, su información también estará sujeta a las condiciones de privacidad de dicho servicio. No envíe información personal de salud confidencial a través del sitio web."],
+        ["Conservación y solicitudes", "Los registros de consultas comerciales pueden conservarse con fines de cumplimiento, servicio y archivo empresarial. Utilice el canal comercial publicado para solicitar acceso, corrección o eliminación cuando corresponda."],
+      ],
+    },
+    fr: {
+      tag: "Informations juridiques",
+      title: "Politique de confidentialité",
+      date: "Dernière mise à jour : 25 juillet 2026",
+      sections: [
+        ["Informations que nous recevons", "Lorsque vous soumettez ou poursuivez une demande, nous pouvons recevoir votre nom, votre organisation, le pays de destination, vos coordonnées, le produit recherché, la quantité estimée, l’usage professionnel prévu et le contenu de votre message."],
+        ["Utilisation des informations", "Ces informations servent à évaluer la qualification du client, l’éligibilité de la destination, la disponibilité des documents, les besoins de devis et la coordination de l’exportation. Elles ne sont pas utilisées pour fournir des conseils médicaux ou des recommandations d’usage destinées aux consommateurs."],
+        ["WhatsApp et services externes", "Si vous poursuivez l’échange via WhatsApp ou par e-mail, vos informations sont également soumises aux conditions de confidentialité de ce service. Ne transmettez pas de données personnelles de santé confidentielles via le site."],
+        ["Conservation et demandes", "Les dossiers de demandes commerciales peuvent être conservés à des fins de conformité, de service et d’archivage commercial. Utilisez le canal professionnel publié pour demander l’accès, la rectification ou la suppression de vos données lorsque cela s’applique."],
       ],
     },
     zh: {
@@ -83,6 +117,28 @@ const documents = {
         ["Uso aceitável", "Você não pode usar este site para buscar produtos destinados a uso ilícito, não autorizado, humano ou veterinário. Podemos recusar ou interromper qualquer solicitação que não cumpra requisitos profissionais ou legais."],
       ],
     },
+    es: {
+      tag: "Información legal",
+      title: "Condiciones del Sitio",
+      date: "Última actualización: 25 de julio de 2026",
+      sections: [
+        ["Público profesional", "Este sitio web está dirigido a organizaciones y clientes profesionales cualificados. No es una farmacia minorista, clínica, servicio de telesalud ni fuente de asesoramiento médico."],
+        ["Sin venta online", "El contenido del catálogo es informativo y no constituye una oferta de venta sin restricciones. Una consulta desde el sitio no genera un pedido ni un compromiso de suministro. Antes de cotizar puede ser necesario revisar al cliente, el uso previsto, el destino, la documentación y los requisitos legales."],
+        ["Información de producto", "Las configuraciones y la disponibilidad documental pueden variar según el lote. Las especificaciones finales, el embalaje, el plazo, la documentación y las condiciones comerciales deben confirmarse por escrito para cada consulta profesional."],
+        ["Uso aceptable", "No puede utilizar este sitio para solicitar productos destinados a usos ilícitos, no autorizados, humanos o veterinarios. Podemos rechazar o interrumpir cualquier solicitud que no cumpla los requisitos profesionales o legales."],
+      ],
+    },
+    fr: {
+      tag: "Informations juridiques",
+      title: "Conditions d’utilisation du site",
+      date: "Dernière mise à jour : 25 juillet 2026",
+      sections: [
+        ["Public professionnel", "Ce site s’adresse aux organisations et aux clients professionnels qualifiés. Il ne s’agit ni d’une pharmacie grand public, ni d’une clinique, ni d’un service de télésanté, ni d’une source de conseils médicaux."],
+        ["Aucune vente en ligne", "Le contenu du catalogue est fourni à titre informatif et ne constitue pas une offre de vente sans restriction. Une demande effectuée sur le site ne crée ni commande ni engagement de fourniture. Une vérification du client, de l’usage prévu, de la destination, des documents et du cadre légal peut être requise avant tout devis."],
+        ["Informations produit", "Les configurations et la disponibilité des documents peuvent varier selon le lot. Les spécifications finales, l’emballage, le délai, la documentation et les conditions commerciales doivent être confirmés par écrit pour chaque demande professionnelle."],
+        ["Utilisation acceptable", "Vous ne pouvez pas utiliser ce site pour rechercher des produits destinés à une utilisation illicite, non autorisée, humaine ou vétérinaire. Nous pouvons refuser ou interrompre toute demande qui ne répond pas aux exigences professionnelles ou légales."],
+      ],
+    },
     zh: {
       tag: "法律信息",
       title: "网站使用条款",
@@ -118,6 +174,28 @@ const documents = {
         ["Documentação", "Referências a COA ou informações analíticas significam que a disponibilidade será verificada para o produto e lote pertinentes. Nenhuma certificação, aprovação, acreditação ou situação regulatória deve ser presumida sem suporte expresso em documentação atual."],
       ],
     },
+    es: {
+      tag: "Suministro responsable",
+      title: "Aviso de Cumplimiento",
+      date: "Solo consultas profesionales cualificadas",
+      sections: [
+        ["Aplicaciones profesionales previstas", "Los productos mostrados solo pueden considerarse para investigación cualificada, análisis, desarrollo de formulaciones, fabricación u otras aplicaciones profesionales lícitas. No se presentan como medicamentos ni están destinados al uso humano o veterinario."],
+        ["Sin contenido médico ni de uso al consumidor", "No proporcionamos afirmaciones médicas, recomendaciones de tratamiento, dosis, instrucciones de reconstitución, orientación sobre inyecciones, testimonios de antes y después ni consejos para uso personal."],
+        ["Revisión del cliente y del destino", "La elegibilidad del producto puede variar según la jurisdicción. Podemos solicitar datos de la organización, información sobre el uso previsto, credenciales de importación, declaraciones del usuario final u otros documentos. Una solicitud puede rechazarse cuando el destino o el uso previsto no pueda atenderse legalmente."],
+        ["Documentación", "Las referencias a COA o información analítica significan que se comprobará su disponibilidad para el producto y lote correspondientes. No debe presuponerse ninguna certificación, aprobación, acreditación o situación regulatoria salvo que esté respaldada expresamente por documentación vigente."],
+      ],
+    },
+    fr: {
+      tag: "Approvisionnement responsable",
+      title: "Avis de conformité",
+      date: "Demandes professionnelles qualifiées uniquement",
+      sections: [
+        ["Applications professionnelles prévues", "Les produits présentés peuvent uniquement être envisagés pour la recherche qualifiée, l’analyse, le développement de formulations, la fabrication ou d’autres applications professionnelles licites. Ils ne sont pas présentés comme des médicaments et ne sont pas destinés à un usage humain ou vétérinaire."],
+        ["Aucun contenu médical ou destiné aux consommateurs", "Nous ne fournissons aucune allégation médicale, recommandation de traitement, posologie, instruction de reconstitution, indication d’injection, témoignage avant-après ou conseil d’usage personnel."],
+        ["Vérification du client et de la destination", "L’éligibilité d’un produit peut varier selon la juridiction. Nous pouvons demander des informations sur l’organisation et l’usage prévu, des justificatifs d’importation, une déclaration de l’utilisateur final ou d’autres documents. Une demande peut être refusée lorsque la destination ou l’usage prévu ne peut pas être pris en charge légalement."],
+        ["Documentation", "Toute référence à un COA ou à des informations analytiques signifie que leur disponibilité sera vérifiée pour le produit et le lot concernés. Aucune certification, approbation, accréditation ou situation réglementaire ne doit être présumée sans preuve documentaire actuelle et explicite."],
+      ],
+    },
     zh: {
       tag: "负责任的供应",
       title: "合规声明",
@@ -140,10 +218,9 @@ export default function LegalDocument({ kind }: { kind: DocumentKind }) {
   useEffect(() => {
     try {
       const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (savedLocale === "en" || savedLocale === "pt" || savedLocale === "zh") {
+      if (isSiteLocale(savedLocale)) {
         setLocale(savedLocale);
-        document.documentElement.lang =
-          savedLocale === "zh" ? "zh-CN" : savedLocale === "pt" ? "pt-BR" : "en";
+        document.documentElement.lang = htmlLang(savedLocale);
       }
     } catch {
       // The legal page remains available in English when storage is unavailable.
@@ -152,8 +229,7 @@ export default function LegalDocument({ kind }: { kind: DocumentKind }) {
 
   function changeLocale(nextLocale: Locale) {
     setLocale(nextLocale);
-    document.documentElement.lang =
-      nextLocale === "zh" ? "zh-CN" : nextLocale === "pt" ? "pt-BR" : "en";
+    document.documentElement.lang = htmlLang(nextLocale);
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
     } catch {
@@ -165,23 +241,19 @@ export default function LegalDocument({ kind }: { kind: DocumentKind }) {
     <main className={`legal-page${locale === "zh" ? " legal-page-zh" : ""}`}>
       <div className="legal-toolbar">
         <Link className="legal-back" href="/">{common.back}</Link>
-        <div className="language-switcher" role="group" aria-label="Language / Idioma / 语言">
-          {([
-            ["en", "EN"],
-            ["pt", "PT"],
-            ["zh", "中文"],
-          ] as const).map(([code, label]) => (
-            <button
-              className={locale === code ? "active" : ""}
-              type="button"
-              key={code}
-              aria-pressed={locale === code}
-              onClick={() => changeLocale(code)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        <label className="language-select">
+          <span aria-hidden="true">LANG</span>
+          <span className="sr-only">Language / Idioma / Langue / 语言</span>
+          <select
+            value={locale}
+            onChange={(event) => changeLocale(event.target.value as Locale)}
+            aria-label="Language / Idioma / Langue / 语言"
+          >
+            {LANGUAGE_OPTIONS.map((option) => (
+              <option value={option.code} key={option.code}>{option.label}</option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <p className="section-tag">{content.tag}</p>

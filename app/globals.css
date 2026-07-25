@@ -32,6 +32,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -48,6 +49,18 @@ img {
 main {
   min-height: 100vh;
   overflow: hidden;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .site-intro {
@@ -496,8 +509,7 @@ main {
   gap: 30px;
 }
 
-.nav a,
-.language-switcher button {
+.nav a {
   position: relative;
   padding-block: 8px;
   border: 0;
@@ -508,39 +520,64 @@ main {
   cursor: pointer;
 }
 
-.language-switcher {
-  padding: 3px;
+.language-select {
+  position: relative;
+  width: 152px;
+  height: 40px;
+  padding: 0 31px 0 11px;
   border: 1px solid var(--line);
   border-radius: 999px;
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 9px;
   background: rgba(255, 255, 255, 0.46);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-.language-switcher button {
-  min-width: 31px;
-  padding: 6px 8px;
-  border-radius: 999px;
+.language-select > span:first-child {
+  padding-right: 8px;
+  border-right: 1px solid var(--line);
   color: var(--muted);
-  font-size: 9px;
+  font-size: 7px;
   font-weight: 800;
-  letter-spacing: 0.06em;
-  transition: background 160ms ease, color 160ms ease;
+  letter-spacing: 0.12em;
 }
 
-.language-switcher button:hover {
+.language-select select {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  appearance: none;
+  background: transparent;
   color: var(--ink);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
 }
 
-.language-switcher button.active {
-  background: var(--ink);
-  color: white;
+.language-select::after {
+  content: "⌄";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+  transform: translateY(-58%);
 }
 
-.language-switcher button:focus-visible {
-  outline: 2px solid var(--green);
-  outline-offset: 2px;
+.language-select:hover {
+  border-color: rgba(6, 25, 27, 0.3);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.language-select:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(25, 216, 170, 0.15);
 }
 
 .nav a::after {
@@ -670,12 +707,6 @@ main {
   gap: 26px;
   font-size: 12px;
   font-weight: 750;
-}
-
-.micro-note {
-  margin: 22px 0 0;
-  color: #78908e;
-  font-size: 11px;
 }
 
 .hero-visual {
@@ -2067,10 +2098,14 @@ main {
     right: 48px;
   }
 
-  .language-switcher button {
-    min-width: 27px;
-    padding-inline: 6px;
-    font-size: 8px;
+  .language-select {
+    width: 108px;
+    height: 36px;
+    padding-left: 10px;
+  }
+
+  .language-select > span:first-child {
+    display: none;
   }
 
   .hero {
@@ -2361,8 +2396,9 @@ main {
     display: none;
   }
 
-  .language-switcher button {
-    min-width: 24px;
-    padding-inline: 5px;
+  .language-select {
+    width: 94px;
+    padding-left: 9px;
+    padding-right: 26px;
   }
 }

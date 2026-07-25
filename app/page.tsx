@@ -3,21 +3,26 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { createWhatsAppUrl, siteConfig } from "../site.config";
+import {
+  htmlLang,
+  isSiteLocale,
+  LANGUAGE_OPTIONS,
+  LOCALE_STORAGE_KEY,
+  type SiteLocale as Locale,
+} from "./i18n";
 
-type Locale = "en" | "pt" | "zh";
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
 type IntroState = "hidden" | "visible" | "closing";
 
 const INTRO_SESSION_KEY = "peptivanta-factory-intro-seen";
-const LOCALE_STORAGE_KEY = "peptivanta-locale";
 
 const copy = {
   en: {
     nav: ["Products", "Quality", "Private label", "Company"],
     navIds: ["products", "quality", "private-label", "company"],
-    eyebrow: "Qualified B2B peptide supply",
-    heroTitleA: "Evidence first.",
-    heroTitleB: "Every batch.",
+    eyebrow: "Peptide catalogue · Private label · Export coordination",
+    heroTitleA: "Peptide supply,",
+    heroTitleB: "made clear.",
     heroText:
       "Documented catalogue peptides, flexible private-label support, and responsive export coordination for qualified professional customers.",
     primaryCta: "Start an inquiry",
@@ -31,7 +36,6 @@ const copy = {
     introStages: ["Prepare", "Verify", "Pack", "Dispatch"],
     introAria: "Peptivanta facility workflow introduction",
     introMeta: "AUTHENTIC WORKFLOW FOOTAGE · MUTED · 08 SEC",
-    heroNote: "No online checkout · Every inquiry is reviewed",
     imageLabel: "Controlled packaging environment",
     imageSub: "Authentic operational facility image",
     heroImageAlt: "Controlled packaging facility",
@@ -142,9 +146,9 @@ const copy = {
   pt: {
     nav: ["Produtos", "Qualidade", "Marca própria", "Empresa"],
     navIds: ["products", "quality", "private-label", "company"],
-    eyebrow: "Fornecimento B2B qualificado de peptídeos",
-    heroTitleA: "Evidência primeiro.",
-    heroTitleB: "Em cada lote.",
+    eyebrow: "Catálogo de peptídeos · Marca própria · Coordenação de exportação",
+    heroTitleA: "Fornecimento de peptídeos,",
+    heroTitleB: "com mais clareza.",
     heroText:
       "Peptídeos de catálogo documentados, suporte flexível de marca própria e coordenação ágil de exportação para clientes profissionais qualificados.",
     primaryCta: "Iniciar consulta",
@@ -158,7 +162,6 @@ const copy = {
     introStages: ["Preparar", "Verificar", "Embalar", "Expedir"],
     introAria: "Introdução ao fluxo operacional da Peptivanta",
     introMeta: "IMAGENS REAIS DO FLUXO · SEM ÁUDIO · 08 SEG",
-    heroNote: "Sem checkout online · Toda consulta é revisada",
     imageLabel: "Ambiente controlado de embalagem",
     imageSub: "Imagem autêntica do ambiente operacional",
     heroImageAlt: "Ambiente controlado de embalagem",
@@ -266,12 +269,262 @@ const copy = {
     menuLabel: "Alternar navegação",
     navLabel: "Navegação principal",
   },
+  es: {
+    nav: ["Productos", "Calidad", "Marca privada", "Empresa"],
+    navIds: ["products", "quality", "private-label", "company"],
+    eyebrow: "Catálogo de péptidos · Marca privada · Coordinación de exportación",
+    heroTitleA: "Suministro de péptidos,",
+    heroTitleB: "con mayor claridad.",
+    heroText:
+      "Péptidos de catálogo documentados, soporte flexible de marca privada y coordinación ágil de exportación para clientes profesionales cualificados.",
+    primaryCta: "Iniciar una consulta",
+    secondaryCta: "Ver catálogo",
+    introReplay: "Ver el proceso",
+    introSkip: "Saltar introducción",
+    introKicker: "Peptivanta · Operaciones",
+    introLead: "Precisión",
+    introFinish: "en movimiento.",
+    introStatement: "Un recorrido controlado desde la manipulación y verificación hasta el despacho para exportación.",
+    introStages: ["Preparar", "Verificar", "Empacar", "Despachar"],
+    introAria: "Introducción al flujo operativo de Peptivanta",
+    introMeta: "IMÁGENES REALES DEL PROCESO · SIN AUDIO · 08 SEG",
+    imageLabel: "Entorno controlado de empaque",
+    imageSub: "Imagen auténtica del entorno operativo",
+    heroImageAlt: "Entorno controlado de empaque",
+    proof: [
+      ["Documentación", "vinculada al lote"],
+      ["Solo B2B", "revisión del cliente"],
+      ["Global", "coordinación de exportación"],
+    ],
+    introTag: "Una experiencia de suministro más clara",
+    introTitle: "Basado en documentos, no en promesas.",
+    introText:
+      "Un proceso enfocado para distribuidores, organizaciones de investigación, equipos de formulación y compradores comerciales cualificados.",
+    pillars: [
+      ["01", "Especificaciones definidas", "Producto, formato, cantidad y documentación se confirman antes de cotizar."],
+      ["02", "Visibilidad de calidad", "El COA, los datos analíticos y la información de lote disponibles se revisan con cada consulta."],
+      ["03", "Atención personal", "Un contacto dedicado acompaña la solicitud desde la cualificación hasta el despacho."],
+    ],
+    categoryTag: "Categorías de productos",
+    categoryTitle: "Una entrada más clara al catálogo.",
+    categoryText:
+      "Explore por formato de suministro y aplicación profesional. Cada categoría conduce a una consulta cualificada, no a una compra directa de consumidor.",
+    categoryItems: [
+      ["01", "Péptidos de catálogo", "Configuraciones definidas en un amplio catálogo de péptidos.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
+      ["02", "Ingredientes cosméticos", "Ingredientes peptídicos para equipos cualificados de formulación y compras.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
+      ["03", "Mezclas de péptidos", "Revisión orientada por especificaciones para necesidades multicomponente.", "Especificación · Planificación de lote", "catalogue"],
+      ["04", "Suministro a granel", "Cantidad, formato, documentos y destino se revisan en conjunto.", "Volumen comercial · Revisión de exportación", "custom"],
+      ["05", "Marca privada", "Coordinación de arte, presentación de viales y empaque.", "OEM · Empaque · Soporte de marca", "custom"],
+      ["06", "Consulta personalizada", "Un proceso guiado para requisitos fuera del catálogo visible.", "Secuencia · Formato · Documentación", "custom"],
+    ],
+    productsTag: "Catálogo seleccionado",
+    productsTitle: "Encuentre un punto de partida.",
+    productsText:
+      "Artículos representativos de un catálogo más amplio. La disponibilidad y elegibilidad por destino se confirman individualmente.",
+    search: "Buscar nombre del producto",
+    categories: ["Todos", "Péptidos de catálogo", "Ingredientes cosméticos", "Personalizado y granel"],
+    ask: "Consultar por WhatsApp",
+    docs: "Revisión documental",
+    noProducts: "No se encontraron productos.",
+    productGroupLabel: "Categorías de productos",
+    qualityTag: "Marco de calidad",
+    qualityTitle: "Trazabilidad desde el diseño.",
+    qualityText:
+      "Nuestro proceso prioriza la alineación de especificaciones, disponibilidad documental, empaque cuidadoso y entrega clara.",
+    steps: [
+      ["01", "Revisión del requisito", "Confirmamos identidad, configuración, cantidad, destino y uso profesional."],
+      ["02", "Alineación documental", "La información de lote y los documentos analíticos disponibles se asocian a la solicitud."],
+      ["03", "Control de empaque", "La configuración y los requisitos de manipulación se confirman antes del despacho."],
+      ["04", "Coordinación de exportación", "Las opciones de envío se revisan según el destino y el perfil del pedido."],
+    ],
+    facilityKicker: "Imágenes reales",
+    facilityTitle: "Un entorno operativo profesional.",
+    facilityText:
+      "Utilizamos fotografías auténticas de la red de suministro. La identidad de las instalaciones y sus certificaciones solo se comunican cuando existe documentación verificable.",
+    inventoryCaption: "Inventario organizado y asignación de pedidos",
+    facilityMetrics: ["Revisión de disponibilidad", "Datos analíticos cuando estén disponibles"],
+    privateTag: "Soporte de marca privada",
+    privateTitle: "Su marca, con un proceso más disciplinado.",
+    privateText:
+      "Para distribuidores y equipos de marca cualificados, apoyamos la coordinación del diseño de etiquetas, la configuración del empaque y la planificación por lote.",
+    privateBullets: [
+      "Revisión de tamaño y diseño de etiqueta",
+      "Evaluación de pedido piloto",
+      "Coordinación de lote y empaque",
+      "Comunicación B2B confidencial",
+    ],
+    privateCta: "Hablar sobre un proyecto de marca privada",
+    vialsAlt: "Viales sin etiqueta preparados para empaque",
+    customLabelSystem: "SISTEMA DE ETIQUETA PERSONALIZADA",
+    companyTag: "La marca",
+    companyTitle: "Peptivanta Biosciences está diseñada para aportar claridad al suministro profesional.",
+    companyText:
+      "Peptivanta Biosciences es nuestra marca de productos y servicios para la comunicación profesional, cualificación de solicitudes, coordinación documental y seguimiento de exportación.",
+    companyDetails: ["Región operativa", "Enfoque de la marca", "Objetivo de respuesta", "Dirección registrada"],
+    operatingRegion: "RAE de Hong Kong · Coordinación de ventas y exportación",
+    brandFocusValue: "Consultas profesionales sobre suministro de péptidos",
+    responseTime: "En un día hábil",
+    inquiryTag: "Consulta profesional",
+    inquiryTitle: "Cuéntenos qué necesita.",
+    inquiryText:
+      "Comparta producto, configuración, cantidad y destino. Confirmaremos qué puede suministrarse legalmente y qué documentación está disponible.",
+    form: {
+      name: "Su nombre",
+      company: "Empresa / organización",
+      country: "País de destino",
+      contact: "Correo o WhatsApp",
+      product: "Producto o servicio",
+      quantity: "Cantidad estimada",
+      use: "Uso profesional previsto",
+      placeholderUse: "Investigación, análisis, formulación, distribución…",
+      consent: "Confirmo que esta es una consulta profesional y acepto el aviso de cumplimiento.",
+      submit: "Continuar en WhatsApp",
+      missing: "El número de WhatsApp aún no está configurado. Actualice site.config.ts antes del lanzamiento.",
+    },
+    complianceTitle: "Aviso de uso profesional y cumplimiento",
+    complianceText:
+      "Los productos se ofrecen únicamente para investigación cualificada, análisis, desarrollo de formulaciones u otras aplicaciones profesionales lícitas. No se presentan como medicamentos ni están destinados a uso humano o veterinario. No proporcionamos afirmaciones médicas, dosis ni instrucciones de uso al consumidor. El suministro está sujeto a la cualificación del cliente, revisión del país de destino y legislación aplicable.",
+    footerNote: "Suministro documentado de péptidos para clientes profesionales cualificados.",
+    footerLinks: ["Privacidad", "Términos", "Cumplimiento"],
+    contactLabels: ["WhatsApp", "Correo"],
+    contactMissing: ["Añada el número en site.config.ts", "Añada el correo en site.config.ts"],
+    whatsappCta: "Consultar",
+    whatsappAria: "Consulta por WhatsApp",
+    servicePrinciplesLabel: "Principios del servicio",
+    menuLabel: "Abrir o cerrar navegación",
+    navLabel: "Navegación principal",
+  },
+  fr: {
+    nav: ["Produits", "Qualité", "Marque blanche", "Entreprise"],
+    navIds: ["products", "quality", "private-label", "company"],
+    eyebrow: "Catalogue de peptides · Marque blanche · Coordination export",
+    heroTitleA: "L’approvisionnement en peptides,",
+    heroTitleB: "en toute clarté.",
+    heroText:
+      "Peptides de catalogue documentés, accompagnement flexible en marque blanche et coordination export réactive pour les clients professionnels qualifiés.",
+    primaryCta: "Démarrer une demande",
+    secondaryCta: "Voir le catalogue",
+    introReplay: "Voir le processus",
+    introSkip: "Passer l’introduction",
+    introKicker: "Peptivanta · Opérations",
+    introLead: "La précision",
+    introFinish: "en mouvement.",
+    introStatement: "Un parcours maîtrisé, de la manipulation et la vérification jusqu’à l’expédition export.",
+    introStages: ["Préparer", "Vérifier", "Emballer", "Expédier"],
+    introAria: "Introduction au flux opérationnel de Peptivanta",
+    introMeta: "IMAGES RÉELLES DU PROCESSUS · SANS SON · 08 SEC",
+    imageLabel: "Environnement d’emballage contrôlé",
+    imageSub: "Image authentique de l’environnement opérationnel",
+    heroImageAlt: "Environnement d’emballage contrôlé",
+    proof: [
+      ["Documentation", "liée au lot"],
+      ["B2B uniquement", "examen du client"],
+      ["International", "coordination export"],
+    ],
+    introTag: "Une expérience d’approvisionnement plus claire",
+    introTitle: "Fondé sur des documents, pas sur des promesses.",
+    introText:
+      "Un processus ciblé pour les distributeurs, organismes de recherche, équipes de formulation et acheteurs professionnels qualifiés.",
+    pillars: [
+      ["01", "Spécifications définies", "Le produit, le format, la quantité et la documentation sont confirmés avant devis."],
+      ["02", "Visibilité qualité", "Les COA, données analytiques et informations de lot disponibles sont examinés avec chaque demande."],
+      ["03", "Suivi humain", "Un interlocuteur dédié accompagne la demande de la qualification jusqu’à l’expédition."],
+    ],
+    categoryTag: "Catégories de produits",
+    categoryTitle: "Un accès plus clair au catalogue.",
+    categoryText:
+      "Parcourez les produits par format d’approvisionnement et application professionnelle. Chaque catégorie mène à une demande qualifiée, jamais à un achat consommateur direct.",
+    categoryItems: [
+      ["01", "Peptides de catalogue", "Configurations définies sur un large catalogue de peptides.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
+      ["02", "Ingrédients cosmétiques", "Ingrédients peptidiques pour les équipes qualifiées de formulation et d’approvisionnement.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
+      ["03", "Mélanges de peptides", "Échange guidé par les spécifications pour les besoins multicomposants.", "Spécification · Planification de lot", "catalogue"],
+      ["04", "Approvisionnement en vrac", "Quantité, format, documents et destination sont examinés ensemble.", "Volumes commerciaux · Revue export", "custom"],
+      ["05", "Marque blanche", "Coordination du graphisme, de la présentation des flacons et de l’emballage.", "OEM · Emballage · Accompagnement de marque", "custom"],
+      ["06", "Demande personnalisée", "Un parcours guidé pour les besoins hors catalogue visible.", "Séquence · Format · Documentation", "custom"],
+    ],
+    productsTag: "Sélection du catalogue",
+    productsTitle: "Trouvez un point de départ.",
+    productsText:
+      "Produits représentatifs d’un catalogue plus large. La disponibilité et l’éligibilité selon la destination sont confirmées individuellement.",
+    search: "Rechercher un produit",
+    categories: ["Tous", "Peptides de catalogue", "Ingrédients cosmétiques", "Personnalisé et vrac"],
+    ask: "Demander sur WhatsApp",
+    docs: "Examen documentaire",
+    noProducts: "Aucun produit correspondant.",
+    productGroupLabel: "Catégories de produits",
+    qualityTag: "Cadre qualité",
+    qualityTitle: "La traçabilité dès la conception.",
+    qualityText:
+      "Notre processus privilégie l’alignement des spécifications, la disponibilité documentaire, un emballage soigné et une transmission claire.",
+    steps: [
+      ["01", "Examen du besoin", "Nous confirmons l’identité, la configuration, la quantité, la destination et l’usage professionnel."],
+      ["02", "Alignement documentaire", "Les informations de lot et documents analytiques disponibles sont associés à la demande."],
+      ["03", "Contrôle de l’emballage", "La configuration et les exigences de manipulation sont confirmées avant expédition."],
+      ["04", "Coordination export", "Les options d’envoi sont examinées selon la destination et le profil de commande."],
+    ],
+    facilityKicker: "Images réelles",
+    facilityTitle: "Un environnement opérationnel professionnel.",
+    facilityText:
+      "Nous utilisons des photographies authentiques du réseau d’approvisionnement. L’identité des installations et les certifications ne sont communiquées qu’avec des documents vérifiables.",
+    inventoryCaption: "Inventaire organisé et affectation des commandes",
+    facilityMetrics: ["Vérification de disponibilité", "Données analytiques lorsqu’elles sont disponibles"],
+    privateTag: "Accompagnement en marque blanche",
+    privateTitle: "Votre marque, avec un processus plus rigoureux.",
+    privateText:
+      "Pour les distributeurs et équipes de marque qualifiés, nous accompagnons la coordination du graphisme, la configuration de l’emballage et la planification par lot.",
+    privateBullets: [
+      "Vérification du format et du graphisme de l’étiquette",
+      "Étude d’une commande pilote",
+      "Coordination du lot et de l’emballage",
+      "Communication B2B confidentielle",
+    ],
+    privateCta: "Échanger sur un projet de marque blanche",
+    vialsAlt: "Flacons non étiquetés préparés pour l’emballage",
+    customLabelSystem: "SYSTÈME D’ÉTIQUETTE PERSONNALISÉE",
+    companyTag: "La marque",
+    companyTitle: "Peptivanta Biosciences apporte davantage de clarté à l’approvisionnement professionnel.",
+    companyText:
+      "Peptivanta Biosciences est notre marque de produits et services dédiée à la communication professionnelle, la qualification des demandes, la coordination documentaire et le suivi export.",
+    companyDetails: ["Région opérationnelle", "Positionnement de la marque", "Délai de réponse", "Adresse enregistrée"],
+    operatingRegion: "R.A.S. de Hong Kong · Coordination commerciale et export",
+    brandFocusValue: "Demandes professionnelles d’approvisionnement en peptides",
+    responseTime: "Sous un jour ouvré",
+    inquiryTag: "Demande professionnelle",
+    inquiryTitle: "Présentez-nous votre besoin.",
+    inquiryText:
+      "Indiquez le produit, la configuration, la quantité et la destination. Nous confirmerons ce qui peut être fourni légalement et les documents disponibles.",
+    form: {
+      name: "Votre nom",
+      company: "Entreprise / organisme",
+      country: "Pays de destination",
+      contact: "E-mail ou WhatsApp",
+      product: "Produit ou service",
+      quantity: "Quantité estimée",
+      use: "Usage professionnel prévu",
+      placeholderUse: "Recherche, analyse, formulation, distribution…",
+      consent: "Je confirme qu’il s’agit d’une demande professionnelle et j’accepte l’avis de conformité.",
+      submit: "Continuer sur WhatsApp",
+      missing: "Le numéro WhatsApp n’est pas encore configuré. Mettez à jour site.config.ts avant le lancement.",
+    },
+    complianceTitle: "Avis d’usage professionnel et de conformité",
+    complianceText:
+      "Les produits sont proposés uniquement pour la recherche qualifiée, l’analyse, le développement de formulations ou d’autres applications professionnelles licites. Ils ne sont pas présentés comme des médicaments et ne sont pas destinés à un usage humain ou vétérinaire. Nous ne fournissons aucune allégation médicale, posologie ou instruction d’utilisation grand public. L’approvisionnement est soumis à la qualification du client, à l’examen du pays de destination et à la législation applicable.",
+    footerNote: "Approvisionnement documenté en peptides pour les clients professionnels qualifiés.",
+    footerLinks: ["Confidentialité", "Conditions", "Conformité"],
+    contactLabels: ["WhatsApp", "E-mail"],
+    contactMissing: ["Ajoutez le numéro dans site.config.ts", "Ajoutez l’e-mail dans site.config.ts"],
+    whatsappCta: "Demander",
+    whatsappAria: "Demande via WhatsApp",
+    servicePrinciplesLabel: "Principes de service",
+    menuLabel: "Ouvrir ou fermer la navigation",
+    navLabel: "Navigation principale",
+  },
   zh: {
     nav: ["产品目录", "质量体系", "贴牌服务", "品牌介绍"],
     navIds: ["products", "quality", "private-label", "company"],
-    eyebrow: "面向专业客户的 B2B 多肽供应",
-    heroTitleA: "先看证据。",
-    heroTitleB: "每一批次。",
+    eyebrow: "多肽目录 · 贴牌服务 · 出口协调",
+    heroTitleA: "多肽供应，",
+    heroTitleB: "清晰可控。",
     heroText:
       "提供文件化的多肽产品目录、灵活的贴牌支持，以及面向合格专业客户的出口协调服务。",
     primaryCta: "发起询盘",
@@ -285,7 +538,6 @@ const copy = {
     introStages: ["准备", "核验", "包装", "发运"],
     introAria: "Peptivanta 工厂流程开场",
     introMeta: "真实流程影像 · 静音播放 · 08 秒",
-    heroNote: "不提供在线直接下单 · 每一份询盘均需审核",
     imageLabel: "规范化包装环境",
     imageSub: "真实运营场景照片",
     heroImageAlt: "规范化包装作业环境",
@@ -396,76 +648,76 @@ const copy = {
 
 const products = [
   {
-    names: { en: "Retatrutide", pt: "Retatrutide", zh: "Retatrutide" },
+    names: { en: "Retatrutide", pt: "Retatrutide", es: "Retatrutide", fr: "Retatrutide", zh: "Retatrutide" },
     code: "RT",
     category: "catalogue",
-    formats: { en: "5–100 mg · 10 vials", pt: "5–100 mg · 10 frascos", zh: "5–100 mg · 10 瓶" },
+    formats: { en: "5–100 mg · 10 vials", pt: "5–100 mg · 10 frascos", es: "5–100 mg · 10 viales", fr: "5–100 mg · 10 flacons", zh: "5–100 mg · 10 瓶" },
   },
   {
-    names: { en: "Tirzepatide", pt: "Tirzepatide", zh: "Tirzepatide" },
+    names: { en: "Tirzepatide", pt: "Tirzepatide", es: "Tirzepatide", fr: "Tirzepatide", zh: "Tirzepatide" },
     code: "TR",
     category: "catalogue",
-    formats: { en: "5–60 mg · 10 vials", pt: "5–60 mg · 10 frascos", zh: "5–60 mg · 10 瓶" },
+    formats: { en: "5–60 mg · 10 vials", pt: "5–60 mg · 10 frascos", es: "5–60 mg · 10 viales", fr: "5–60 mg · 10 flacons", zh: "5–60 mg · 10 瓶" },
   },
   {
-    names: { en: "Semaglutide", pt: "Semaglutide", zh: "Semaglutide" },
+    names: { en: "Semaglutide", pt: "Semaglutide", es: "Semaglutide", fr: "Semaglutide", zh: "Semaglutide" },
     code: "SM",
     category: "catalogue",
-    formats: { en: "Multiple configurations", pt: "Várias configurações", zh: "多种规格" },
+    formats: { en: "Multiple configurations", pt: "Várias configurações", es: "Varias configuraciones", fr: "Plusieurs configurations", zh: "多种规格" },
   },
   {
-    names: { en: "BPC-157", pt: "BPC-157", zh: "BPC-157" },
+    names: { en: "BPC-157", pt: "BPC-157", es: "BPC-157", fr: "BPC-157", zh: "BPC-157" },
     code: "BC",
     category: "catalogue",
-    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", zh: "2–10 mg · 10 瓶" },
+    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", es: "2–10 mg · 10 viales", fr: "2–10 mg · 10 flacons", zh: "2–10 mg · 10 瓶" },
   },
   {
-    names: { en: "TB-500", pt: "TB-500", zh: "TB-500" },
+    names: { en: "TB-500", pt: "TB-500", es: "TB-500", fr: "TB-500", zh: "TB-500" },
     code: "TB",
     category: "catalogue",
-    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", zh: "2–10 mg · 10 瓶" },
+    formats: { en: "2–10 mg · 10 vials", pt: "2–10 mg · 10 frascos", es: "2–10 mg · 10 viales", fr: "2–10 mg · 10 flacons", zh: "2–10 mg · 10 瓶" },
   },
   {
-    names: { en: "CJC-1295", pt: "CJC-1295", zh: "CJC-1295" },
+    names: { en: "CJC-1295", pt: "CJC-1295", es: "CJC-1295", fr: "CJC-1295", zh: "CJC-1295" },
     code: "CJ",
     category: "catalogue",
-    formats: { en: "Multiple configurations", pt: "Várias configurações", zh: "多种规格" },
+    formats: { en: "Multiple configurations", pt: "Várias configurações", es: "Varias configuraciones", fr: "Plusieurs configurations", zh: "多种规格" },
   },
   {
-    names: { en: "Ipamorelin", pt: "Ipamorelin", zh: "Ipamorelin" },
+    names: { en: "Ipamorelin", pt: "Ipamorelin", es: "Ipamorelin", fr: "Ipamorelin", zh: "Ipamorelin" },
     code: "IP",
     category: "catalogue",
-    formats: { en: "5–10 mg · 10 vials", pt: "5–10 mg · 10 frascos", zh: "5–10 mg · 10 瓶" },
+    formats: { en: "5–10 mg · 10 vials", pt: "5–10 mg · 10 frascos", es: "5–10 mg · 10 viales", fr: "5–10 mg · 10 flacons", zh: "5–10 mg · 10 瓶" },
   },
   {
-    names: { en: "MOTS-C", pt: "MOTS-C", zh: "MOTS-C" },
+    names: { en: "MOTS-C", pt: "MOTS-C", es: "MOTS-C", fr: "MOTS-C", zh: "MOTS-C" },
     code: "MC",
     category: "catalogue",
-    formats: { en: "10–40 mg · 10 vials", pt: "10–40 mg · 10 frascos", zh: "10–40 mg · 10 瓶" },
+    formats: { en: "10–40 mg · 10 vials", pt: "10–40 mg · 10 frascos", es: "10–40 mg · 10 viales", fr: "10–40 mg · 10 flacons", zh: "10–40 mg · 10 瓶" },
   },
   {
-    names: { en: "GHK-Cu", pt: "GHK-Cu", zh: "GHK-Cu" },
+    names: { en: "GHK-Cu", pt: "GHK-Cu", es: "GHK-Cu", fr: "GHK-Cu", zh: "GHK-Cu" },
     code: "CU",
     category: "cosmetic",
-    formats: { en: "50–100 mg · Raw material", pt: "50–100 mg · Matéria-prima", zh: "50–100 mg · 原料" },
+    formats: { en: "50–100 mg · Raw material", pt: "50–100 mg · Matéria-prima", es: "50–100 mg · Materia prima", fr: "50–100 mg · Matière première", zh: "50–100 mg · 原料" },
   },
   {
-    names: { en: "Acetyl Hexapeptide-8", pt: "Acetyl Hexapeptide-8", zh: "Acetyl Hexapeptide-8" },
+    names: { en: "Acetyl Hexapeptide-8", pt: "Acetyl Hexapeptide-8", es: "Acetyl Hexapeptide-8", fr: "Acetyl Hexapeptide-8", zh: "Acetyl Hexapeptide-8" },
     code: "AH8",
     category: "cosmetic",
-    formats: { en: "Bulk inquiry", pt: "Consulta a granel", zh: "大货询盘" },
+    formats: { en: "Bulk inquiry", pt: "Consulta a granel", es: "Consulta a granel", fr: "Demande en vrac", zh: "大货询盘" },
   },
   {
-    names: { en: "Custom configuration", pt: "Configuração personalizada", zh: "自定义规格" },
+    names: { en: "Custom configuration", pt: "Configuração personalizada", es: "Configuración personalizada", fr: "Configuration personnalisée", zh: "自定义规格" },
     code: "OEM",
     category: "custom",
-    formats: { en: "Private label · Packaging", pt: "Marca própria · Embalagem", zh: "贴牌 · 包装" },
+    formats: { en: "Private label · Packaging", pt: "Marca própria · Embalagem", es: "Marca privada · Empaque", fr: "Marque blanche · Emballage", zh: "贴牌 · 包装" },
   },
   {
-    names: { en: "Bulk peptide inquiry", pt: "Consulta de peptídeos a granel", zh: "多肽大货询盘" },
+    names: { en: "Bulk peptide inquiry", pt: "Consulta de peptídeos a granel", es: "Consulta de péptidos a granel", fr: "Demande de peptides en vrac", zh: "多肽大货询盘" },
     code: "BLK",
     category: "custom",
-    formats: { en: "Specification-led review", pt: "Revisão orientada por especificação", zh: "按规格审核" },
+    formats: { en: "Specification-led review", pt: "Revisão orientada por especificação", es: "Revisión según especificaciones", fr: "Examen selon les spécifications", zh: "按规格审核" },
   },
 ] satisfies Array<{
   names: Record<Locale, string>;
@@ -498,10 +750,9 @@ export default function Home() {
   useEffect(() => {
     try {
       const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (savedLocale === "en" || savedLocale === "pt" || savedLocale === "zh") {
+      if (isSiteLocale(savedLocale)) {
         setLocale(savedLocale);
-        document.documentElement.lang =
-          savedLocale === "zh" ? "zh-CN" : savedLocale === "pt" ? "pt-BR" : "en";
+        document.documentElement.lang = htmlLang(savedLocale);
       }
     } catch {
       // The language switcher still works when browser storage is unavailable.
@@ -565,14 +816,19 @@ export default function Home() {
     if (locale === "pt") {
       return `Olá, represento uma organização profissional e tenho interesse em ${name} (${formats}). Por favor, envie configurações disponíveis, MOQ, documentação e elegibilidade para o destino.`;
     }
+    if (locale === "es") {
+      return `Hola, represento a una organización profesional y me interesa ${name} (${formats}). Comparta las configuraciones disponibles, MOQ, documentación y elegibilidad para el destino.`;
+    }
+    if (locale === "fr") {
+      return `Bonjour, je représente un organisme professionnel et je m’intéresse à ${name} (${formats}). Merci de communiquer les configurations disponibles, le MOQ, la documentation et l’éligibilité de la destination.`;
+    }
     return `Hello, I represent a professional organization and am interested in ${name} (${formats}). Please share available configurations, MOQ, documentation, and destination eligibility.`;
   }
 
   function changeLocale(nextLocale: Locale) {
     setLocale(nextLocale);
     setFormStatus("");
-    document.documentElement.lang =
-      nextLocale === "zh" ? "zh-CN" : nextLocale === "pt" ? "pt-BR" : "en";
+    document.documentElement.lang = htmlLang(nextLocale);
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale);
     } catch {
@@ -596,39 +852,27 @@ export default function Home() {
       setFormStatus(t.form.missing);
       return;
     }
-    const message =
-      locale === "zh"
-        ? [
-            "网站专业询盘",
-            `姓名：${data.get("name")}`,
-            `公司：${data.get("company")}`,
-            `目的地：${data.get("country")}`,
-            `联系方式：${data.get("contact")}`,
-            `产品：${data.get("product")}`,
-            `数量：${data.get("quantity")}`,
-            `专业用途：${data.get("intendedUse")}`,
-          ].join("\n")
-        : locale === "pt"
-          ? [
-              "Consulta qualificada pelo site",
-              `Nome: ${data.get("name")}`,
-              `Empresa: ${data.get("company")}`,
-              `Destino: ${data.get("country")}`,
-              `Contato: ${data.get("contact")}`,
-              `Produto: ${data.get("product")}`,
-              `Quantidade: ${data.get("quantity")}`,
-              `Uso profissional: ${data.get("intendedUse")}`,
-            ].join("\n")
-          : [
-              "Qualified website inquiry",
-              `Name: ${data.get("name")}`,
-              `Company: ${data.get("company")}`,
-              `Destination: ${data.get("country")}`,
-              `Contact: ${data.get("contact")}`,
-              `Product: ${data.get("product")}`,
-              `Quantity: ${data.get("quantity")}`,
-              `Professional use: ${data.get("intendedUse")}`,
-            ].join("\n");
+    const messageLabels: Record<Locale, string[]> = {
+      en: ["Professional website inquiry", "Name", "Company", "Destination", "Contact", "Product", "Quantity", "Professional use"],
+      pt: ["Consulta profissional pelo site", "Nome", "Empresa", "Destino", "Contato", "Produto", "Quantidade", "Uso profissional"],
+      es: ["Consulta profesional desde el sitio", "Nombre", "Empresa", "Destino", "Contacto", "Producto", "Cantidad", "Uso profesional"],
+      fr: ["Demande professionnelle depuis le site", "Nom", "Entreprise", "Destination", "Contact", "Produit", "Quantité", "Usage professionnel"],
+      zh: ["网站专业询盘", "姓名", "公司", "目的地", "联系方式", "产品", "数量", "专业用途"],
+    };
+    const labels = messageLabels[locale];
+    const values = [
+      data.get("name"),
+      data.get("company"),
+      data.get("country"),
+      data.get("contact"),
+      data.get("product"),
+      data.get("quantity"),
+      data.get("intendedUse"),
+    ];
+    const message = [
+      labels[0],
+      ...values.map((value, index) => `${labels[index + 1]}: ${value}`),
+    ].join("\n");
     window.open(createWhatsAppUrl(message), "_blank", "noopener,noreferrer");
   }
 
@@ -712,23 +956,19 @@ export default function Home() {
           ))}
         </nav>
         <div className="header-actions">
-          <div className="language-switcher" role="group" aria-label="Language / Idioma / 语言">
-            {([
-              ["en", "EN"],
-              ["pt", "PT"],
-              ["zh", "中文"],
-            ] as const).map(([code, label]) => (
-              <button
-                className={locale === code ? "active" : ""}
-                type="button"
-                key={code}
-                aria-pressed={locale === code}
-                onClick={() => changeLocale(code)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <label className="language-select">
+            <span aria-hidden="true">LANG</span>
+            <span className="sr-only">Language / Idioma / Langue / 语言</span>
+            <select
+              value={locale}
+              onChange={(event) => changeLocale(event.target.value as Locale)}
+              aria-label="Language / Idioma / Langue / 语言"
+            >
+              {LANGUAGE_OPTIONS.map((option) => (
+                <option value={option.code} key={option.code}>{option.label}</option>
+              ))}
+            </select>
+          </label>
           <a className="button button-small" href="#inquiry">
             {t.primaryCta}
           </a>
@@ -752,7 +992,6 @@ export default function Home() {
             {t.introReplay}
             <small>08 SEC</small>
           </button>
-          <p className="micro-note">{t.heroNote}</p>
         </div>
         <div className="hero-visual">
           <div className="orbit orbit-one" />
@@ -1015,7 +1254,11 @@ export default function Home() {
             ? "您好，我有一项专业多肽供应询盘。"
             : locale === "pt"
               ? "Olá, tenho uma consulta profissional sobre fornecimento de peptídeos."
-              : "Hello, I have a professional peptide supply inquiry.",
+              : locale === "es"
+                ? "Hola, tengo una consulta profesional sobre suministro de péptidos."
+                : locale === "fr"
+                  ? "Bonjour, j’ai une demande professionnelle concernant l’approvisionnement en peptides."
+                  : "Hello, I have a professional peptide supply inquiry.",
         )}
         target={siteConfig.whatsappNumber ? "_blank" : undefined}
         rel="noreferrer"

@@ -30,26 +30,38 @@ test("server-renders the finished website", async () => {
 
   const html = await response.text();
   assert.match(html, /Peptivanta Biosciences/i);
-  assert.match(html, /Evidence first/i);
-  assert.match(html, /Qualified B2B peptide supply/i);
+  assert.match(html, /Peptide supply,/i);
+  assert.match(html, /made clear/i);
   assert.match(html, /Watch the workflow/i);
+  assert.match(html, /Português/);
+  assert.match(html, /Español/);
+  assert.match(html, /Français/);
   assert.match(html, /中文/);
   assert.match(html, /Professional-use and compliance notice/i);
+  assert.doesNotMatch(html, /Evidence first|Every batch|No direct online ordering/i);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
 
-test("includes complete Chinese locale content", async () => {
+test("includes complete multilingual content", async () => {
   const [homepage, legalDocument] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/LegalDocument.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(homepage, /先看证据。/);
+  assert.match(homepage, /多肽供应，/);
+  assert.match(homepage, /Suministro de péptidos,/);
+  assert.match(homepage, /L’approvisionnement en peptides,/);
   assert.match(homepage, /产品分类 · Products Categories/);
   assert.match(homepage, /前往 WhatsApp 继续沟通/);
   assert.match(legalDocument, /隐私政策/);
+  assert.match(legalDocument, /Política de Privacidad/);
+  assert.match(legalDocument, /Politique de confidentialité/);
   assert.match(legalDocument, /网站使用条款/);
   assert.match(legalDocument, /合规声明/);
+  assert.doesNotMatch(
+    homepage,
+    /先看证据|每一批次|不提供在线直接下单|每一份询盘均需审核/,
+  );
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {

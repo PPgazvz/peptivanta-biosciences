@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: "%s | Peptivanta Biosciences",
     },
     description:
-      "Qualified B2B peptide supply inquiries, batch documentation, private-label support, and export coordination.",
+      "Documented peptide supply, private-label support, and export coordination for professional customers.",
     icons: {
       icon: "/favicon.svg",
       shortcut: "/favicon.svg",
@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: new URL("/og.png", origin).toString(),
           width: 1732,
           height: 909,
-          alt: "Peptivanta Biosciences — Evidence first. Every batch.",
+          alt: "Peptivanta Biosciences — Peptide supply, made clear.",
         },
       ],
     },
