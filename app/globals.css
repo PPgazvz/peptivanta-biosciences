@@ -6,11 +6,14 @@
   --mint: #77fbdc;
   --green: #19d8aa;
   --blue: #327cff;
-  --muted: #627474;
+  --muted: #4f6665;
   --line: rgba(6, 25, 27, 0.14);
   --dark-line: rgba(255, 255, 255, 0.14);
   --radius: 22px;
   --shell: min(1180px, calc(100vw - 48px));
+  --font-sans: "Segoe UI Variable Text", "Aptos", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Segoe UI Variable Display", "Aptos Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-cjk: "Microsoft YaHei UI", "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", "Segoe UI", sans-serif;
 }
 
 * {
@@ -26,8 +29,12 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -163,15 +170,16 @@ main {
 }
 
 .site-intro-brand strong {
-  font-size: 14px;
-  letter-spacing: 0.19em;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .site-intro-brand small {
   margin-top: 6px;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 7px;
-  letter-spacing: 0.31em;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  letter-spacing: 0.2em;
 }
 
 .site-intro-skip {
@@ -187,9 +195,9 @@ main {
   background: transparent;
   color: white;
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 750;
-  letter-spacing: 0.14em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   animation: intro-rise 700ms 180ms both;
 }
@@ -216,19 +224,20 @@ main {
 .site-intro-copy > p {
   margin: 0 0 28px;
   color: var(--mint);
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.23em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   animation: intro-rise 700ms 260ms both;
 }
 
 .site-intro-copy h2 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(72px, 10vw, 158px);
-  font-weight: 570;
-  letter-spacing: -0.078em;
-  line-height: 0.78;
+  font-weight: 700;
+  letter-spacing: -0.06em;
+  line-height: 0.82;
 }
 
 .site-intro-copy h2 span,
@@ -239,9 +248,9 @@ main {
 
 .site-intro-copy h2 em {
   margin-top: 0.17em;
-  color: transparent;
+  color: var(--mint);
   font-style: normal;
-  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.86);
+  -webkit-text-stroke: 0;
   animation-delay: 130ms;
 }
 
@@ -258,16 +267,16 @@ main {
 .site-intro-statement > span {
   padding-top: 4px;
   color: var(--mint);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
 }
 
 .site-intro-statement p {
   margin: 0;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: clamp(14px, 1.2vw, 18px);
-  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.6;
 }
 
 .site-intro-timeline {
@@ -306,10 +315,10 @@ main {
 .site-intro-timeline li {
   display: grid;
   gap: 5px;
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 9px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -320,7 +329,7 @@ main {
 
 .site-intro-timeline li span {
   color: var(--mint);
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .site-intro-meta {
@@ -328,8 +337,8 @@ main {
   right: 54px;
   top: 50%;
   margin: 0;
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 7px;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -347,9 +356,9 @@ main {
   background: transparent;
   color: #315453;
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.11em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
@@ -364,7 +373,7 @@ main {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 8px;
+  font-size: 10px;
   transition: transform 180ms ease, background 180ms ease;
 }
 
@@ -376,13 +385,13 @@ main {
 .workflow-replay small {
   padding-left: 10px;
   border-left: 1px solid var(--line);
-  color: #78908e;
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
 }
 
 .lang-zh {
-  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+  font-family: var(--font-cjk);
 }
 
 .lang-zh .hero h1 {
@@ -490,16 +499,18 @@ main {
 }
 
 .brand strong {
-  font-size: 17px;
-  letter-spacing: 0.1em;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.075em;
   text-transform: uppercase;
 }
 
 .brand small {
   margin-top: 4px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--muted);
-  letter-spacing: 0.27em;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
@@ -514,9 +525,9 @@ main {
   padding-block: 8px;
   border: 0;
   background: none;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.04em;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
 }
 
@@ -538,9 +549,9 @@ main {
   padding-right: 8px;
   border-right: 1px solid var(--line);
   color: var(--muted);
-  font-size: 7px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .language-select select {
@@ -553,9 +564,9 @@ main {
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  font-size: 10px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .language-select::after {
@@ -617,9 +628,9 @@ main {
   align-items: center;
   justify-content: center;
   gap: 22px;
-  font-size: 13px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
     transform 180ms ease,
@@ -636,7 +647,7 @@ main {
 .button-small {
   min-height: 40px;
   padding-inline: 18px;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 .hero {
@@ -651,13 +662,13 @@ main {
 .eyebrow,
 .section-tag {
   margin: 0 0 28px;
-  color: #315453;
+  color: #234c49;
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.2em;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
   text-transform: uppercase;
 }
 
@@ -670,26 +681,28 @@ main {
 .hero h1 {
   max-width: 620px;
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(58px, 7.2vw, 108px);
-  line-height: 0.88;
-  letter-spacing: -0.072em;
-  font-weight: 650;
+  line-height: 0.94;
+  letter-spacing: -0.055em;
+  font-weight: 700;
 }
 
 .hero h1 em {
   display: block;
   margin-top: 8px;
-  color: transparent;
+  color: #0c7f6b;
   font-style: normal;
-  -webkit-text-stroke: 1.5px #173b3d;
+  -webkit-text-stroke: 0;
 }
 
 .hero-text {
   max-width: 580px;
   margin: 34px 0 0;
-  color: #49615f;
-  font-size: 18px;
-  line-height: 1.65;
+  color: #344f4d;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.7;
 }
 
 .hero-actions {
@@ -705,8 +718,8 @@ main {
   display: inline-flex;
   align-items: center;
   gap: 26px;
-  font-size: 12px;
-  font-weight: 750;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .hero-visual {
@@ -800,13 +813,14 @@ main {
 }
 
 .image-caption strong {
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .image-caption small {
-  color: #9bb6b4;
-  font-size: 9px;
-  line-height: 1.5;
+  color: #c4d6d4;
+  font-size: 11px;
+  line-height: 1.55;
 }
 
 .pulse {
@@ -847,12 +861,12 @@ main {
 }
 
 .molecule-card strong {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .molecule-card small {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 11px;
 }
 
 .proof-strip {
@@ -877,15 +891,15 @@ main {
 }
 
 .proof-strip strong {
-  font-size: 14px;
-  font-weight: 760;
+  font-size: 16px;
+  font-weight: 700;
 }
 
 .proof-strip span,
 .proof-strip p {
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .proof-strip p {
@@ -908,10 +922,11 @@ main {
 .company-heading h2,
 .inquiry-copy h2 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(42px, 5.1vw, 74px);
-  line-height: 0.99;
-  letter-spacing: -0.055em;
-  font-weight: 620;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  font-weight: 700;
 }
 
 .section-heading > p:last-child,
@@ -920,9 +935,9 @@ main {
 .private-copy > p,
 .company-content > p,
 .inquiry-copy > p {
-  color: var(--muted);
-  font-size: 16px;
-  line-height: 1.7;
+  color: #3f5957;
+  font-size: 17px;
+  line-height: 1.75;
 }
 
 .pillar-grid {
@@ -964,15 +979,16 @@ main {
 
 .pillar-card h3 {
   margin: auto 0 18px;
-  font-size: 24px;
+  font-size: 25px;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 
 .pillar-card p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .category-showcase {
@@ -1063,7 +1079,7 @@ main {
 .category-number {
   color: currentColor;
   opacity: 0.5;
-  font: 700 9px/1 Consolas, monospace;
+  font: 700 11px/1 Consolas, monospace;
 }
 
 .category-symbol {
@@ -1145,8 +1161,10 @@ main {
 
 .category-card strong {
   max-width: 330px;
-  font-size: 23px;
-  line-height: 1.06;
+  font-family: var(--font-display);
+  font-size: 25px;
+  font-weight: 700;
+  line-height: 1.12;
   letter-spacing: -0.035em;
 }
 
@@ -1158,16 +1176,16 @@ main {
   max-width: 360px;
   margin-top: 13px;
   color: currentColor;
-  opacity: 0.64;
-  font-size: 11px;
-  line-height: 1.55;
+  opacity: 0.78;
+  font-size: 14px;
+  line-height: 1.65;
 }
 
 .category-card em {
   margin-top: 22px;
   color: currentColor;
-  opacity: 0.54;
-  font: 700 8px/1.4 Consolas, monospace;
+  opacity: 0.7;
+  font: 700 10px/1.5 Consolas, monospace;
   font-style: normal;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1234,7 +1252,7 @@ main {
   outline: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .filter-tabs {
@@ -1250,7 +1268,7 @@ main {
   border-radius: 999px;
   background: none;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1290,7 +1308,7 @@ main {
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font: 700 9px/1 Consolas, monospace;
+  font: 700 11px/1 Consolas, monospace;
 }
 
 .product-top > span {
@@ -1303,14 +1321,15 @@ main {
 
 .product-card h3 {
   margin: 42px 0 8px;
-  font-size: 20px;
+  font-size: 22px;
+  font-weight: 700;
   letter-spacing: -0.03em;
 }
 
 .product-card > p {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .product-meta {
@@ -1319,7 +1338,7 @@ main {
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 9px;
+  font-size: 11px;
 }
 
 .product-meta i {
@@ -1336,8 +1355,8 @@ main {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
-  font-weight: 750;
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .product-card > a span {
@@ -1355,8 +1374,8 @@ main {
   padding: 16px 20px;
   border-left: 2px solid var(--green);
   color: var(--muted);
-  font-size: 10px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .quality {
@@ -1377,7 +1396,7 @@ main {
 }
 
 .quality-copy > p:last-child {
-  color: #8eabaa;
+  color: #b4c8c6;
 }
 
 .quality-steps {
@@ -1394,20 +1413,20 @@ main {
 
 .quality-steps article > span {
   color: var(--mint);
-  font: 700 10px/1.3 Consolas, monospace;
+  font: 700 12px/1.3 Consolas, monospace;
 }
 
 .quality-steps h3 {
   margin: 0 0 12px;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .quality-steps p {
   margin: 0;
-  color: #8eabaa;
-  font-size: 12px;
-  line-height: 1.65;
+  color: #b4c8c6;
+  font-size: 15px;
+  line-height: 1.7;
 }
 
 .facility {
@@ -1438,12 +1457,13 @@ main {
 }
 
 .facility-metrics strong {
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 700;
 }
 
 .facility-metrics span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .facility-photo {
@@ -1464,7 +1484,7 @@ main {
   border-radius: 12px;
   background: rgba(6, 25, 27, 0.88);
   color: white;
-  font-size: 10px;
+  font-size: 13px;
   backdrop-filter: blur(10px);
 }
 
@@ -1518,14 +1538,14 @@ main {
 }
 
 .label-sample strong {
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  font-size: 12px;
+  letter-spacing: 0.1em;
 }
 
 .label-sample small {
-  color: #8fc0b9;
-  font-size: 7px;
-  letter-spacing: 0.12em;
+  color: #b7d6d1;
+  font-size: 10px;
+  letter-spacing: 0.07em;
 }
 
 .private-copy ul {
@@ -1538,11 +1558,12 @@ main {
 }
 
 .private-copy li {
-  color: #37514f;
+  color: #294846;
   display: flex;
   gap: 10px;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .private-copy li span {
@@ -1564,7 +1585,7 @@ main {
 
 .company-content > p {
   margin-top: 0;
-  font-size: 18px;
+  font-size: 19px;
 }
 
 .company-content dl {
@@ -1581,13 +1602,14 @@ main {
 
 .company-content dt {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .company-content dd {
   margin: 0;
-  font-size: 11px;
-  font-weight: 650;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .inquiry {
@@ -1614,12 +1636,13 @@ main {
 }
 
 .contact-lines span {
-  color: #586433;
-  font-size: 10px;
+  color: #465427;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .contact-lines strong {
-  font-size: 11px;
+  font-size: 14px;
 }
 
 .inquiry-form {
@@ -1640,9 +1663,10 @@ main {
   margin-bottom: 20px;
   display: grid;
   gap: 9px;
-  color: #a8bfbd;
-  font-size: 9px;
-  letter-spacing: 0.04em;
+  color: #c5d7d5;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .inquiry-form input:not([type="checkbox"]),
@@ -1655,7 +1679,8 @@ main {
   outline: 0;
   background: transparent;
   color: white;
-  font-size: 13px;
+  font-size: 15px;
+  font-weight: 500;
   transition: border-color 180ms ease;
 }
 
@@ -1690,8 +1715,8 @@ main {
 .form-status {
   margin: 16px 0 0;
   color: #ffd98c;
-  font-size: 10px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
 .compliance {
@@ -1717,14 +1742,15 @@ main {
 
 .compliance h2 {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .compliance p {
   margin: 0;
   color: var(--muted);
-  font-size: 10px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.75;
 }
 
 .footer {
@@ -1741,8 +1767,8 @@ main {
   max-width: 310px;
   margin: 28px 0 0;
   color: var(--muted);
-  font-size: 11px;
-  line-height: 1.6;
+  font-size: 13px;
+  line-height: 1.7;
 }
 
 .footer-links {
@@ -1754,7 +1780,7 @@ main {
 .footer > p {
   margin: 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .whatsapp-float {
@@ -1785,7 +1811,7 @@ main {
 }
 
 .whatsapp-float small {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -2027,18 +2053,18 @@ main {
   }
 
   .site-intro-brand strong {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .site-intro-brand small {
-    font-size: 6px;
+    font-size: 8px;
   }
 
   .site-intro-skip {
     top: 29px;
     right: 26px;
     gap: 10px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .site-intro-copy {
@@ -2049,7 +2075,7 @@ main {
 
   .site-intro-copy > p {
     margin-bottom: 20px;
-    font-size: 8px;
+    font-size: 10px;
   }
 
   .site-intro-copy h2 {
@@ -2067,7 +2093,7 @@ main {
   }
 
   .site-intro-statement p {
-    font-size: 13px;
+    font-size: 15px;
   }
 
   .site-intro-timeline {
@@ -2081,8 +2107,8 @@ main {
   }
 
   .site-intro-timeline li {
-    font-size: 7px;
-    letter-spacing: 0.08em;
+    font-size: 9px;
+    letter-spacing: 0.05em;
   }
 
   .site-intro-timeline li:not(:first-child) {
@@ -2121,7 +2147,7 @@ main {
   }
 
   .hero-text {
-    font-size: 15px;
+    font-size: 17px;
   }
 
   .hero-actions {
@@ -2308,7 +2334,7 @@ main {
   display: inline-block;
   margin-bottom: 86px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2317,7 +2343,7 @@ main {
 }
 
 .legal-page-zh {
-  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+  font-family: var(--font-cjk);
 }
 
 .legal-page-zh h1 {
@@ -2332,15 +2358,17 @@ main {
 .legal-page h1 {
   max-width: 660px;
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(54px, 9vw, 94px);
-  line-height: 0.92;
-  letter-spacing: -0.065em;
+  line-height: 0.98;
+  letter-spacing: -0.05em;
+  font-weight: 700;
 }
 
 .legal-date {
   margin: 26px 0 80px;
   color: var(--muted);
-  font: 700 10px/1.4 Consolas, monospace;
+  font: 700 12px/1.5 Consolas, monospace;
   text-transform: uppercase;
   letter-spacing: 0.09em;
 }
@@ -2352,14 +2380,15 @@ main {
 
 .legal-page section h2 {
   margin: 0 0 14px;
-  font-size: 19px;
+  font-size: 22px;
+  font-weight: 700;
 }
 
 .legal-page section p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: 15px;
+  line-height: 1.85;
 }
 
 .legal-page footer {
@@ -2367,7 +2396,7 @@ main {
   padding-top: 24px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 
 @media (max-width: 560px) {
@@ -2388,7 +2417,7 @@ main {
   }
 
   .brand strong {
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 0.06em;
   }
 
