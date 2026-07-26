@@ -10,6 +10,7 @@ import {
   LOCALE_STORAGE_KEY,
   type SiteLocale as Locale,
 } from "./i18n";
+import FactoryWorkflow from "./FactoryWorkflow";
 
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
 type IntroState = "hidden" | "visible" | "closing";
@@ -32,10 +33,10 @@ const copy = {
     introKicker: "Peptivanta · Operations",
     introLead: "Precision",
     introFinish: "in motion.",
-    introStatement: "A controlled path from handling and verification to export-ready dispatch.",
-    introStages: ["Prepare", "Verify", "Pack", "Dispatch"],
+    introStatement: "A visible path from line preparation and automated handling to labelled inventory control.",
+    introStages: ["Prepare", "Process", "Label", "Pack", "Track"],
     introAria: "Peptivanta facility workflow introduction",
-    introMeta: "AUTHENTIC WORKFLOW FOOTAGE · MUTED · 08 SEC",
+    introMeta: "FACTORY WORKFLOW · MUTED · 08 SEC",
     imageLabel: "Controlled packaging environment",
     imageSub: "Authentic operational facility image",
     heroImageAlt: "Controlled packaging facility",
@@ -52,6 +53,19 @@ const copy = {
       ["01", "Defined specifications", "Product, format, quantity, and documentation are confirmed before quotation."],
       ["02", "Quality visibility", "Available COA, analytical data, and batch information are reviewed with each inquiry."],
       ["03", "Human support", "A dedicated contact follows the request from qualification through dispatch."],
+    ],
+    workflowTag: "Factory workflow",
+    workflowTitle: "One line. Five visible stages.",
+    workflowText:
+      "Follow the movement from prepared components through automated handling, identification, packaging, and inventory control inside our manufacturing facility.",
+    workflowMediaLabel: "FACTORY PROCESS VIEW",
+    workflowHint: "Scroll or select a stage to continue",
+    workflowSteps: [
+      ["01", "Prepare", "Components are arranged and the line is readied for an organized production run.", "LINE SETUP"],
+      ["02", "Process", "Automated transfer moves units consistently through the production line.", "AUTOMATED HANDLING"],
+      ["03", "Label", "Product identification is applied through the dedicated labelling stage.", "IDENTIFICATION"],
+      ["04", "Pack", "Finished units are grouped and organized for controlled handling.", "PACKAGING"],
+      ["05", "Track", "Inventory is scanned, placed, and organized for the next operational step.", "INVENTORY CONTROL"],
     ],
     categoryTag: "Products Categories",
     categoryTitle: "A clearer way into the catalogue.",
@@ -85,10 +99,10 @@ const copy = {
       ["03", "Packaging control", "Packaging configuration and handling requirements are confirmed before dispatch."],
       ["04", "Export coordination", "Shipping options are reviewed against destination requirements and order profile."],
     ],
-    facilityKicker: "Real facility imagery",
-    facilityTitle: "A professional operating environment.",
+    facilityKicker: "Manufacturing facility",
+    facilityTitle: "Inside our production and inventory environment.",
     facilityText:
-      "We use authentic supply-network photography and avoid stock-lab claims. Facility identity and certifications are disclosed only when documentary verification is available.",
+      "The imagery shown on this site comes from our production line and inventory operations. Product availability and applicable documentation are confirmed with each request.",
     inventoryCaption: "Organized inventory and order allocation",
     facilityMetrics: ["Availability review", "Analytical data where available"],
     privateTag: "Private-label support",
@@ -158,10 +172,10 @@ const copy = {
     introKicker: "Peptivanta · Operações",
     introLead: "Precisão",
     introFinish: "em movimento.",
-    introStatement: "Um percurso controlado do manuseio e verificação à expedição para exportação.",
-    introStages: ["Preparar", "Verificar", "Embalar", "Expedir"],
+    introStatement: "Um percurso visível da preparação da linha e do manuseio automatizado ao controle do estoque identificado.",
+    introStages: ["Preparar", "Processar", "Rotular", "Embalar", "Rastrear"],
     introAria: "Introdução ao fluxo operacional da Peptivanta",
-    introMeta: "IMAGENS REAIS DO FLUXO · SEM ÁUDIO · 08 SEG",
+    introMeta: "FLUXO DA FÁBRICA · SEM ÁUDIO · 08 SEG",
     imageLabel: "Ambiente controlado de embalagem",
     imageSub: "Imagem autêntica do ambiente operacional",
     heroImageAlt: "Ambiente controlado de embalagem",
@@ -178,6 +192,19 @@ const copy = {
       ["01", "Especificações definidas", "Produto, formato, quantidade e documentação são confirmados antes da cotação."],
       ["02", "Visibilidade de qualidade", "COA, dados analíticos e informações de lote disponíveis são revisados em cada consulta."],
       ["03", "Suporte humano", "Um contato dedicado acompanha a solicitação até a expedição."],
+    ],
+    workflowTag: "Fluxo da fábrica",
+    workflowTitle: "Uma linha. Cinco etapas visíveis.",
+    workflowText:
+      "Acompanhe o percurso dos componentes preparados pelo manuseio automatizado, identificação, embalagem e controle de estoque dentro de nossa fábrica.",
+    workflowMediaLabel: "VISÃO DO PROCESSO",
+    workflowHint: "Role ou selecione uma etapa para continuar",
+    workflowSteps: [
+      ["01", "Preparar", "Os componentes são organizados e a linha é preparada para uma produção ordenada.", "PREPARAÇÃO DA LINHA"],
+      ["02", "Processar", "A transferência automatizada conduz as unidades de forma consistente pela linha.", "MANUSEIO AUTOMATIZADO"],
+      ["03", "Rotular", "A identificação do produto é aplicada na etapa dedicada de rotulagem.", "IDENTIFICAÇÃO"],
+      ["04", "Embalar", "As unidades finalizadas são agrupadas e organizadas para o manuseio controlado.", "EMBALAGEM"],
+      ["05", "Rastrear", "O estoque é escaneado, armazenado e organizado para a próxima etapa operacional.", "CONTROLE DE ESTOQUE"],
     ],
     categoryTag: "Products Categories",
     categoryTitle: "Uma entrada mais clara para o catálogo.",
@@ -211,10 +238,10 @@ const copy = {
       ["03", "Controle de embalagem", "Configuração e manuseio são confirmados antes da expedição."],
       ["04", "Coordenação de exportação", "As opções de envio são revisadas conforme destino e perfil do pedido."],
     ],
-    facilityKicker: "Imagens reais",
-    facilityTitle: "Um ambiente operacional profissional.",
+    facilityKicker: "Instalações de fabricação",
+    facilityTitle: "Nosso ambiente de produção e estoque.",
     facilityText:
-      "Utilizamos fotografias autênticas da rede de fornecimento. Identidade da instalação e certificações só são divulgadas com documentação verificável.",
+      "As imagens exibidas no site vêm de nossa linha de produção e das operações de estoque. A disponibilidade do produto e os documentos aplicáveis são confirmados em cada solicitação.",
     inventoryCaption: "Estoque organizado e alocação de pedidos",
     facilityMetrics: ["Revisão de disponibilidade", "Dados analíticos quando disponíveis"],
     privateTag: "Suporte de marca própria",
@@ -284,10 +311,10 @@ const copy = {
     introKicker: "Peptivanta · Operaciones",
     introLead: "Precisión",
     introFinish: "en movimiento.",
-    introStatement: "Un recorrido controlado desde la manipulación y verificación hasta el despacho para exportación.",
-    introStages: ["Preparar", "Verificar", "Empacar", "Despachar"],
+    introStatement: "Un recorrido visible desde la preparación de la línea y la manipulación automatizada hasta el control del inventario identificado.",
+    introStages: ["Preparar", "Procesar", "Etiquetar", "Embalar", "Trazar"],
     introAria: "Introducción al flujo operativo de Peptivanta",
-    introMeta: "IMÁGENES REALES DEL PROCESO · SIN AUDIO · 08 SEG",
+    introMeta: "FLUJO DE FÁBRICA · SIN AUDIO · 08 SEG",
     imageLabel: "Entorno controlado de empaque",
     imageSub: "Imagen auténtica del entorno operativo",
     heroImageAlt: "Entorno controlado de empaque",
@@ -304,6 +331,19 @@ const copy = {
       ["01", "Especificaciones definidas", "Producto, formato, cantidad y documentación se confirman antes de cotizar."],
       ["02", "Visibilidad de calidad", "El COA, los datos analíticos y la información de lote disponibles se revisan con cada consulta."],
       ["03", "Atención personal", "Un contacto dedicado acompaña la solicitud desde la cualificación hasta el despacho."],
+    ],
+    workflowTag: "Flujo de fábrica",
+    workflowTitle: "Una línea. Cinco etapas visibles.",
+    workflowText:
+      "Siga el recorrido desde los componentes preparados hasta la manipulación automatizada, la identificación, el embalaje y el control de inventario dentro de nuestra fábrica.",
+    workflowMediaLabel: "VISTA DEL PROCESO",
+    workflowHint: "Desplácese o seleccione una etapa para continuar",
+    workflowSteps: [
+      ["01", "Preparar", "Los componentes se organizan y la línea se acondiciona para una producción ordenada.", "PREPARACIÓN DE LÍNEA"],
+      ["02", "Procesar", "La transferencia automatizada desplaza las unidades de forma constante por la línea.", "MANIPULACIÓN AUTOMATIZADA"],
+      ["03", "Etiquetar", "La identificación del producto se aplica en la etapa dedicada de etiquetado.", "IDENTIFICACIÓN"],
+      ["04", "Embalar", "Las unidades terminadas se agrupan y organizan para una manipulación controlada.", "EMBALAJE"],
+      ["05", "Trazar", "El inventario se escanea, ubica y organiza para la siguiente etapa operativa.", "CONTROL DE INVENTARIO"],
     ],
     categoryTag: "Categorías de productos",
     categoryTitle: "Una entrada más clara al catálogo.",
@@ -337,10 +377,10 @@ const copy = {
       ["03", "Control de empaque", "La configuración y los requisitos de manipulación se confirman antes del despacho."],
       ["04", "Coordinación de exportación", "Las opciones de envío se revisan según el destino y el perfil del pedido."],
     ],
-    facilityKicker: "Imágenes reales",
-    facilityTitle: "Un entorno operativo profesional.",
+    facilityKicker: "Instalaciones de fabricación",
+    facilityTitle: "Nuestro entorno de producción e inventario.",
     facilityText:
-      "Utilizamos fotografías auténticas de la red de suministro. La identidad de las instalaciones y sus certificaciones solo se comunican cuando existe documentación verificable.",
+      "Las imágenes de este sitio proceden de nuestra línea de producción y de las operaciones de inventario. La disponibilidad del producto y la documentación aplicable se confirman con cada solicitud.",
     inventoryCaption: "Inventario organizado y asignación de pedidos",
     facilityMetrics: ["Revisión de disponibilidad", "Datos analíticos cuando estén disponibles"],
     privateTag: "Soporte de marca privada",
@@ -409,10 +449,10 @@ const copy = {
     introKicker: "Peptivanta · Opérations",
     introLead: "La précision",
     introFinish: "en mouvement.",
-    introStatement: "Un parcours maîtrisé, de la manipulation et la vérification jusqu’à l’expédition export.",
-    introStages: ["Préparer", "Vérifier", "Emballer", "Expédier"],
+    introStatement: "Un parcours visible, de la préparation de ligne et la manipulation automatisée au contrôle des stocks identifiés.",
+    introStages: ["Préparer", "Traiter", "Étiqueter", "Emballer", "Tracer"],
     introAria: "Introduction au flux opérationnel de Peptivanta",
-    introMeta: "IMAGES RÉELLES DU PROCESSUS · SANS SON · 08 SEC",
+    introMeta: "FLUX DE L’USINE · SANS SON · 08 SEC",
     imageLabel: "Environnement d’emballage contrôlé",
     imageSub: "Image authentique de l’environnement opérationnel",
     heroImageAlt: "Environnement d’emballage contrôlé",
@@ -429,6 +469,19 @@ const copy = {
       ["01", "Spécifications définies", "Le produit, le format, la quantité et la documentation sont confirmés avant devis."],
       ["02", "Visibilité qualité", "Les COA, données analytiques et informations de lot disponibles sont examinés avec chaque demande."],
       ["03", "Suivi humain", "Un interlocuteur dédié accompagne la demande de la qualification jusqu’à l’expédition."],
+    ],
+    workflowTag: "Flux de l’usine",
+    workflowTitle: "Une ligne. Cinq étapes visibles.",
+    workflowText:
+      "Suivez le parcours des composants préparés jusqu’à la manipulation automatisée, l’identification, l’emballage et le contrôle des stocks au sein de notre usine.",
+    workflowMediaLabel: "VUE DU PROCESSUS",
+    workflowHint: "Faites défiler ou sélectionnez une étape",
+    workflowSteps: [
+      ["01", "Préparer", "Les composants sont organisés et la ligne est préparée pour une production ordonnée.", "PRÉPARATION DE LIGNE"],
+      ["02", "Traiter", "Le transfert automatisé déplace les unités de manière régulière sur la ligne.", "MANIPULATION AUTOMATISÉE"],
+      ["03", "Étiqueter", "L’identification du produit est appliquée lors de l’étape dédiée d’étiquetage.", "IDENTIFICATION"],
+      ["04", "Emballer", "Les unités terminées sont regroupées et organisées pour une manipulation contrôlée.", "EMBALLAGE"],
+      ["05", "Tracer", "Le stock est scanné, rangé et organisé pour l’étape opérationnelle suivante.", "CONTRÔLE DES STOCKS"],
     ],
     categoryTag: "Catégories de produits",
     categoryTitle: "Un accès plus clair au catalogue.",
@@ -462,10 +515,10 @@ const copy = {
       ["03", "Contrôle de l’emballage", "La configuration et les exigences de manipulation sont confirmées avant expédition."],
       ["04", "Coordination export", "Les options d’envoi sont examinées selon la destination et le profil de commande."],
     ],
-    facilityKicker: "Images réelles",
-    facilityTitle: "Un environnement opérationnel professionnel.",
+    facilityKicker: "Site de fabrication",
+    facilityTitle: "Notre environnement de production et de stockage.",
     facilityText:
-      "Nous utilisons des photographies authentiques du réseau d’approvisionnement. L’identité des installations et les certifications ne sont communiquées qu’avec des documents vérifiables.",
+      "Les images présentées sur ce site proviennent de notre ligne de production et de nos opérations de stockage. La disponibilité des produits et les documents applicables sont confirmés pour chaque demande.",
     inventoryCaption: "Inventaire organisé et affectation des commandes",
     facilityMetrics: ["Vérification de disponibilité", "Données analytiques lorsqu’elles sont disponibles"],
     privateTag: "Accompagnement en marque blanche",
@@ -534,10 +587,10 @@ const copy = {
     introKicker: "Peptivanta · 运营流程",
     introLead: "精准把控",
     introFinish: "贯穿全程。",
-    introStatement: "从操作、核验到出口发运，以清晰流程衔接每一个环节。",
-    introStages: ["准备", "核验", "包装", "发运"],
+    introStatement: "从产线准备、自动流转到贴标、包装与库存追踪，完整呈现生产链路。",
+    introStages: ["准备", "流转", "贴标", "包装", "追踪"],
     introAria: "Peptivanta 工厂流程开场",
-    introMeta: "真实流程影像 · 静音播放 · 08 秒",
+    introMeta: "工厂流程 · 静音播放 · 08 秒",
     imageLabel: "规范化包装环境",
     imageSub: "真实运营场景照片",
     heroImageAlt: "规范化包装作业环境",
@@ -554,6 +607,19 @@ const copy = {
       ["01", "明确产品规格", "报价前确认产品、规格、数量和所需文件。"],
       ["02", "质量信息透明", "根据询盘核对可提供的 COA、分析数据和批次信息。"],
       ["03", "专人跟进支持", "从资质确认到发运交接，由专人持续跟进。"],
+    ],
+    workflowTag: "工厂生产流程",
+    workflowTitle: "一条产线，五个清晰环节。",
+    workflowText:
+      "从物料准备到自动流转、产品识别、包装整理和库存追踪，直观查看我们的工厂作业链路。",
+    workflowMediaLabel: "工厂流程画面",
+    workflowHint: "继续滚动或点击步骤查看",
+    workflowSteps: [
+      ["01", "准备", "整理生产组件并完成产线准备，使后续作业有序衔接。", "产线准备"],
+      ["02", "流转", "通过自动化输送，让产品在生产线上持续、稳定流转。", "自动化处理"],
+      ["03", "贴标", "通过专用贴标环节完成产品识别信息的应用。", "产品识别"],
+      ["04", "包装", "将完成的产品集中整理，进入规范化包装处理。", "包装整理"],
+      ["05", "追踪", "通过扫码、上架和库存整理，完成后续环节前的追踪管理。", "库存管理"],
     ],
     categoryTag: "产品分类 · Products Categories",
     categoryTitle: "更快找到合适的产品入口。",
@@ -587,10 +653,10 @@ const copy = {
       ["03", "包装控制", "发运前确认包装配置及相应操作要求。"],
       ["04", "出口协调", "根据目的地要求与订单情况评估运输方案。"],
     ],
-    facilityKicker: "真实现场影像",
-    facilityTitle: "专业、规范的运营环境。",
+    facilityKicker: "自有生产工厂",
+    facilityTitle: "走进我们的生产与仓储环境。",
     facilityText:
-      "网站采用真实供应链现场照片，避免使用与实际无关的库存实验室图片。设施身份和认证信息仅在具备可核验文件时披露。",
+      "网站展示的影像来自我们的生产线与库存作业现场。具体产品的供应情况及适用文件将结合每项需求确认。",
     inventoryCaption: "规范化库存管理与订单分配",
     facilityMetrics: ["根据批次确认可用性", "在可提供时匹配分析数据"],
     privateTag: "贴牌服务支持",
@@ -889,16 +955,16 @@ export default function Home() {
             muted
             playsInline
             preload="metadata"
-            poster="/media/factory-flow-poster.webp"
+            poster="/media/factory-flow-poster-v2.webp"
             onEnded={closeIntro}
             aria-hidden="true"
           >
             <source
-              src="/media/factory-flow-mobile.mp4"
+              src="/media/factory-flow-mobile-v2.mp4"
               type="video/mp4"
               media="(max-width: 720px)"
             />
-            <source src="/media/factory-flow-desktop.mp4" type="video/mp4" />
+            <source src="/media/factory-flow-desktop-v2.mp4" type="video/mp4" />
           </video>
           <div className="site-intro-shade" aria-hidden="true" />
           <div className="site-intro-grid" aria-hidden="true" />
@@ -1036,6 +1102,15 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <FactoryWorkflow
+        tag={t.workflowTag}
+        title={t.workflowTitle}
+        text={t.workflowText}
+        mediaLabel={t.workflowMediaLabel}
+        hint={t.workflowHint}
+        steps={t.workflowSteps}
+      />
 
       <section className="category-showcase section-shell" id="categories">
         <div className="section-heading split-heading">

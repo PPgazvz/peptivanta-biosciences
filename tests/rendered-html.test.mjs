@@ -33,6 +33,8 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Peptide supply,/i);
   assert.match(html, /made clear/i);
   assert.match(html, /Watch the workflow/i);
+  assert.match(html, /One line\. Five visible stages\./i);
+  assert.match(html, /Factory process view/i);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
   assert.match(html, /Français/);
@@ -49,8 +51,11 @@ test("includes complete multilingual content", async () => {
   ]);
 
   assert.match(homepage, /多肽供应，/);
+  assert.match(homepage, /一条产线，五个清晰环节。/);
   assert.match(homepage, /Suministro de péptidos,/);
   assert.match(homepage, /L’approvisionnement en peptides,/);
+  assert.match(homepage, /factory-flow-desktop-v2\.mp4/);
+  assert.match(homepage, /FactoryWorkflow/);
   assert.match(homepage, /产品分类 · Products Categories/);
   assert.match(homepage, /前往 WhatsApp 继续沟通/);
   assert.match(legalDocument, /隐私政策/);
@@ -60,7 +65,7 @@ test("includes complete multilingual content", async () => {
   assert.match(legalDocument, /合规声明/);
   assert.doesNotMatch(
     homepage,
-    /先看证据|每一批次|不提供在线直接下单|每一份询盘均需审核/,
+    /先看证据|每一批次|不提供在线直接下单|每一份询盘均需审核|供应链现场/,
   );
 });
 

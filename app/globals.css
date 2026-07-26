@@ -308,7 +308,7 @@ main {
   margin: 13px 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   list-style: none;
 }
 
@@ -417,13 +417,16 @@ main {
 .lang-zh .facility-copy h2,
 .lang-zh .private-copy h2,
 .lang-zh .company-heading h2,
-.lang-zh .inquiry-copy h2 {
+.lang-zh .inquiry-copy h2,
+.lang-zh .factory-workflow-heading h2 {
   line-height: 1.08;
   letter-spacing: -0.045em;
 }
 
 .lang-zh .category-card strong,
-.lang-zh .product-card h3 {
+.lang-zh .product-card h3,
+.lang-zh .factory-workflow-steps h3,
+.lang-zh .factory-screen-caption strong {
   line-height: 1.16;
   letter-spacing: -0.025em;
 }
@@ -989,6 +992,277 @@ main {
   color: var(--muted);
   font-size: 15px;
   line-height: 1.7;
+}
+
+.factory-workflow {
+  position: relative;
+  overflow: clip;
+  padding-block: 140px 150px;
+  background: #06191b;
+  color: white;
+  isolation: isolate;
+}
+
+.factory-workflow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 760px;
+  height: 760px;
+  top: -260px;
+  right: -190px;
+  border: 1px solid rgba(119, 251, 220, 0.11);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 100px rgba(119, 251, 220, 0.025),
+    0 0 0 220px rgba(50, 124, 255, 0.018);
+}
+
+.factory-workflow-heading {
+  margin-bottom: 86px;
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  align-items: end;
+  gap: 120px;
+}
+
+.factory-workflow .section-tag {
+  color: var(--mint);
+}
+
+.factory-workflow-heading h2 {
+  max-width: 760px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(46px, 5.5vw, 78px);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+}
+
+.factory-workflow-heading > p {
+  margin: 0;
+  color: #b4c8c6;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.factory-workflow-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(390px, 0.78fr);
+  align-items: start;
+  gap: 96px;
+}
+
+.factory-workflow-visual {
+  position: sticky;
+  top: 24px;
+  display: grid;
+  justify-items: center;
+}
+
+.factory-workflow-screen {
+  position: relative;
+  width: min(100%, 520px);
+  aspect-ratio: 9 / 13;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.17);
+  border-radius: 28px;
+  background: #0a2528;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.32);
+}
+
+.factory-workflow-screen::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(3, 18, 20, 0.5), transparent 24%, transparent 56%, rgba(3, 18, 20, 0.88)),
+    linear-gradient(90deg, rgba(12, 61, 63, 0.12), transparent 44%);
+  pointer-events: none;
+}
+
+.factory-workflow-screen video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.78) contrast(1.04);
+  animation: factory-video-enter 420ms ease-out both;
+}
+
+.factory-screen-grid {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(119, 251, 220, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(119, 251, 220, 0.3) 1px, transparent 1px);
+  background-size: 25% 20%;
+  mask-image: linear-gradient(180deg, black, transparent 48%);
+  pointer-events: none;
+}
+
+.factory-screen-top {
+  position: absolute;
+  z-index: 3;
+  top: 24px;
+  right: 24px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.factory-screen-top i {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mint);
+  font-style: normal;
+  font-family: Consolas, monospace;
+}
+
+.factory-screen-top b {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+  box-shadow: 0 0 0 5px rgba(119, 251, 220, 0.12);
+}
+
+.factory-screen-caption {
+  position: absolute;
+  z-index: 3;
+  right: 26px;
+  bottom: 28px;
+  left: 26px;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  align-items: end;
+  gap: 18px;
+}
+
+.factory-screen-caption > span {
+  color: var(--mint);
+  font: 700 13px/1 Consolas, monospace;
+}
+
+.factory-screen-caption div {
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
+  display: grid;
+  gap: 5px;
+}
+
+.factory-screen-caption small {
+  color: #b4c8c6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.factory-screen-caption strong {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1;
+}
+
+.factory-workflow-hint {
+  margin: 18px 0 0;
+  color: #8fa8a6;
+  font-size: 12px;
+}
+
+.factory-workflow-steps {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.factory-workflow-steps button {
+  width: 100%;
+  min-height: 190px;
+  padding: 30px 10px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  background: transparent;
+  color: white;
+  display: grid;
+  grid-template-columns: 44px 1fr 30px;
+  align-items: start;
+  gap: 20px;
+  text-align: left;
+  opacity: 0.43;
+  cursor: pointer;
+  transition: opacity 180ms ease, background 180ms ease, padding 180ms ease;
+}
+
+.factory-workflow-steps button:hover,
+.factory-workflow-steps button.active {
+  padding-inline: 18px;
+  background: linear-gradient(90deg, rgba(119, 251, 220, 0.08), transparent 86%);
+  opacity: 1;
+}
+
+.factory-workflow-steps button > span {
+  padding-top: 6px;
+  color: var(--mint);
+  font: 700 11px/1 Consolas, monospace;
+}
+
+.factory-workflow-steps button div {
+  display: grid;
+}
+
+.factory-workflow-steps small {
+  color: #8fa8a6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.factory-workflow-steps h3 {
+  margin: 10px 0 12px;
+  font-family: var(--font-display);
+  font-size: 30px;
+  line-height: 1;
+}
+
+.factory-workflow-steps p {
+  max-width: 430px;
+  margin: 0;
+  color: #b4c8c6;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.factory-workflow-steps button > b {
+  color: var(--mint);
+  font-size: 15px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translate(-5px, 5px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.factory-workflow-steps button.active > b,
+.factory-workflow-steps button:hover > b {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+@keyframes factory-video-enter {
+  from { opacity: 0.3; transform: scale(1.025); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 .category-showcase {
@@ -1958,6 +2232,37 @@ main {
     grid-template-columns: 1fr 1fr;
   }
 
+  .factory-workflow {
+    padding-block: 105px 120px;
+  }
+
+  .factory-workflow-heading {
+    margin-bottom: 58px;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .factory-workflow-layout {
+    display: block;
+  }
+
+  .factory-workflow-visual {
+    z-index: 4;
+    top: 12px;
+    padding-block: 8px 14px;
+    background: #06191b;
+  }
+
+  .factory-workflow-screen {
+    width: min(100%, 480px);
+    height: min(56vh, 620px);
+    aspect-ratio: auto;
+  }
+
+  .factory-workflow-steps {
+    margin-top: 42px;
+  }
+
   .category-card-1,
   .category-card-6 {
     grid-column: span 8;
@@ -2215,6 +2520,66 @@ main {
   .company-heading h2,
   .inquiry-copy h2 {
     font-size: 43px;
+  }
+
+  .factory-workflow-heading h2 {
+    font-size: 43px;
+  }
+
+  .factory-workflow-heading > p {
+    font-size: 16px;
+  }
+
+  .factory-workflow-screen {
+    height: min(52vh, 520px);
+    border-radius: 20px;
+  }
+
+  .factory-screen-top {
+    top: 18px;
+    right: 18px;
+    left: 18px;
+    font-size: 9px;
+  }
+
+  .factory-screen-caption {
+    right: 20px;
+    bottom: 22px;
+    left: 20px;
+    grid-template-columns: 38px 1fr;
+    gap: 12px;
+  }
+
+  .factory-screen-caption div {
+    padding-left: 12px;
+  }
+
+  .factory-screen-caption strong {
+    font-size: 31px;
+  }
+
+  .factory-workflow-hint {
+    display: none;
+  }
+
+  .factory-workflow-steps {
+    margin-top: 28px;
+  }
+
+  .factory-workflow-steps button {
+    min-height: 165px;
+    padding: 25px 4px;
+    grid-template-columns: 36px 1fr 20px;
+    gap: 12px;
+  }
+
+  .factory-workflow-steps button:hover,
+  .factory-workflow-steps button.active {
+    padding-inline: 10px;
+  }
+
+  .factory-workflow-steps h3 {
+    font-size: 26px;
   }
 
   .pillar-grid,
