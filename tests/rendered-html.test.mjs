@@ -35,12 +35,14 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Watch the workflow/i);
   assert.match(html, /One line\. Five visible stages\./i);
   assert.match(html, /Factory process view/i);
+  assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
   assert.match(html, /Français/);
   assert.match(html, /中文/);
   assert.match(html, /Professional-use and compliance notice/i);
   assert.doesNotMatch(html, /Evidence first|Every batch|No direct online ordering/i);
+  assert.doesNotMatch(html, /\/images\/inventory\.jpg/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
 

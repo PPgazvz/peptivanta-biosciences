@@ -814,15 +814,21 @@ export default function Home() {
   const t = copy[locale];
 
   useEffect(() => {
+    let localeFrame = 0;
+
     try {
       const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
       if (isSiteLocale(savedLocale)) {
-        setLocale(savedLocale);
-        document.documentElement.lang = htmlLang(savedLocale);
+        localeFrame = window.requestAnimationFrame(() => {
+          setLocale(savedLocale);
+          document.documentElement.lang = htmlLang(savedLocale);
+        });
       }
     } catch {
       // The language switcher still works when browser storage is unavailable.
     }
+
+    return () => window.cancelAnimationFrame(localeFrame);
   }, []);
 
   useEffect(() => {
@@ -1233,7 +1239,14 @@ export default function Home() {
           </div>
         </div>
         <figure className="facility-photo">
-          <img src="/images/inventory.jpg" alt={t.inventoryCaption} />
+          <img
+            src="/images/inventory.webp"
+            alt={t.inventoryCaption}
+            width={1080}
+            height={1652}
+            loading="lazy"
+            decoding="async"
+          />
           <figcaption>{t.inventoryCaption}</figcaption>
         </figure>
       </section>

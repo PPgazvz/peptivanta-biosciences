@@ -216,15 +216,21 @@ export default function LegalDocument({ kind }: { kind: DocumentKind }) {
   const common = shared[locale];
 
   useEffect(() => {
+    let localeFrame = 0;
+
     try {
       const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
       if (isSiteLocale(savedLocale)) {
-        setLocale(savedLocale);
-        document.documentElement.lang = htmlLang(savedLocale);
+        localeFrame = window.requestAnimationFrame(() => {
+          setLocale(savedLocale);
+          document.documentElement.lang = htmlLang(savedLocale);
+        });
       }
     } catch {
       // The legal page remains available in English when storage is unavailable.
     }
+
+    return () => window.cancelAnimationFrame(localeFrame);
   }, []);
 
   function changeLocale(nextLocale: Locale) {
