@@ -11,6 +11,7 @@ import {
   type SiteLocale as Locale,
 } from "./i18n";
 import FactoryWorkflow from "./FactoryWorkflow";
+import FulfillmentCases from "./FulfillmentCases";
 
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
 type IntroState = "hidden" | "visible" | "closing";
@@ -1302,6 +1303,8 @@ export default function Home() {
           </dl>
         </div>
       </section>
+
+      <FulfillmentCases locale={locale} />
 
       <section className="inquiry" id="inquiry">
         <div className="section-shell inquiry-shell">

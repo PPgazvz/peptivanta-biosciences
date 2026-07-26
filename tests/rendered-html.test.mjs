@@ -37,6 +37,8 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Factory process view/i);
   assert.match(html, /Request a quote/i);
   assert.match(html, /Get quote on WhatsApp/i);
+  assert.match(html, /Recent fulfillment activity/i);
+  assert.match(html, /Loading recent records/i);
   assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
@@ -50,8 +52,9 @@ test("server-renders the finished website", async () => {
 });
 
 test("includes complete multilingual content", async () => {
-  const [homepage, legalDocument] = await Promise.all([
+  const [homepage, fulfillmentCases, legalDocument] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/FulfillmentCases.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/LegalDocument.tsx", import.meta.url), "utf8"),
   ]);
 
@@ -62,6 +65,8 @@ test("includes complete multilingual content", async () => {
   assert.match(homepage, /factory-flow-desktop-v2\.mp4/);
   assert.match(homepage, /FactoryWorkflow/);
   assert.match(homepage, /产品分类 · Products Categories/);
+  assert.match(fulfillmentCases, /近期成交与履约记录/);
+  assert.match(fulfillmentCases, /个月时间范围/);
   assert.match(homepage, /前往 WhatsApp 获取报价/);
   assert.match(legalDocument, /隐私政策/);
   assert.match(legalDocument, /Política de Privacidad/);
@@ -72,6 +77,19 @@ test("includes complete multilingual content", async () => {
     homepage,
     /先看证据|每一批次|不提供在线直接下单|每一份询盘均需审核|供应链现场/,
   );
+});
+
+test("configures durable recent fulfillment records", async () => {
+  const [hosting, route, schema] = await Promise.all([
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/fulfillment-cases/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+  ]);
+
+  assert.equal(JSON.parse(hosting).d1, "DB");
+  assert.match(route, /DISPLAY_LIMIT = 100/);
+  assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
+  assert.match(schema, /fulfillment_cases/);
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {
