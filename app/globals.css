@@ -2082,6 +2082,13 @@ main {
   align-items: center;
   gap: 9px;
   box-shadow: 0 12px 35px rgba(6, 25, 27, 0.23);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.whatsapp-float.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(14px);
 }
 
 .whatsapp-float > span {

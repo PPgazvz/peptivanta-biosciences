@@ -35,6 +35,8 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Watch the workflow/i);
   assert.match(html, /One line\. Five visible stages\./i);
   assert.match(html, /Factory process view/i);
+  assert.match(html, /Request a quote/i);
+  assert.match(html, /Get quote on WhatsApp/i);
   assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
@@ -42,6 +44,7 @@ test("server-renders the finished website", async () => {
   assert.match(html, /中文/);
   assert.match(html, /Professional-use and compliance notice/i);
   assert.doesNotMatch(html, /Evidence first|Every batch|No direct online ordering/i);
+  assert.doesNotMatch(html, /Add email in site\.config\.ts/i);
   assert.doesNotMatch(html, /\/images\/inventory\.jpg/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
@@ -59,7 +62,7 @@ test("includes complete multilingual content", async () => {
   assert.match(homepage, /factory-flow-desktop-v2\.mp4/);
   assert.match(homepage, /FactoryWorkflow/);
   assert.match(homepage, /产品分类 · Products Categories/);
-  assert.match(homepage, /前往 WhatsApp 继续沟通/);
+  assert.match(homepage, /前往 WhatsApp 获取报价/);
   assert.match(legalDocument, /隐私政策/);
   assert.match(legalDocument, /Política de Privacidad/);
   assert.match(legalDocument, /Politique de confidentialité/);

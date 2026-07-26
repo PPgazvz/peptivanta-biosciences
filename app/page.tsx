@@ -26,7 +26,7 @@ const copy = {
     heroTitleB: "made clear.",
     heroText:
       "Documented catalogue peptides, flexible private-label support, and responsive export coordination for qualified professional customers.",
-    primaryCta: "Start an inquiry",
+    primaryCta: "Request a quote",
     secondaryCta: "Explore catalogue",
     introReplay: "Watch the workflow",
     introSkip: "Skip intro",
@@ -42,7 +42,7 @@ const copy = {
     heroImageAlt: "Controlled packaging facility",
     proof: [
       ["Batch-linked", "documentation"],
-      ["B2B only", "customer review"],
+      ["Professional", "B2B support"],
       ["Global", "export coordination"],
     ],
     introTag: "A clearer supply experience",
@@ -70,7 +70,7 @@ const copy = {
     categoryTag: "Products Categories",
     categoryTitle: "A clearer way into the catalogue.",
     categoryText:
-      "Browse by supply format and professional application. Every category routes to a qualification-led inquiry, never direct consumer checkout.",
+      "Browse by supply format and professional application. Open any category to view matching products and request availability, MOQ, and a quotation.",
     categoryItems: [
       ["01", "Catalogue Peptides", "Defined configurations across a broad peptide catalogue.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
       ["02", "Cosmetic Ingredients", "Peptide ingredients for qualified formulation and sourcing teams.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
@@ -85,7 +85,7 @@ const copy = {
       "Representative items from a broader catalogue. Availability and destination eligibility are confirmed individually.",
     search: "Search product name",
     categories: ["All", "Catalogue peptides", "Cosmetic ingredients", "Custom & bulk"],
-    ask: "Ask on WhatsApp",
+    ask: "Get quote on WhatsApp",
     docs: "Documentation review",
     noProducts: "No matching products.",
     productGroupLabel: "Product categories",
@@ -126,21 +126,21 @@ const copy = {
     operatingRegion: "Hong Kong SAR · Sales & Export Coordination",
     brandFocusValue: "Professional peptide supply inquiries",
     responseTime: "Within one business day",
-    inquiryTag: "Qualified inquiry",
-    inquiryTitle: "Tell us what you need.",
+    inquiryTag: "Quote & availability",
+    inquiryTitle: "Request availability and pricing.",
     inquiryText:
-      "Share the product, configuration, quantity, and destination. We will confirm what can be supplied lawfully and what documentation is available.",
+      "Share the product, configuration, quantity, and destination. We will reply with available options, MOQ, document availability, and export coordination details.",
     form: {
       name: "Your name",
       company: "Company / organization",
       country: "Destination country",
-      contact: "Email or WhatsApp",
+      contact: "Email or WhatsApp (optional)",
       product: "Product or service",
-      quantity: "Estimated quantity",
-      use: "Professional intended use",
+      quantity: "Estimated quantity (optional)",
+      use: "Professional intended use (optional)",
       placeholderUse: "Research, analytical, formulation, distribution…",
       consent: "I confirm this is a professional inquiry and accept the compliance notice.",
-      submit: "Continue on WhatsApp",
+      submit: "Get quote on WhatsApp",
       missing:
         "The site owner has not added a WhatsApp number yet. Please update site.config.ts before launch.",
     },
@@ -151,7 +151,7 @@ const copy = {
     footerLinks: ["Privacy", "Terms", "Compliance"],
     contactLabels: ["WhatsApp", "Email"],
     contactMissing: ["Add number in site.config.ts", "Add email in site.config.ts"],
-    whatsappCta: "Inquire",
+    whatsappCta: "Get quote",
     whatsappAria: "WhatsApp inquiry",
     servicePrinciplesLabel: "Service principles",
     menuLabel: "Toggle navigation",
@@ -165,7 +165,7 @@ const copy = {
     heroTitleB: "com mais clareza.",
     heroText:
       "Peptídeos de catálogo documentados, suporte flexível de marca própria e coordenação ágil de exportação para clientes profissionais qualificados.",
-    primaryCta: "Iniciar consulta",
+    primaryCta: "Solicitar cotação",
     secondaryCta: "Ver catálogo",
     introReplay: "Ver o fluxo",
     introSkip: "Pular abertura",
@@ -181,7 +181,7 @@ const copy = {
     heroImageAlt: "Ambiente controlado de embalagem",
     proof: [
       ["Documentação", "vinculada ao lote"],
-      ["Somente B2B", "análise do cliente"],
+      ["Suporte", "B2B profissional"],
       ["Global", "coordenação de exportação"],
     ],
     introTag: "Uma experiência de fornecimento mais clara",
@@ -209,7 +209,7 @@ const copy = {
     categoryTag: "Products Categories",
     categoryTitle: "Uma entrada mais clara para o catálogo.",
     categoryText:
-      "Navegue por formato de fornecimento e aplicação profissional. Cada categoria leva a uma consulta qualificada, nunca a um checkout de consumidor.",
+      "Navegue por formato de fornecimento e aplicação profissional. Abra uma categoria para ver os produtos e solicitar disponibilidade, MOQ e cotação.",
     categoryItems: [
       ["01", "Peptídeos de catálogo", "Configurações definidas em um amplo catálogo de peptídeos.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
       ["02", "Ingredientes cosméticos", "Ingredientes peptídicos para equipes qualificadas de formulação e compras.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
@@ -224,7 +224,7 @@ const copy = {
       "Itens representativos de um catálogo maior. Disponibilidade e elegibilidade por destino são confirmadas individualmente.",
     search: "Buscar nome do produto",
     categories: ["Todos", "Peptídeos de catálogo", "Ingredientes cosméticos", "Personalizado e granel"],
-    ask: "Consultar no WhatsApp",
+    ask: "Cotação no WhatsApp",
     docs: "Revisão de documentação",
     noProducts: "Nenhum produto encontrado.",
     productGroupLabel: "Categorias de produtos",
@@ -265,21 +265,21 @@ const copy = {
     operatingRegion: "Hong Kong SAR · Coordenação de vendas e exportação",
     brandFocusValue: "Consultas profissionais sobre fornecimento de peptídeos",
     responseTime: "Em até um dia útil",
-    inquiryTag: "Consulta qualificada",
-    inquiryTitle: "Conte-nos o que você precisa.",
+    inquiryTag: "Cotação e disponibilidade",
+    inquiryTitle: "Solicite disponibilidade e cotação.",
     inquiryText:
-      "Informe produto, configuração, quantidade e destino. Confirmaremos o fornecimento permitido e a documentação disponível.",
+      "Informe produto, configuração, quantidade e destino. Responderemos com opções disponíveis, MOQ, documentos e detalhes de coordenação de exportação.",
     form: {
       name: "Seu nome",
       company: "Empresa / organização",
       country: "País de destino",
-      contact: "E-mail ou WhatsApp",
+      contact: "E-mail ou WhatsApp (opcional)",
       product: "Produto ou serviço",
-      quantity: "Quantidade estimada",
-      use: "Uso profissional pretendido",
+      quantity: "Quantidade estimada (opcional)",
+      use: "Uso profissional pretendido (opcional)",
       placeholderUse: "Pesquisa, análise, formulação, distribuição…",
       consent: "Confirmo que esta é uma consulta profissional e aceito o aviso de conformidade.",
-      submit: "Continuar no WhatsApp",
+      submit: "Solicitar cotação no WhatsApp",
       missing:
         "O número de WhatsApp ainda não foi configurado. Atualize site.config.ts antes do lançamento.",
     },
@@ -290,7 +290,7 @@ const copy = {
     footerLinks: ["Privacidade", "Termos", "Conformidade"],
     contactLabels: ["WhatsApp", "E-mail"],
     contactMissing: ["Adicione o número em site.config.ts", "Adicione o e-mail em site.config.ts"],
-    whatsappCta: "Consultar",
+    whatsappCta: "Cotação",
     whatsappAria: "Consulta pelo WhatsApp",
     servicePrinciplesLabel: "Princípios do serviço",
     menuLabel: "Alternar navegação",
@@ -304,7 +304,7 @@ const copy = {
     heroTitleB: "con mayor claridad.",
     heroText:
       "Péptidos de catálogo documentados, soporte flexible de marca privada y coordinación ágil de exportación para clientes profesionales cualificados.",
-    primaryCta: "Iniciar una consulta",
+    primaryCta: "Solicitar cotización",
     secondaryCta: "Ver catálogo",
     introReplay: "Ver el proceso",
     introSkip: "Saltar introducción",
@@ -320,7 +320,7 @@ const copy = {
     heroImageAlt: "Entorno controlado de empaque",
     proof: [
       ["Documentación", "vinculada al lote"],
-      ["Solo B2B", "revisión del cliente"],
+      ["Soporte", "B2B profesional"],
       ["Global", "coordinación de exportación"],
     ],
     introTag: "Una experiencia de suministro más clara",
@@ -348,7 +348,7 @@ const copy = {
     categoryTag: "Categorías de productos",
     categoryTitle: "Una entrada más clara al catálogo.",
     categoryText:
-      "Explore por formato de suministro y aplicación profesional. Cada categoría conduce a una consulta cualificada, no a una compra directa de consumidor.",
+      "Explore por formato de suministro y aplicación profesional. Abra una categoría para ver productos y solicitar disponibilidad, MOQ y cotización.",
     categoryItems: [
       ["01", "Péptidos de catálogo", "Configuraciones definidas en un amplio catálogo de péptidos.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
       ["02", "Ingredientes cosméticos", "Ingredientes peptídicos para equipos cualificados de formulación y compras.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
@@ -363,7 +363,7 @@ const copy = {
       "Artículos representativos de un catálogo más amplio. La disponibilidad y elegibilidad por destino se confirman individualmente.",
     search: "Buscar nombre del producto",
     categories: ["Todos", "Péptidos de catálogo", "Ingredientes cosméticos", "Personalizado y granel"],
-    ask: "Consultar por WhatsApp",
+    ask: "Cotizar por WhatsApp",
     docs: "Revisión documental",
     noProducts: "No se encontraron productos.",
     productGroupLabel: "Categorías de productos",
@@ -404,21 +404,21 @@ const copy = {
     operatingRegion: "RAE de Hong Kong · Coordinación de ventas y exportación",
     brandFocusValue: "Consultas profesionales sobre suministro de péptidos",
     responseTime: "En un día hábil",
-    inquiryTag: "Consulta profesional",
-    inquiryTitle: "Cuéntenos qué necesita.",
+    inquiryTag: "Cotización y disponibilidad",
+    inquiryTitle: "Solicite disponibilidad y cotización.",
     inquiryText:
-      "Comparta producto, configuración, cantidad y destino. Confirmaremos qué puede suministrarse legalmente y qué documentación está disponible.",
+      "Indique producto, configuración, cantidad y destino. Responderemos con opciones disponibles, MOQ, documentación y detalles de coordinación de exportación.",
     form: {
       name: "Su nombre",
       company: "Empresa / organización",
       country: "País de destino",
-      contact: "Correo o WhatsApp",
+      contact: "Correo o WhatsApp (opcional)",
       product: "Producto o servicio",
-      quantity: "Cantidad estimada",
-      use: "Uso profesional previsto",
+      quantity: "Cantidad estimada (opcional)",
+      use: "Uso profesional previsto (opcional)",
       placeholderUse: "Investigación, análisis, formulación, distribución…",
       consent: "Confirmo que esta es una consulta profesional y acepto el aviso de cumplimiento.",
-      submit: "Continuar en WhatsApp",
+      submit: "Solicitar cotización por WhatsApp",
       missing: "El número de WhatsApp aún no está configurado. Actualice site.config.ts antes del lanzamiento.",
     },
     complianceTitle: "Aviso de uso profesional y cumplimiento",
@@ -428,7 +428,7 @@ const copy = {
     footerLinks: ["Privacidad", "Términos", "Cumplimiento"],
     contactLabels: ["WhatsApp", "Correo"],
     contactMissing: ["Añada el número en site.config.ts", "Añada el correo en site.config.ts"],
-    whatsappCta: "Consultar",
+    whatsappCta: "Cotizar",
     whatsappAria: "Consulta por WhatsApp",
     servicePrinciplesLabel: "Principios del servicio",
     menuLabel: "Abrir o cerrar navegación",
@@ -442,7 +442,7 @@ const copy = {
     heroTitleB: "en toute clarté.",
     heroText:
       "Peptides de catalogue documentés, accompagnement flexible en marque blanche et coordination export réactive pour les clients professionnels qualifiés.",
-    primaryCta: "Démarrer une demande",
+    primaryCta: "Demander un devis",
     secondaryCta: "Voir le catalogue",
     introReplay: "Voir le processus",
     introSkip: "Passer l’introduction",
@@ -458,7 +458,7 @@ const copy = {
     heroImageAlt: "Environnement d’emballage contrôlé",
     proof: [
       ["Documentation", "liée au lot"],
-      ["B2B uniquement", "examen du client"],
+      ["Accompagnement", "B2B professionnel"],
       ["International", "coordination export"],
     ],
     introTag: "Une expérience d’approvisionnement plus claire",
@@ -486,7 +486,7 @@ const copy = {
     categoryTag: "Catégories de produits",
     categoryTitle: "Un accès plus clair au catalogue.",
     categoryText:
-      "Parcourez les produits par format d’approvisionnement et application professionnelle. Chaque catégorie mène à une demande qualifiée, jamais à un achat consommateur direct.",
+      "Parcourez les produits par format et application professionnelle. Ouvrez une catégorie pour demander disponibilité, MOQ et devis.",
     categoryItems: [
       ["01", "Peptides de catalogue", "Configurations définies sur un large catalogue de peptides.", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
       ["02", "Ingrédients cosmétiques", "Ingrédients peptidiques pour les équipes qualifiées de formulation et d’approvisionnement.", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
@@ -501,7 +501,7 @@ const copy = {
       "Produits représentatifs d’un catalogue plus large. La disponibilité et l’éligibilité selon la destination sont confirmées individuellement.",
     search: "Rechercher un produit",
     categories: ["Tous", "Peptides de catalogue", "Ingrédients cosmétiques", "Personnalisé et vrac"],
-    ask: "Demander sur WhatsApp",
+    ask: "Devis sur WhatsApp",
     docs: "Examen documentaire",
     noProducts: "Aucun produit correspondant.",
     productGroupLabel: "Catégories de produits",
@@ -542,21 +542,21 @@ const copy = {
     operatingRegion: "R.A.S. de Hong Kong · Coordination commerciale et export",
     brandFocusValue: "Demandes professionnelles d’approvisionnement en peptides",
     responseTime: "Sous un jour ouvré",
-    inquiryTag: "Demande professionnelle",
-    inquiryTitle: "Présentez-nous votre besoin.",
+    inquiryTag: "Devis et disponibilité",
+    inquiryTitle: "Demandez disponibilité et devis.",
     inquiryText:
-      "Indiquez le produit, la configuration, la quantité et la destination. Nous confirmerons ce qui peut être fourni légalement et les documents disponibles.",
+      "Indiquez le produit, la configuration, la quantité et la destination. Nous répondrons avec les options disponibles, le MOQ, les documents et les détails de coordination export.",
     form: {
       name: "Votre nom",
       company: "Entreprise / organisme",
       country: "Pays de destination",
-      contact: "E-mail ou WhatsApp",
+      contact: "E-mail ou WhatsApp (facultatif)",
       product: "Produit ou service",
-      quantity: "Quantité estimée",
-      use: "Usage professionnel prévu",
+      quantity: "Quantité estimée (facultatif)",
+      use: "Usage professionnel prévu (facultatif)",
       placeholderUse: "Recherche, analyse, formulation, distribution…",
       consent: "Je confirme qu’il s’agit d’une demande professionnelle et j’accepte l’avis de conformité.",
-      submit: "Continuer sur WhatsApp",
+      submit: "Demander un devis sur WhatsApp",
       missing: "Le numéro WhatsApp n’est pas encore configuré. Mettez à jour site.config.ts avant le lancement.",
     },
     complianceTitle: "Avis d’usage professionnel et de conformité",
@@ -566,7 +566,7 @@ const copy = {
     footerLinks: ["Confidentialité", "Conditions", "Conformité"],
     contactLabels: ["WhatsApp", "E-mail"],
     contactMissing: ["Ajoutez le numéro dans site.config.ts", "Ajoutez l’e-mail dans site.config.ts"],
-    whatsappCta: "Demander",
+    whatsappCta: "Devis",
     whatsappAria: "Demande via WhatsApp",
     servicePrinciplesLabel: "Principes de service",
     menuLabel: "Ouvrir ou fermer la navigation",
@@ -580,7 +580,7 @@ const copy = {
     heroTitleB: "清晰可控。",
     heroText:
       "提供文件化的多肽产品目录、灵活的贴牌支持，以及面向合格专业客户的出口协调服务。",
-    primaryCta: "发起询盘",
+    primaryCta: "获取报价",
     secondaryCta: "浏览产品目录",
     introReplay: "观看工厂流程",
     introSkip: "跳过开场",
@@ -596,7 +596,7 @@ const copy = {
     heroImageAlt: "规范化包装作业环境",
     proof: [
       ["批次关联", "文件与信息"],
-      ["仅限 B2B", "客户资质审核"],
+      ["专业客户", "B2B 对接支持"],
       ["全球市场", "出口协调服务"],
     ],
     introTag: "更清晰的供应体验",
@@ -624,7 +624,7 @@ const copy = {
     categoryTag: "产品分类 · Products Categories",
     categoryTitle: "更快找到合适的产品入口。",
     categoryText:
-      "可按供应形式和专业应用浏览。所有分类均进入资质审核型询盘流程，不面向消费者直接结账。",
+      "可按供应形式和专业应用浏览。打开任一分类，即可查看匹配产品并咨询供应情况、起订量和报价。",
     categoryItems: [
       ["01", "目录多肽", "覆盖多种目录多肽与既定规格。", "Retatrutide · Tirzepatide · BPC-157", "catalogue"],
       ["02", "化妆品肽原料", "面向合格配方与采购团队的多肽原料。", "GHK-Cu · Acetyl Hexapeptide-8", "cosmetic"],
@@ -639,7 +639,7 @@ const copy = {
       "以下为完整目录中的代表性产品。具体供应情况及目的地合规性需要逐项确认。",
     search: "搜索产品名称",
     categories: ["全部", "目录多肽", "化妆品肽原料", "定制与大货"],
-    ask: "通过 WhatsApp 询价",
+    ask: "WhatsApp 获取报价",
     docs: "批次文件审核",
     noProducts: "未找到匹配的产品。",
     productGroupLabel: "产品分类筛选",
@@ -680,21 +680,21 @@ const copy = {
     operatingRegion: "中国香港特别行政区 · 销售与出口协调",
     brandFocusValue: "专业多肽供应询盘",
     responseTime: "一个工作日内",
-    inquiryTag: "专业询盘",
-    inquiryTitle: "告诉我们你的采购需求。",
+    inquiryTag: "供应与报价",
+    inquiryTitle: "查询供应情况并获取报价。",
     inquiryText:
-      "请提供产品、规格、数量和目的地。我们将确认可依法供应的内容及可提供的文件。",
+      "请提供产品、规格、预计数量和目的地。我们会回复可选规格、起订量、相关文件与出口协调信息。",
     form: {
       name: "姓名",
       company: "公司 / 机构",
       country: "目的国家或地区",
-      contact: "邮箱或 WhatsApp",
+      contact: "邮箱或 WhatsApp（选填）",
       product: "产品或服务",
-      quantity: "预计数量",
-      use: "预期专业用途",
+      quantity: "预计数量（选填）",
+      use: "预期专业用途（选填）",
       placeholderUse: "科研、分析、配方开发、经销等",
       consent: "我确认这是专业用途询盘，并同意网站合规声明。",
-      submit: "前往 WhatsApp 继续沟通",
+      submit: "前往 WhatsApp 获取报价",
       missing: "网站尚未配置 WhatsApp 号码，请先在 site.config.ts 中添加。",
     },
     complianceTitle: "专业用途与合规声明",
@@ -704,7 +704,7 @@ const copy = {
     footerLinks: ["隐私政策", "网站条款", "合规声明"],
     contactLabels: ["WhatsApp", "企业邮箱"],
     contactMissing: ["请在 site.config.ts 中添加号码", "请在 site.config.ts 中添加邮箱"],
-    whatsappCta: "立即询盘",
+    whatsappCta: "获取报价",
     whatsappAria: "通过 WhatsApp 发起询盘",
     servicePrinciplesLabel: "服务原则",
     menuLabel: "展开或收起导航",
@@ -811,6 +811,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [formStatus, setFormStatus] = useState("");
   const [introState, setIntroState] = useState<IntroState>("hidden");
+  const [inquiryVisible, setInquiryVisible] = useState(false);
   const t = copy[locale];
 
   useEffect(() => {
@@ -854,6 +855,19 @@ export default function Home() {
     }, 180);
 
     return () => window.clearTimeout(revealTimer);
+  }, []);
+
+  useEffect(() => {
+    const inquirySection = document.getElementById("inquiry");
+    if (!inquirySection) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInquiryVisible(entry.isIntersecting),
+      { threshold: 0.12 },
+    );
+    observer.observe(inquirySection);
+
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -941,9 +955,12 @@ export default function Home() {
       data.get("quantity"),
       data.get("intendedUse"),
     ];
+    const messageDetails = values
+      .map((value, index) => [labels[index + 1], String(value ?? "").trim()] as const)
+      .filter(([, value]) => value);
     const message = [
       labels[0],
-      ...values.map((value, index) => `${labels[index + 1]}: ${value}`),
+      ...messageDetails.map(([label, value]) => `${label}: ${value}`),
     ].join("\n");
     window.open(createWhatsAppUrl(message), "_blank", "noopener,noreferrer");
   }
@@ -1294,7 +1311,11 @@ export default function Home() {
             <p>{t.inquiryText}</p>
             <div className="contact-lines">
               <span>{t.contactLabels[0]}</span><strong>{siteConfig.whatsappNumber || t.contactMissing[0]}</strong>
-              <span>{t.contactLabels[1]}</span><strong>{siteConfig.salesEmail || t.contactMissing[1]}</strong>
+              {siteConfig.salesEmail && (
+                <>
+                  <span>{t.contactLabels[1]}</span><strong>{siteConfig.salesEmail}</strong>
+                </>
+              )}
             </div>
           </div>
           <form className="inquiry-form" onSubmit={handleInquiry}>
@@ -1304,13 +1325,13 @@ export default function Home() {
             </div>
             <div className="form-row">
               <label>{t.form.country}<input name="country" required /></label>
-              <label>{t.form.contact}<input name="contact" required /></label>
+              <label>{t.form.contact}<input name="contact" /></label>
             </div>
             <div className="form-row">
               <label>{t.form.product}<input name="product" required /></label>
-              <label>{t.form.quantity}<input name="quantity" required /></label>
+              <label>{t.form.quantity}<input name="quantity" /></label>
             </div>
-            <label>{t.form.use}<textarea name="intendedUse" placeholder={t.form.placeholderUse} required /></label>
+            <label>{t.form.use}<textarea name="intendedUse" placeholder={t.form.placeholderUse} /></label>
             <label className="consent">
               <input type="checkbox" required /><span>{t.form.consent}</span>
             </label>
@@ -1336,7 +1357,7 @@ export default function Home() {
       </footer>
 
       <a
-        className="whatsapp-float"
+        className={`whatsapp-float${inquiryVisible ? " is-hidden" : ""}`}
         href={createWhatsAppUrl(
           locale === "zh"
             ? "您好，我有一项专业多肽供应询盘。"
@@ -1351,6 +1372,8 @@ export default function Home() {
         target={siteConfig.whatsappNumber ? "_blank" : undefined}
         rel="noreferrer"
         aria-label={t.whatsappAria}
+        aria-hidden={inquiryVisible}
+        tabIndex={inquiryVisible ? -1 : undefined}
       >
         <span>WA</span><small>{t.whatsappCta}</small>
       </a>
