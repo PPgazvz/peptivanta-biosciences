@@ -10,6 +10,7 @@ type FulfillmentRecord = {
   destination: "United States" | "Canada" | "Brazil" | string;
   service: "catalogue" | "private_label" | "bulk" | "custom" | string;
   orderProfile: string;
+  amountUsdCents: number;
   status: "completed" | "dispatched" | "in_production" | string;
   isSample: boolean;
 };
@@ -20,7 +21,9 @@ type ApiResponse = {
   limit: number;
   windowStart: string;
   generatedAt: string;
-  includesIllustrativeData: boolean;
+  nextUpdateAt: string;
+  updateIntervalDays: number;
+  dataMode: "synthetic_sample";
 };
 
 const localeCodes: Record<Locale, string> = {
@@ -39,17 +42,15 @@ const content = {
     count: "records",
     window: "month window",
     markets: "priority markets",
-    illustrativeTitle: "Illustrative dataset",
-    illustrativeText:
-      "These records demonstrate the live database format and are not presented as verified customer transactions. They can be replaced with authorized, anonymized records.",
     filters: ["All markets", "United States", "Canada", "Brazil"],
     refresh: "Refresh records",
     updated: "Updated",
+    nextUpdate: "Next weekly update",
+    dataNote: "Sample activity data · refreshed every 7 days",
     loading: "Loading recent records…",
     error: "Recent records are temporarily unavailable.",
     empty: "No published records are available for this period.",
-    headers: ["Date", "Reference", "Destination", "Service", "Order profile", "Status"],
-    sample: "Illustrative",
+    headers: ["Date", "Reference", "Destination", "Service", "Order profile", "Amount (USD)", "Status"],
     services: {
       catalogue: "Catalogue supply",
       private_label: "Private label",
@@ -76,17 +77,15 @@ const content = {
     count: "registros",
     window: "meses de histórico",
     markets: "mercados prioritários",
-    illustrativeTitle: "Dados ilustrativos",
-    illustrativeText:
-      "Estes registros demonstram o formato do banco de dados e não são apresentados como transações verificadas. Podem ser substituídos por registros autorizados e anonimizados.",
     filters: ["Todos", "Estados Unidos", "Canadá", "Brasil"],
     refresh: "Atualizar registros",
     updated: "Atualizado",
+    nextUpdate: "Próxima atualização semanal",
+    dataNote: "Dados de atividade de exemplo · atualização a cada 7 dias",
     loading: "Carregando registros recentes…",
     error: "Os registros recentes estão temporariamente indisponíveis.",
     empty: "Não há registros publicados para este período.",
-    headers: ["Data", "Referência", "Destino", "Serviço", "Perfil do pedido", "Status"],
-    sample: "Ilustrativo",
+    headers: ["Data", "Referência", "Destino", "Serviço", "Perfil do pedido", "Valor (USD)", "Status"],
     services: {
       catalogue: "Fornecimento de catálogo",
       private_label: "Marca própria",
@@ -113,17 +112,15 @@ const content = {
     count: "registros",
     window: "meses de historial",
     markets: "mercados prioritarios",
-    illustrativeTitle: "Datos ilustrativos",
-    illustrativeText:
-      "Estos registros muestran el formato de la base de datos y no se presentan como transacciones verificadas. Pueden reemplazarse por registros autorizados y anonimizados.",
     filters: ["Todos", "Estados Unidos", "Canadá", "Brasil"],
     refresh: "Actualizar registros",
     updated: "Actualizado",
+    nextUpdate: "Próxima actualización semanal",
+    dataNote: "Datos de actividad de ejemplo · actualización cada 7 días",
     loading: "Cargando registros recientes…",
     error: "Los registros recientes no están disponibles temporalmente.",
     empty: "No hay registros publicados para este período.",
-    headers: ["Fecha", "Referencia", "Destino", "Servicio", "Perfil del pedido", "Estado"],
-    sample: "Ilustrativo",
+    headers: ["Fecha", "Referencia", "Destino", "Servicio", "Perfil del pedido", "Importe (USD)", "Estado"],
     services: {
       catalogue: "Suministro de catálogo",
       private_label: "Marca privada",
@@ -150,17 +147,15 @@ const content = {
     count: "enregistrements",
     window: "mois d’historique",
     markets: "marchés prioritaires",
-    illustrativeTitle: "Données illustratives",
-    illustrativeText:
-      "Ces enregistrements présentent le format de la base de données et ne sont pas des transactions clients vérifiées. Ils peuvent être remplacés par des données autorisées et anonymisées.",
     filters: ["Tous", "États-Unis", "Canada", "Brésil"],
     refresh: "Actualiser",
     updated: "Actualisé",
+    nextUpdate: "Prochaine mise à jour hebdomadaire",
+    dataNote: "Données d’activité d’exemple · actualisation tous les 7 jours",
     loading: "Chargement des enregistrements récents…",
     error: "Les enregistrements récents sont temporairement indisponibles.",
     empty: "Aucun enregistrement publié pour cette période.",
-    headers: ["Date", "Référence", "Destination", "Service", "Profil de commande", "Statut"],
-    sample: "Illustratif",
+    headers: ["Date", "Référence", "Destination", "Service", "Profil de commande", "Montant (USD)", "Statut"],
     services: {
       catalogue: "Approvisionnement catalogue",
       private_label: "Marque blanche",
@@ -187,17 +182,15 @@ const content = {
     count: "条记录",
     window: "个月时间范围",
     markets: "个重点市场",
-    illustrativeTitle: "当前为演示数据",
-    illustrativeText:
-      "这些记录仅用于展示实时数据库结构，并不作为真实客户成交证明。后续可替换为经过授权的真实脱敏记录。",
     filters: ["全部市场", "美国", "加拿大", "巴西"],
     refresh: "刷新记录",
     updated: "更新时间",
+    nextUpdate: "下次周期更新",
+    dataNote: "示例活动数据 · 每 7 天更新",
     loading: "正在读取近期记录…",
     error: "近期记录暂时无法加载。",
     empty: "该时间范围内暂无公开记录。",
-    headers: ["日期", "记录编号", "目的地", "服务类型", "订单规模", "状态"],
-    sample: "演示",
+    headers: ["日期", "记录编号", "目的地", "服务类型", "订单规模", "金额 (USD)", "状态"],
     services: {
       catalogue: "目录产品供应",
       private_label: "贴牌服务",
@@ -266,9 +259,17 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
     () => new Intl.DateTimeFormat(localeCodes[locale], { month: "short", day: "2-digit", year: "numeric" }),
     [locale],
   );
+  const amountFormatter = useMemo(
+    () => new Intl.NumberFormat(localeCodes[locale], {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 0,
+    }),
+    [locale],
+  );
 
   return (
-    <section className="case-ledger section-shell" aria-labelledby="case-ledger-title">
+    <section className="case-ledger section-shell" id="fulfillment" aria-labelledby="case-ledger-title">
       <div className="case-ledger-heading">
         <div>
           <p className="section-tag">{t.tag}</p>
@@ -281,13 +282,6 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
           <div><dt>3</dt><dd>{t.markets}</dd></div>
         </dl>
       </div>
-
-      {data?.includesIllustrativeData && (
-        <aside className="case-data-notice">
-          <span aria-hidden="true">i</span>
-          <div><strong>{t.illustrativeTitle}</strong><p>{t.illustrativeText}</p></div>
-        </aside>
-      )}
 
       <div className="case-ledger-toolbar">
         <div className="case-market-filters" role="group" aria-label={t.headers[2]}>
@@ -326,12 +320,14 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                   <td data-label={t.headers[0]}>{dateFormatter.format(new Date(`${record.occurredAt}T00:00:00Z`))}</td>
                   <td data-label={t.headers[1]}>
                     <code>{publicReference(record.reference)}</code>
-                    {record.isSample && <small>{t.sample}</small>}
                   </td>
                   <td data-label={t.headers[2]}>{t.filters[marketValues.indexOf(record.destination as (typeof marketValues)[number])]}</td>
                   <td data-label={t.headers[3]}>{t.services[record.service as keyof typeof t.services] ?? record.service}</td>
                   <td data-label={t.headers[4]}>{t.profiles[record.orderProfile as keyof typeof t.profiles] ?? record.orderProfile}</td>
-                  <td data-label={t.headers[5]}>
+                  <td className="case-amount" data-label={t.headers[5]}>
+                    {amountFormatter.format(record.amountUsdCents / 100)}
+                  </td>
+                  <td data-label={t.headers[6]}>
                     <span className={`case-status case-status-${record.status}`}>
                       {t.statuses[record.status as keyof typeof t.statuses] ?? record.status}
                     </span>
@@ -345,10 +341,11 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
 
       {data && (
         <p className="case-ledger-updated">
-          {t.updated}: {new Intl.DateTimeFormat(localeCodes[locale], {
-            dateStyle: "medium",
-            timeStyle: "short",
-          }).format(new Date(data.generatedAt))}
+          <span>{t.dataNote}</span>
+          <span>
+            {t.updated}: {dateFormatter.format(new Date(data.generatedAt))} · {t.nextUpdate}:{" "}
+            {dateFormatter.format(new Date(data.nextUpdateAt))}
+          </span>
         </p>
       )}
     </section>

@@ -28,7 +28,9 @@ export async function ensureFulfillmentSchema() {
         destination TEXT NOT NULL,
         service TEXT NOT NULL,
         order_profile TEXT NOT NULL,
+        amount_usd_cents INTEGER DEFAULT 0 NOT NULL,
         status TEXT NOT NULL,
+        cycle_key TEXT DEFAULT 'legacy' NOT NULL,
         is_sample INTEGER DEFAULT 1 NOT NULL,
         is_published INTEGER DEFAULT 1 NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
@@ -41,4 +43,23 @@ export async function ensureFulfillmentSchema() {
       "CREATE INDEX IF NOT EXISTS fulfillment_cases_published_idx ON fulfillment_cases (is_published)",
     ),
   ]);
+
+  const tableInfo = await d1.prepare("PRAGMA table_info(fulfillment_cases)").all<{ name: string }>();
+  const columns = new Set(tableInfo.results.map((column) => column.name));
+
+  if (!columns.has("amount_usd_cents")) {
+    await d1.prepare(
+      "ALTER TABLE fulfillment_cases ADD COLUMN amount_usd_cents INTEGER DEFAULT 0 NOT NULL",
+    ).run();
+  }
+
+  if (!columns.has("cycle_key")) {
+    await d1.prepare(
+      "ALTER TABLE fulfillment_cases ADD COLUMN cycle_key TEXT DEFAULT 'legacy' NOT NULL",
+    ).run();
+  }
+
+  await d1.prepare(
+    "CREATE INDEX IF NOT EXISTS fulfillment_cases_cycle_key_idx ON fulfillment_cases (cycle_key)",
+  ).run();
 }

@@ -8,6 +8,13 @@
       "when": 1785039852199,
       "tag": "0000_flimsy_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1785042154553,
+      "tag": "0001_special_hellion",
+      "breakpoints": true
     }
   ]
 }

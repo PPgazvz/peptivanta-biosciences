@@ -20,8 +20,8 @@ const INTRO_SESSION_KEY = "peptivanta-factory-intro-seen";
 
 const copy = {
   en: {
-    nav: ["Products", "Quality", "Private label", "Company"],
-    navIds: ["products", "quality", "private-label", "company"],
+    nav: ["Products", "Quality", "Private label", "Company", "Recent fulfillment"],
+    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
     eyebrow: "Peptide catalogue · Private label · Export coordination",
     heroTitleA: "Peptide supply,",
     heroTitleB: "made clear.",
@@ -159,8 +159,8 @@ const copy = {
     navLabel: "Primary navigation",
   },
   pt: {
-    nav: ["Produtos", "Qualidade", "Marca própria", "Empresa"],
-    navIds: ["products", "quality", "private-label", "company"],
+    nav: ["Produtos", "Qualidade", "Marca própria", "Empresa", "Atividade recente"],
+    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
     eyebrow: "Catálogo de peptídeos · Marca própria · Coordenação de exportação",
     heroTitleA: "Fornecimento de peptídeos,",
     heroTitleB: "com mais clareza.",
@@ -298,8 +298,8 @@ const copy = {
     navLabel: "Navegação principal",
   },
   es: {
-    nav: ["Productos", "Calidad", "Marca privada", "Empresa"],
-    navIds: ["products", "quality", "private-label", "company"],
+    nav: ["Productos", "Calidad", "Marca privada", "Empresa", "Actividad reciente"],
+    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
     eyebrow: "Catálogo de péptidos · Marca privada · Coordinación de exportación",
     heroTitleA: "Suministro de péptidos,",
     heroTitleB: "con mayor claridad.",
@@ -436,8 +436,8 @@ const copy = {
     navLabel: "Navegación principal",
   },
   fr: {
-    nav: ["Produits", "Qualité", "Marque blanche", "Entreprise"],
-    navIds: ["products", "quality", "private-label", "company"],
+    nav: ["Produits", "Qualité", "Marque blanche", "Entreprise", "Activité récente"],
+    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
     eyebrow: "Catalogue de peptides · Marque blanche · Coordination export",
     heroTitleA: "L’approvisionnement en peptides,",
     heroTitleB: "en toute clarté.",
@@ -574,8 +574,8 @@ const copy = {
     navLabel: "Navigation principale",
   },
   zh: {
-    nav: ["产品目录", "质量体系", "贴牌服务", "品牌介绍"],
-    navIds: ["products", "quality", "private-label", "company"],
+    nav: ["产品目录", "质量体系", "贴牌服务", "品牌介绍", "近期履约"],
+    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
     eyebrow: "多肽目录 · 贴牌服务 · 出口协调",
     heroTitleA: "多肽供应，",
     heroTitleB: "清晰可控。",

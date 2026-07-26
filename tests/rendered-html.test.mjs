@@ -38,6 +38,7 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Request a quote/i);
   assert.match(html, /Get quote on WhatsApp/i);
   assert.match(html, /Recent fulfillment activity/i);
+  assert.match(html, /Recent fulfillment/i);
   assert.match(html, /Loading recent records/i);
   assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
@@ -66,7 +67,10 @@ test("includes complete multilingual content", async () => {
   assert.match(homepage, /FactoryWorkflow/);
   assert.match(homepage, /产品分类 · Products Categories/);
   assert.match(fulfillmentCases, /近期成交与履约记录/);
+  assert.match(fulfillmentCases, /金额 \(USD\)/);
   assert.match(fulfillmentCases, /个月时间范围/);
+  assert.doesNotMatch(fulfillmentCases, /当前为演示数据/);
+  assert.doesNotMatch(fulfillmentCases, /这些记录仅用于展示实时数据库结构/);
   assert.match(homepage, /前往 WhatsApp 获取报价/);
   assert.match(legalDocument, /隐私政策/);
   assert.match(legalDocument, /Política de Privacidad/);
@@ -88,8 +92,13 @@ test("configures durable recent fulfillment records", async () => {
 
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.match(route, /DISPLAY_LIMIT = 100/);
+  assert.match(route, /UPDATE_INTERVAL_DAYS = 7/);
+  assert.match(route, /GENERATOR_VERSION = 2/);
+  assert.match(route, /cycleKey/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.match(schema, /fulfillment_cases/);
+  assert.match(schema, /amount_usd_cents/);
+  assert.match(schema, /cycle_key/);
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {
