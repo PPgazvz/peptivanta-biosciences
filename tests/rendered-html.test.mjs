@@ -93,8 +93,10 @@ test("configures durable recent fulfillment records", async () => {
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.match(route, /DISPLAY_LIMIT = 100/);
   assert.match(route, /UPDATE_INTERVAL_DAYS = 7/);
-  assert.match(route, /GENERATOR_VERSION = 2/);
+  assert.match(route, /GENERATOR_VERSION = 3/);
   assert.match(route, /cycleKey/);
+  assert.match(route, /ageAtCycleEndDays > 14 && !isBulk/);
+  assert.match(route, /occurredAt < juneStart/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.match(schema, /fulfillment_cases/);
   assert.match(schema, /amount_usd_cents/);

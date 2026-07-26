@@ -5,7 +5,7 @@ import { fulfillmentCases } from "../../../db/schema";
 const DISPLAY_LIMIT = 100;
 const UPDATE_INTERVAL_DAYS = 7;
 const UPDATE_INTERVAL_MS = UPDATE_INTERVAL_DAYS * 24 * 60 * 60 * 1000;
-const GENERATOR_VERSION = 2;
+const GENERATOR_VERSION = 3;
 
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -51,6 +51,52 @@ function createSeededRandom(seed: number) {
   };
 }
 
+function fulfillmentStatus({
+  occurredAt,
+  service,
+  orderProfile,
+  cycleStart,
+  random,
+}: {
+  occurredAt: Date;
+  service: "catalogue" | "private_label" | "bulk" | "custom";
+  orderProfile: string;
+  cycleStart: Date;
+  random: () => number;
+}) {
+  const juneStart = new Date(Date.UTC(cycleStart.getUTCFullYear(), 5, 1));
+  const cycleEnd = new Date(cycleStart.getTime() + UPDATE_INTERVAL_MS - 1);
+  const ageAtCycleEndDays = Math.floor(
+    (cycleEnd.getTime() - occurredAt.getTime()) / (24 * 60 * 60 * 1000),
+  );
+  const isBulk = service === "bulk" || orderProfile === "Bulk specification";
+
+  if (occurredAt < juneStart) {
+    return "completed" as const;
+  }
+
+  if (ageAtCycleEndDays > 14 && !isBulk) {
+    return "completed" as const;
+  }
+
+  const draw = random();
+  if (ageAtCycleEndDays > 14) {
+    if (draw < 0.68) return "completed" as const;
+    if (draw < 0.88) return "dispatched" as const;
+    return "in_production" as const;
+  }
+
+  if (isBulk) {
+    if (draw < 0.18) return "completed" as const;
+    if (draw < 0.52) return "dispatched" as const;
+    return "in_production" as const;
+  }
+
+  if (draw < 0.25) return "completed" as const;
+  if (draw < 0.7) return "dispatched" as const;
+  return "in_production" as const;
+}
+
 function createWeeklyRows(count: number, cycleStart: Date, cycleKey: string) {
   const destinations = ["United States", "Canada", "Brazil"] as const;
   const services = ["catalogue", "private_label", "bulk", "custom"] as const;
@@ -61,7 +107,6 @@ function createWeeklyRows(count: number, cycleStart: Date, cycleKey: string) {
     { label: "Bulk specification", minimum: 15000, maximum: 75000 },
     { label: "Packaging project", minimum: 8000, maximum: 40000 },
   ] as const;
-  const statuses = ["completed", "dispatched", "in_production"] as const;
   const random = createSeededRandom(hashSeed(`peptivanta-${cycleKey}`));
 
   return Array.from({ length: count }, (_, index) => {
@@ -71,7 +116,13 @@ function createWeeklyRows(count: number, cycleStart: Date, cycleKey: string) {
     const destination = destinations[Math.floor(random() * destinations.length)];
     const service = services[Math.floor(random() * services.length)];
     const profile = orderProfiles[Math.floor(random() * orderProfiles.length)];
-    const status = statuses[Math.floor(random() * statuses.length)];
+    const status = fulfillmentStatus({
+      occurredAt,
+      service,
+      orderProfile: profile.label,
+      cycleStart,
+      random,
+    });
     const amountUsd = Math.round(
       (profile.minimum + random() * (profile.maximum - profile.minimum)) / 10,
     ) * 10;
