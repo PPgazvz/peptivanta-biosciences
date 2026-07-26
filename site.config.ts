@@ -39,7 +39,7 @@ export const siteConfig = {
    * 目前留空，所以网站不会显示邮箱地址。
    * 企业邮箱准备好后，只需要修改下面这一行。
    */
-  salesEmail: "",
+  salesEmail: "sales@peptivanta.com",
 
   // 公司运营地区。请只填写能够由公司资料支持的真实信息。
   operatingRegion: "Hong Kong SAR · Sales & Export Coordination",
