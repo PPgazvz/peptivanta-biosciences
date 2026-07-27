@@ -86,19 +86,23 @@ test("includes complete multilingual content", async () => {
 });
 
 test("configures durable recent fulfillment records", async () => {
-  const [hosting, route, schema] = await Promise.all([
+  const [hosting, route, generator, schema] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../app/api/fulfillment-cases/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/fulfillment-cases/generator.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
   ]);
 
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.match(route, /DISPLAY_LIMIT = 100/);
   assert.match(route, /UPDATE_INTERVAL_DAYS = 7/);
-  assert.match(route, /GENERATOR_VERSION = 3/);
+  assert.match(generator, /GENERATOR_VERSION = 5/);
   assert.match(route, /cycleKey/);
-  assert.match(route, /ageAtCycleEndDays > 14 && !isBulk/);
-  assert.match(route, /occurredAt < juneStart/);
+  assert.match(generator, /SERVICE_PROFILES/);
+  assert.match(generator, /3,000\+ kits/);
+  assert.match(generator, /currentFulfillmentStatus/);
+  assert.match(generator, /ageDays >= 14/);
+  assert.match(generator, /ageDays >= 4/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.match(schema, /fulfillment_cases/);
   assert.match(schema, /amount_usd_cents/);
