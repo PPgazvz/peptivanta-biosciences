@@ -1195,6 +1195,10 @@ main {
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
+.factory-workflow-mobile-detail {
+  display: none;
+}
+
 .factory-workflow-steps button {
   width: 100%;
   min-height: 190px;
@@ -1898,6 +1902,43 @@ main {
   font-weight: 600;
 }
 
+.company-ledger-link {
+  min-height: 112px;
+  margin-top: 34px;
+  padding: 22px 24px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.48);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 20px;
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.company-ledger-link:hover {
+  transform: translateY(-3px);
+  background: white;
+  box-shadow: 0 18px 44px rgba(6, 25, 27, 0.08);
+}
+
+.company-ledger-link > span {
+  color: var(--green);
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.company-ledger-link > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 .case-ledger {
   padding-block: 150px;
   border-top: 1px solid var(--line);
@@ -2174,6 +2215,78 @@ main {
 
 .case-ledger-updated span:first-child {
   color: #556d6a;
+}
+
+.fulfillment-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 86% 5%, rgba(25, 216, 170, 0.09), transparent 31%),
+    var(--paper);
+}
+
+.fulfillment-page-header {
+  position: relative;
+  z-index: 10;
+  width: var(--shell);
+  min-height: 96px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+}
+
+.fulfillment-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.fulfillment-back {
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: color 160ms ease;
+}
+
+.fulfillment-back:hover {
+  color: var(--ink);
+}
+
+.fulfillment-page .case-ledger {
+  padding-top: 105px;
+  border-top: 0;
+}
+
+.fulfillment-page-cta {
+  margin-bottom: 100px;
+  padding: 34px;
+  border-radius: 22px;
+  background: var(--ink);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+.fulfillment-page-cta p {
+  max-width: 650px;
+  margin: 0;
+  color: #c5d7d5;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.fulfillment-page-cta .button {
+  flex: 0 0 auto;
+  border-color: var(--mint);
+  background: var(--mint);
+  color: var(--ink);
 }
 
 .inquiry {
@@ -2544,20 +2657,104 @@ main {
   }
 
   .factory-workflow-visual {
-    z-index: 4;
-    top: 12px;
-    padding-block: 8px 14px;
-    background: #06191b;
+    position: static;
+    padding: 0;
+    background: transparent;
   }
 
   .factory-workflow-screen {
-    width: min(100%, 480px);
-    height: min(56vh, 620px);
-    aspect-ratio: auto;
+    width: min(100%, 520px);
+    height: auto;
+    aspect-ratio: 4 / 5;
   }
 
   .factory-workflow-steps {
-    margin-top: 42px;
+    width: 100%;
+    margin-top: 18px;
+    padding-bottom: 7px;
+    border-top: 0;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(119, 251, 220, 0.45) transparent;
+  }
+
+  .factory-workflow-steps button {
+    flex: 0 0 112px;
+    min-height: 84px;
+    padding: 13px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 14px;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    opacity: 0.62;
+    scroll-snap-align: start;
+  }
+
+  .factory-workflow-steps button:hover,
+  .factory-workflow-steps button.active {
+    padding-inline: 12px;
+    border-color: rgba(119, 251, 220, 0.55);
+    background: rgba(119, 251, 220, 0.09);
+  }
+
+  .factory-workflow-steps button div {
+    display: block;
+  }
+
+  .factory-workflow-steps small,
+  .factory-workflow-steps p,
+  .factory-workflow-steps button > b {
+    display: none;
+  }
+
+  .factory-workflow-steps h3 {
+    margin: 5px 0 0;
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .factory-workflow-mobile-detail {
+    margin-top: 14px;
+    padding: 23px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+    display: grid;
+    gap: 14px;
+  }
+
+  .factory-workflow-mobile-detail > small {
+    color: var(--mint);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+  }
+
+  .factory-workflow-mobile-detail > div {
+    display: flex;
+    align-items: baseline;
+    gap: 13px;
+  }
+
+  .factory-workflow-mobile-detail span {
+    color: var(--mint);
+    font: 700 11px/1 Consolas, monospace;
+  }
+
+  .factory-workflow-mobile-detail h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 28px;
+  }
+
+  .factory-workflow-mobile-detail p {
+    margin: 0;
+    color: #b4c8c6;
+    font-size: 14px;
+    line-height: 1.7;
   }
 
   .category-card-1,
@@ -2622,6 +2819,15 @@ main {
     grid-template-columns: 1fr;
     gap: 30px;
     align-items: start;
+  }
+
+  .fulfillment-page-cta {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fulfillment-page-cta .button {
+    width: 100%;
   }
 }
 
@@ -2838,7 +3044,8 @@ main {
   }
 
   .factory-workflow-screen {
-    height: min(52vh, 520px);
+    height: auto;
+    aspect-ratio: 4 / 5;
     border-radius: 20px;
   }
 
@@ -2870,23 +3077,18 @@ main {
   }
 
   .factory-workflow-steps {
-    margin-top: 28px;
+    margin-top: 14px;
   }
 
   .factory-workflow-steps button {
-    min-height: 165px;
-    padding: 25px 4px;
-    grid-template-columns: 36px 1fr 20px;
-    gap: 12px;
+    flex-basis: 102px;
+    min-height: 78px;
+    padding: 12px 10px;
   }
 
   .factory-workflow-steps button:hover,
   .factory-workflow-steps button.active {
     padding-inline: 10px;
-  }
-
-  .factory-workflow-steps h3 {
-    font-size: 26px;
   }
 
   .pillar-grid,
@@ -3019,6 +3221,37 @@ main {
 
   .footer-links {
     flex-wrap: wrap;
+  }
+
+  .fulfillment-page-header {
+    min-height: 82px;
+  }
+
+  .fulfillment-page-header .brand small,
+  .fulfillment-back {
+    display: none;
+  }
+
+  .fulfillment-page-actions {
+    gap: 8px;
+  }
+
+  .fulfillment-page .case-ledger {
+    padding-top: 76px;
+  }
+
+  .fulfillment-page-cta {
+    margin-bottom: 60px;
+    padding: 25px;
+  }
+
+  .company-ledger-link {
+    min-height: 98px;
+    padding: 18px;
+  }
+
+  .company-ledger-link > span {
+    font-size: 36px;
   }
 }
 

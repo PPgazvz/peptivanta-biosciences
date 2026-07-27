@@ -34,27 +34,45 @@ export default function FactoryWorkflow({
   const media = workflowMedia[activeStep];
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+    const desktopQuery = window.matchMedia("(min-width: 821px)");
+    let observer: IntersectionObserver | null = null;
 
-        if (visible) {
-          setActiveStep(Number((visible.target as HTMLElement).dataset.workflowStep));
-        }
-      },
-      {
-        rootMargin: "-26% 0px -48% 0px",
-        threshold: [0.15, 0.35, 0.6],
-      },
-    );
+    function updateObserver() {
+      observer?.disconnect();
+      observer = null;
 
-    stepRefs.current.forEach((step) => {
-      if (step) observer.observe(step);
-    });
+      // Desktop keeps the scroll-led story. On phones the stage only changes
+      // after an intentional tap, so the video cannot change while it is off-screen.
+      if (!desktopQuery.matches) return;
 
-    return () => observer.disconnect();
+      observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+          if (visible) {
+            setActiveStep(Number((visible.target as HTMLElement).dataset.workflowStep));
+          }
+        },
+        {
+          rootMargin: "-26% 0px -48% 0px",
+          threshold: [0.15, 0.35, 0.6],
+        },
+      );
+
+      stepRefs.current.forEach((step) => {
+        if (step) observer?.observe(step);
+      });
+    }
+
+    updateObserver();
+    desktopQuery.addEventListener("change", updateObserver);
+
+    return () => {
+      desktopQuery.removeEventListener("change", updateObserver);
+      observer?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -95,7 +113,7 @@ export default function FactoryWorkflow({
                 <span>{mediaLabel}</span>
                 <i aria-hidden="true"><b />0{activeStep + 1} / 05</i>
               </div>
-              <div className="factory-screen-caption">
+              <div className="factory-screen-caption" aria-live="polite">
                 <span>{active[0]}</span>
                 <div>
                   <small>{active[3]}</small>
@@ -106,7 +124,7 @@ export default function FactoryWorkflow({
             <p className="factory-workflow-hint">{hint}</p>
           </div>
 
-          <div className="factory-workflow-steps">
+          <div className="factory-workflow-steps" aria-label={hint}>
             {steps.map(([number, stepTitle, description, status], index) => (
               <button
                 type="button"
@@ -129,6 +147,15 @@ export default function FactoryWorkflow({
                 <b aria-hidden="true">↗</b>
               </button>
             ))}
+          </div>
+
+          <div className="factory-workflow-mobile-detail" aria-live="polite">
+            <small>{active[3]}</small>
+            <div>
+              <span>{active[0]}</span>
+              <h3>{active[1]}</h3>
+            </div>
+            <p>{active[2]}</p>
           </div>
         </div>
       </div>

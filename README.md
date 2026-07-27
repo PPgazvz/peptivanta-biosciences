@@ -34,7 +34,7 @@ WhatsApp 按钮会一起更新。
 找到下面这一行：
 
 ```ts
-salesEmail: "",
+salesEmail: "sales@peptivanta.com",
 ```
 
 替换为准备好的企业邮箱：
@@ -80,6 +80,45 @@ npm run dev
 ```bash
 npm run build
 ```
+
+## 部署到 Cloudflare Workers
+
+仓库已经包含 `wrangler.jsonc` 和 Cloudflare 构建命令。当前配置对应
+`peptivanta.com` 所在的 Cloudflare 账号。
+
+在当前账号连接 GitHub 时使用：
+
+```text
+构建命令：npm run build
+部署命令：npx wrangler deploy -c dist/server/wrangler.json
+根目录：留空
+生产分支：main
+```
+
+### 复制到另一个 Cloudflare 账号
+
+D1 数据库 ID 属于创建它的 Cloudflare 账号，不能跨账号共用。朋友部署前必须：
+
+1. 复制本私人仓库，或取得本仓库的私人访问权限。
+2. 在朋友自己的 Cloudflare 账号创建一个新的 D1 数据库。
+3. 打开 `wrangler.jsonc`：
+   - 把 `name` 改成朋友专用的 Worker 名称；
+   - 把 `database_name` 改成新数据库名称；
+   - 把 `database_id` 改成新数据库 ID。
+4. 在 `site.config.ts` 修改朋友自己的 WhatsApp 和邮箱。
+5. 再按上面的构建、部署命令连接 GitHub。
+
+第一次访问“近期成交与履约”页面时，程序会在新 D1 中自动创建数据表，
+并生成该周固定的 100 条记录。记录每 7 天进入新周期，同一周期内不会乱跳。
+
+> 不要把 `peptivanta.com` 当前的 D1 ID直接用于朋友的 Cloudflare 账号，
+> 否则部署会因账号不匹配而失败。
+
+### 域名
+
+Worker 部署成功后，在 Cloudflare 中为它添加自定义域名。根域名和 `www`
+建议只保留一个正式入口，另一个使用重定向规则跳转。网站使用的 MX、SPF、
+DKIM 等邮箱记录与 Worker 网站记录相互独立，不要在绑定网站时删除邮箱记录。
 
 ## 网站内容定位
 

@@ -11,7 +11,6 @@ import {
   type SiteLocale as Locale,
 } from "./i18n";
 import FactoryWorkflow from "./FactoryWorkflow";
-import FulfillmentCases from "./FulfillmentCases";
 
 type Category = "all" | "catalogue" | "cosmetic" | "custom";
 type IntroState = "hidden" | "visible" | "closing";
@@ -1039,11 +1038,14 @@ export default function Home() {
           <span />
         </button>
         <nav className={menuOpen ? "nav nav-open" : "nav"} aria-label={t.navLabel}>
-          {t.nav.map((item, index) => (
-            <a key={item} href={`#${t.navIds[index]}`} onClick={() => setMenuOpen(false)}>
-              {item}
-            </a>
-          ))}
+          {t.nav.map((item, index) => {
+            const sectionId = t.navIds[index];
+            const href = sectionId === "fulfillment" ? "/fulfillment" : `#${sectionId}`;
+
+            return (
+              <Link key={item} href={href} onClick={() => setMenuOpen(false)}>{item}</Link>
+            );
+          })}
         </nav>
         <div className="header-actions">
           <label className="language-select">
@@ -1301,10 +1303,15 @@ export default function Home() {
               <div><dt>{t.companyDetails[3]}</dt><dd>{siteConfig.registeredAddress}</dd></div>
             )}
           </dl>
+          <Link className="company-ledger-link" href="/fulfillment">
+            <span>100</span>
+            <div>
+              <small>{t.nav[4]}</small>
+              <strong aria-hidden="true">↗</strong>
+            </div>
+          </Link>
         </div>
       </section>
-
-      <FulfillmentCases locale={locale} />
 
       <section className="inquiry" id="inquiry">
         <div className="section-shell inquiry-shell">

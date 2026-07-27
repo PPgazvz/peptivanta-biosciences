@@ -37,9 +37,8 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Factory process view/i);
   assert.match(html, /Request a quote/i);
   assert.match(html, /Get quote on WhatsApp/i);
-  assert.match(html, /Recent fulfillment activity/i);
   assert.match(html, /Recent fulfillment/i);
-  assert.match(html, /Loading recent records/i);
+  assert.match(html, /href="\/fulfillment"/i);
   assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
@@ -53,9 +52,10 @@ test("server-renders the finished website", async () => {
 });
 
 test("includes complete multilingual content", async () => {
-  const [homepage, fulfillmentCases, legalDocument] = await Promise.all([
+  const [homepage, fulfillmentCases, fulfillmentPage, legalDocument] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/FulfillmentCases.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/fulfillment/FulfillmentLedgerPage.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/LegalDocument.tsx", import.meta.url), "utf8"),
   ]);
 
@@ -71,6 +71,8 @@ test("includes complete multilingual content", async () => {
   assert.match(fulfillmentCases, /个月时间范围/);
   assert.doesNotMatch(fulfillmentCases, /当前为演示数据/);
   assert.doesNotMatch(fulfillmentCases, /这些记录仅用于展示实时数据库结构/);
+  assert.match(fulfillmentPage, /返回网站/);
+  assert.match(fulfillmentPage, /FulfillmentCases/);
   assert.match(homepage, /前往 WhatsApp 获取报价/);
   assert.match(legalDocument, /隐私政策/);
   assert.match(legalDocument, /Política de Privacidad/);
@@ -101,6 +103,16 @@ test("configures durable recent fulfillment records", async () => {
   assert.match(schema, /fulfillment_cases/);
   assert.match(schema, /amount_usd_cents/);
   assert.match(schema, /cycle_key/);
+});
+
+test("renders the dedicated fulfillment page", async () => {
+  const response = await render("/fulfillment");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Recent fulfillment activity/i);
+  assert.match(html, /Loading recent records/i);
+  assert.match(html, /Back to website/i);
+  assert.match(html, /wa\.me\/19863059927/i);
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {
