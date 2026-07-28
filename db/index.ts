@@ -6,16 +6,59 @@ async function getD1Binding() {
 
   if (!env.DB) {
     throw new Error(
-      "Cloudflare D1 binding `DB` is unavailable. Set the `d1` field in .openai/hosting.json to `DB` or let your control plane inject the real binding values before using the database."
+      "Cloudflare D1 binding `DB` is unavailable. Set the `d1` field in .openai/hosting.json to `DB` or let your control plane inject the real binding values before using the database.",
     );
   }
 
   return env.DB;
 }
 
+export async function getD1() {
+  return getD1Binding();
+}
+
 export async function getDb() {
   return drizzle(await getD1Binding(), { schema });
 }
+
+const addedColumns = [
+  {
+    name: "amount_usd_cents",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN amount_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "cycle_key",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN cycle_key TEXT DEFAULT 'legacy' NOT NULL",
+  },
+  {
+    name: "product_name",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN product_name TEXT DEFAULT '' NOT NULL",
+  },
+  {
+    name: "specification",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN specification TEXT DEFAULT '' NOT NULL",
+  },
+  {
+    name: "quantity_units",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN quantity_units INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "unit_price_usd_cents",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN unit_price_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "packaging_fee_usd_cents",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN packaging_fee_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "testing_fee_usd_cents",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN testing_fee_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "logistics_fee_usd_cents",
+    sql: "ALTER TABLE fulfillment_cases ADD COLUMN logistics_fee_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+] as const;
 
 export async function ensureFulfillmentSchema() {
   const d1 = await getD1Binding();
@@ -28,12 +71,26 @@ export async function ensureFulfillmentSchema() {
         destination TEXT NOT NULL,
         service TEXT NOT NULL,
         order_profile TEXT NOT NULL,
+        product_name TEXT DEFAULT '' NOT NULL,
+        specification TEXT DEFAULT '' NOT NULL,
+        quantity_units INTEGER DEFAULT 0 NOT NULL,
+        unit_price_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        packaging_fee_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        testing_fee_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        logistics_fee_usd_cents INTEGER DEFAULT 0 NOT NULL,
         amount_usd_cents INTEGER DEFAULT 0 NOT NULL,
         status TEXT NOT NULL,
         cycle_key TEXT DEFAULT 'legacy' NOT NULL,
         is_sample INTEGER DEFAULT 1 NOT NULL,
         is_published INTEGER DEFAULT 1 NOT NULL,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `),
+    d1.prepare(`
+      CREATE TABLE IF NOT EXISTS fulfillment_ledger_meta (
+        key TEXT PRIMARY KEY NOT NULL,
+        value TEXT NOT NULL,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
       )
     `),
     d1.prepare(
@@ -44,22 +101,23 @@ export async function ensureFulfillmentSchema() {
     ),
   ]);
 
-  const tableInfo = await d1.prepare("PRAGMA table_info(fulfillment_cases)").all<{ name: string }>();
+  const tableInfo = await d1
+    .prepare("PRAGMA table_info(fulfillment_cases)")
+    .all<{ name: string }>();
   const columns = new Set(tableInfo.results.map((column) => column.name));
 
-  if (!columns.has("amount_usd_cents")) {
-    await d1.prepare(
-      "ALTER TABLE fulfillment_cases ADD COLUMN amount_usd_cents INTEGER DEFAULT 0 NOT NULL",
-    ).run();
+  for (const column of addedColumns) {
+    if (!columns.has(column.name)) {
+      await d1.prepare(column.sql).run();
+    }
   }
 
-  if (!columns.has("cycle_key")) {
-    await d1.prepare(
-      "ALTER TABLE fulfillment_cases ADD COLUMN cycle_key TEXT DEFAULT 'legacy' NOT NULL",
-    ).run();
-  }
-
-  await d1.prepare(
-    "CREATE INDEX IF NOT EXISTS fulfillment_cases_cycle_key_idx ON fulfillment_cases (cycle_key)",
-  ).run();
+  await d1.batch([
+    d1.prepare(
+      "CREATE INDEX IF NOT EXISTS fulfillment_cases_cycle_key_idx ON fulfillment_cases (cycle_key)",
+    ),
+    d1.prepare(
+      "CREATE INDEX IF NOT EXISTS fulfillment_cases_service_occurred_at_idx ON fulfillment_cases (service, occurred_at)",
+    ),
+  ]);
 }

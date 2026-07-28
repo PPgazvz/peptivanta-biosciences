@@ -15,6 +15,13 @@
       "when": 1785042154553,
       "tag": "0001_special_hellion",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785211850058,
+      "tag": "0002_rapid_peter_quill",
+      "breakpoints": true
     }
   ]
 }

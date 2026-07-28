@@ -1,0 +1,117 @@
+.case-ledger-notice {
+  margin: 30px 0 0;
+  padding: 14px 18px;
+  border: 1px solid rgba(6, 54, 57, 0.12);
+  border-radius: 14px;
+  background: rgba(25, 216, 170, 0.06);
+  color: #365653;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.case-table th:nth-child(1) {
+  width: 9%;
+}
+
+.case-table th:nth-child(2) {
+  width: 12%;
+}
+
+.case-table th:nth-child(3) {
+  width: 9%;
+}
+
+.case-table th:nth-child(4) {
+  width: 20%;
+}
+
+.case-table th:nth-child(5) {
+  width: 12%;
+}
+
+.case-table th:nth-child(6) {
+  width: 8%;
+}
+
+.case-table th:nth-child(7) {
+  width: 18%;
+}
+
+.case-table th:nth-child(8) {
+  width: 12%;
+}
+
+.case-table td {
+  padding-inline: 14px;
+}
+
+.case-product strong,
+.case-service strong {
+  display: block;
+  color: white;
+  font-size: 11px;
+}
+
+.case-product small,
+.case-service small,
+.case-amount small {
+  margin-top: 4px;
+  display: block;
+  color: #8fa7a4;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: normal;
+}
+
+.case-quantity {
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 750;
+}
+
+.case-amount {
+  white-space: normal;
+}
+
+.case-amount strong {
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.case-status-confirmed::before {
+  background: #9bb6cc;
+  box-shadow: 0 0 0 4px rgba(155, 182, 204, 0.08);
+}
+
+.case-status-documentation_review::before {
+  background: #b9a7ff;
+  box-shadow: 0 0 0 4px rgba(185, 167, 255, 0.08);
+}
+
+.case-status-quality_control::before {
+  background: #7edff2;
+  box-shadow: 0 0 0 4px rgba(126, 223, 242, 0.08);
+}
+
+.case-status-packaging::before {
+  background: #ff9b6f;
+  box-shadow: 0 0 0 4px rgba(255, 155, 111, 0.08);
+}
+
+.case-status-delivered::before {
+  background: #d8ff5c;
+  box-shadow: 0 0 0 4px rgba(216, 255, 92, 0.08);
+}
+
+@media (max-width: 720px) {
+  .case-ledger-notice {
+    margin-top: 22px;
+    padding: 12px 14px;
+    font-size: 11px;
+  }
+}

@@ -3,15 +3,32 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SiteLocale as Locale } from "./i18n";
 
+type Market = "United States" | "Canada" | "Brazil" | "Mexico";
+
 type FulfillmentRecord = {
   id: number;
   reference: string;
   occurredAt: string;
-  destination: "United States" | "Canada" | "Brazil" | string;
+  destination: Market;
   service: "catalogue" | "private_label" | "bulk" | "custom" | string;
   orderProfile: string;
+  productName: string;
+  specification: string;
+  quantityUnits: number;
+  unitPriceUsdCents: number;
+  packagingFeeUsdCents: number;
+  testingFeeUsdCents: number;
+  logisticsFeeUsdCents: number;
   amountUsdCents: number;
-  status: "completed" | "dispatched" | "in_production" | string;
+  status:
+    | "confirmed"
+    | "documentation_review"
+    | "in_production"
+    | "quality_control"
+    | "packaging"
+    | "dispatched"
+    | "delivered"
+    | string;
   isSample: boolean;
 };
 
@@ -34,23 +51,92 @@ const localeCodes: Record<Locale, string> = {
   zh: "zh-CN",
 };
 
+const profiles = {
+  en: {
+    "Pilot order": "Pilot order",
+    "10–50 kits": "10–50 kits",
+    "50–100 kits": "50–100 kits",
+    "100–300 kits": "100–300 kits",
+    "300–500 kits": "300–500 kits",
+    "500–1,000 kits": "500–1,000 kits",
+    "1,000–3,000 kits": "1,000–3,000 kits",
+    "3,000+ kits": "3,000+ kits",
+  },
+  pt: {
+    "Pilot order": "Pedido piloto",
+    "10–50 kits": "10–50 kits",
+    "50–100 kits": "50–100 kits",
+    "100–300 kits": "100–300 kits",
+    "300–500 kits": "300–500 kits",
+    "500–1,000 kits": "500–1.000 kits",
+    "1,000–3,000 kits": "1.000–3.000 kits",
+    "3,000+ kits": "Mais de 3.000 kits",
+  },
+  es: {
+    "Pilot order": "Pedido piloto",
+    "10–50 kits": "10–50 kits",
+    "50–100 kits": "50–100 kits",
+    "100–300 kits": "100–300 kits",
+    "300–500 kits": "300–500 kits",
+    "500–1,000 kits": "500–1.000 kits",
+    "1,000–3,000 kits": "1.000–3.000 kits",
+    "3,000+ kits": "Más de 3.000 kits",
+  },
+  fr: {
+    "Pilot order": "Commande pilote",
+    "10–50 kits": "10–50 kits",
+    "50–100 kits": "50–100 kits",
+    "100–300 kits": "100–300 kits",
+    "300–500 kits": "300–500 kits",
+    "500–1,000 kits": "500–1 000 kits",
+    "1,000–3,000 kits": "1 000–3 000 kits",
+    "3,000+ kits": "Plus de 3 000 kits",
+  },
+  zh: {
+    "Pilot order": "小批量试单",
+    "10–50 kits": "10–50 盒",
+    "50–100 kits": "50–100 盒",
+    "100–300 kits": "100–300 盒",
+    "300–500 kits": "300–500 盒",
+    "500–1,000 kits": "500–1,000 盒",
+    "1,000–3,000 kits": "1,000–3,000 盒",
+    "3,000+ kits": "3,000 盒以上",
+  },
+} as const;
+
 const content = {
   en: {
-    tag: "Recent fulfillment ledger",
-    title: "Recent fulfillment activity.",
-    text: "A privacy-conscious view of recent B2B order and fulfillment activity across our priority markets.",
+    tag: "Illustrative fulfillment ledger",
+    title: "Recent workflow activity.",
+    text: "A privacy-conscious model of how B2B orders progress through documentation, production, quality review, packaging, dispatch, and delivery.",
     count: "records",
     window: "month window",
-    markets: "priority markets",
-    filters: ["All markets", "United States", "Canada", "Brazil"],
+    marketsLabel: "target markets",
     refresh: "Refresh records",
-    updated: "Updated",
-    nextUpdate: "Next weekly update",
-    dataNote: "Sample activity data · refreshed every 7 days",
+    updated: "Ledger date",
+    nextUpdate: "Next daily update",
+    notice:
+      "Illustrative workflow data · showing up to 100 records from the latest 3 months · updated daily · not customer transaction proof.",
     loading: "Loading recent records…",
     error: "Recent records are temporarily unavailable.",
     empty: "No published records are available for this period.",
-    headers: ["Date", "Reference", "Destination", "Service", "Order profile", "Amount (USD)", "Status"],
+    headers: [
+      "Date",
+      "Reference",
+      "Destination",
+      "Product / specification",
+      "Service",
+      "Quantity",
+      "Amount (USD)",
+      "Status",
+    ],
+    allMarkets: "All markets",
+    markets: {
+      "United States": "United States",
+      Canada: "Canada",
+      Brazil: "Brazil",
+      Mexico: "Mexico",
+    },
     services: {
       catalogue: "Catalogue supply",
       private_label: "Private label",
@@ -58,159 +144,199 @@ const content = {
       custom: "Custom project",
     },
     statuses: {
-      completed: "Completed",
-      dispatched: "Dispatched",
+      confirmed: "Order confirmed",
+      documentation_review: "Documentation review",
       in_production: "In production",
+      quality_control: "Quality control",
+      packaging: "Packaging",
+      dispatched: "Dispatched",
+      delivered: "Delivered",
     },
-    profiles: {
-      "Pilot order": "Pilot order",
-      "10–50 kits": "10–50 kits",
-      "50–100 kits": "50–100 kits",
-      "100–300 kits": "100–300 kits",
-      "300–500 kits": "300–500 kits",
-      "500–1,000 kits": "500–1,000 kits",
-      "1,000–3,000 kits": "1,000–3,000 kits",
-      "3,000+ kits": "3,000+ kits",
-      "Bulk specification": "Bulk specification",
-      "Packaging project": "Packaging project",
-    },
+    unitPrice: "unit",
+    fees: "packaging, testing & logistics",
   },
   pt: {
-    tag: "Registro recente de atendimento",
-    title: "Atividade recente de pedidos.",
-    text: "Uma visão anonimizada das atividades recentes de pedidos B2B e atendimento em nossos mercados prioritários.",
+    tag: "Registro ilustrativo de atendimento",
+    title: "Atividade recente do fluxo.",
+    text: "Um modelo sem identificação de como pedidos B2B avançam por documentação, produção, qualidade, embalagem, despacho e entrega.",
     count: "registros",
-    window: "meses de histórico",
-    markets: "mercados prioritários",
-    filters: ["Todos", "Estados Unidos", "Canadá", "Brasil"],
-    refresh: "Atualizar registros",
-    updated: "Atualizado",
-    nextUpdate: "Próxima atualização semanal",
-    dataNote: "Dados de atividade de exemplo · atualização a cada 7 dias",
-    loading: "Carregando registros recentes…",
-    error: "Os registros recentes estão temporariamente indisponíveis.",
+    window: "meses",
+    marketsLabel: "mercados-alvo",
+    refresh: "Atualizar",
+    updated: "Data do registro",
+    nextUpdate: "Próxima atualização diária",
+    notice:
+      "Dados ilustrativos de fluxo · até 100 registros dos últimos 3 meses · atualização diária · não são prova de transações de clientes.",
+    loading: "Carregando registros…",
+    error: "Os registros estão temporariamente indisponíveis.",
     empty: "Não há registros publicados para este período.",
-    headers: ["Data", "Referência", "Destino", "Serviço", "Perfil do pedido", "Valor (USD)", "Status"],
+    headers: [
+      "Data",
+      "Referência",
+      "Destino",
+      "Produto / especificação",
+      "Serviço",
+      "Quantidade",
+      "Valor (USD)",
+      "Status",
+    ],
+    allMarkets: "Todos",
+    markets: {
+      "United States": "Estados Unidos",
+      Canada: "Canadá",
+      Brazil: "Brasil",
+      Mexico: "México",
+    },
     services: {
-      catalogue: "Fornecimento de catálogo",
+      catalogue: "Catálogo",
       private_label: "Marca própria",
-      bulk: "Fornecimento a granel",
+      bulk: "Grande volume",
       custom: "Projeto personalizado",
     },
     statuses: {
-      completed: "Concluído",
-      dispatched: "Despachado",
+      confirmed: "Pedido confirmado",
+      documentation_review: "Revisão documental",
       in_production: "Em produção",
+      quality_control: "Controle de qualidade",
+      packaging: "Embalagem",
+      dispatched: "Despachado",
+      delivered: "Entregue",
     },
-    profiles: {
-      "Pilot order": "Pedido piloto",
-      "10–50 kits": "10–50 kits",
-      "50–100 kits": "50–100 kits",
-      "100–300 kits": "100–300 kits",
-      "300–500 kits": "300–500 kits",
-      "500–1,000 kits": "500–1.000 kits",
-      "1,000–3,000 kits": "1.000–3.000 kits",
-      "3,000+ kits": "Mais de 3.000 kits",
-      "Bulk specification": "Especificação a granel",
-      "Packaging project": "Projeto de embalagem",
-    },
+    unitPrice: "unidade",
+    fees: "embalagem, testes e logística",
   },
   es: {
-    tag: "Registro reciente de cumplimiento",
-    title: "Actividad reciente de pedidos.",
-    text: "Una vista anonimizada de la actividad reciente de pedidos B2B y cumplimiento en nuestros mercados prioritarios.",
+    tag: "Registro ilustrativo de cumplimiento",
+    title: "Actividad reciente del flujo.",
+    text: "Un modelo anonimizado de cómo los pedidos B2B avanzan por documentación, producción, calidad, empaque, despacho y entrega.",
     count: "registros",
-    window: "meses de historial",
-    markets: "mercados prioritarios",
-    filters: ["Todos", "Estados Unidos", "Canadá", "Brasil"],
-    refresh: "Actualizar registros",
-    updated: "Actualizado",
-    nextUpdate: "Próxima actualización semanal",
-    dataNote: "Datos de actividad de ejemplo · actualización cada 7 días",
-    loading: "Cargando registros recientes…",
-    error: "Los registros recientes no están disponibles temporalmente.",
+    window: "meses",
+    marketsLabel: "mercados objetivo",
+    refresh: "Actualizar",
+    updated: "Fecha del registro",
+    nextUpdate: "Próxima actualización diaria",
+    notice:
+      "Datos ilustrativos del flujo · hasta 100 registros de los últimos 3 meses · actualización diaria · no prueban transacciones de clientes.",
+    loading: "Cargando registros…",
+    error: "Los registros no están disponibles temporalmente.",
     empty: "No hay registros publicados para este período.",
-    headers: ["Fecha", "Referencia", "Destino", "Servicio", "Perfil del pedido", "Importe (USD)", "Estado"],
+    headers: [
+      "Fecha",
+      "Referencia",
+      "Destino",
+      "Producto / especificación",
+      "Servicio",
+      "Cantidad",
+      "Importe (USD)",
+      "Estado",
+    ],
+    allMarkets: "Todos",
+    markets: {
+      "United States": "Estados Unidos",
+      Canada: "Canadá",
+      Brazil: "Brasil",
+      Mexico: "México",
+    },
     services: {
-      catalogue: "Suministro de catálogo",
+      catalogue: "Catálogo",
       private_label: "Marca privada",
-      bulk: "Suministro a granel",
+      bulk: "Gran volumen",
       custom: "Proyecto personalizado",
     },
     statuses: {
-      completed: "Completado",
-      dispatched: "Despachado",
+      confirmed: "Pedido confirmado",
+      documentation_review: "Revisión documental",
       in_production: "En producción",
+      quality_control: "Control de calidad",
+      packaging: "Empaque",
+      dispatched: "Despachado",
+      delivered: "Entregado",
     },
-    profiles: {
-      "Pilot order": "Pedido piloto",
-      "10–50 kits": "10–50 kits",
-      "50–100 kits": "50–100 kits",
-      "100–300 kits": "100–300 kits",
-      "300–500 kits": "300–500 kits",
-      "500–1,000 kits": "500–1.000 kits",
-      "1,000–3,000 kits": "1.000–3.000 kits",
-      "3,000+ kits": "Más de 3.000 kits",
-      "Bulk specification": "Especificación a granel",
-      "Packaging project": "Proyecto de empaque",
-    },
+    unitPrice: "unidad",
+    fees: "empaque, pruebas y logística",
   },
   fr: {
-    tag: "Registre récent des réalisations",
-    title: "Activité récente des commandes.",
-    text: "Une vue anonymisée de l’activité récente des commandes B2B et des réalisations sur nos marchés prioritaires.",
+    tag: "Registre illustratif d’exécution",
+    title: "Activité récente du flux.",
+    text: "Un modèle anonymisé de progression des commandes B2B entre documentation, production, qualité, emballage, expédition et livraison.",
     count: "enregistrements",
-    window: "mois d’historique",
-    markets: "marchés prioritaires",
-    filters: ["Tous", "États-Unis", "Canada", "Brésil"],
+    window: "mois",
+    marketsLabel: "marchés cibles",
     refresh: "Actualiser",
-    updated: "Actualisé",
-    nextUpdate: "Prochaine mise à jour hebdomadaire",
-    dataNote: "Données d’activité d’exemple · actualisation tous les 7 jours",
-    loading: "Chargement des enregistrements récents…",
-    error: "Les enregistrements récents sont temporairement indisponibles.",
+    updated: "Date du registre",
+    nextUpdate: "Prochaine mise à jour quotidienne",
+    notice:
+      "Données illustratives · jusqu’à 100 enregistrements sur 3 mois · actualisation quotidienne · ne prouvent pas des transactions clients.",
+    loading: "Chargement des enregistrements…",
+    error: "Les enregistrements sont temporairement indisponibles.",
     empty: "Aucun enregistrement publié pour cette période.",
-    headers: ["Date", "Référence", "Destination", "Service", "Profil de commande", "Montant (USD)", "Statut"],
+    headers: [
+      "Date",
+      "Référence",
+      "Destination",
+      "Produit / spécification",
+      "Service",
+      "Quantité",
+      "Montant (USD)",
+      "Statut",
+    ],
+    allMarkets: "Tous",
+    markets: {
+      "United States": "États-Unis",
+      Canada: "Canada",
+      Brazil: "Brésil",
+      Mexico: "Mexique",
+    },
     services: {
-      catalogue: "Approvisionnement catalogue",
+      catalogue: "Catalogue",
       private_label: "Marque blanche",
-      bulk: "Approvisionnement en vrac",
+      bulk: "Grand volume",
       custom: "Projet personnalisé",
     },
     statuses: {
-      completed: "Terminé",
-      dispatched: "Expédié",
+      confirmed: "Commande confirmée",
+      documentation_review: "Revue documentaire",
       in_production: "En production",
+      quality_control: "Contrôle qualité",
+      packaging: "Emballage",
+      dispatched: "Expédié",
+      delivered: "Livré",
     },
-    profiles: {
-      "Pilot order": "Commande pilote",
-      "10–50 kits": "10–50 kits",
-      "50–100 kits": "50–100 kits",
-      "100–300 kits": "100–300 kits",
-      "300–500 kits": "300–500 kits",
-      "500–1,000 kits": "500–1 000 kits",
-      "1,000–3,000 kits": "1 000–3 000 kits",
-      "3,000+ kits": "Plus de 3 000 kits",
-      "Bulk specification": "Spécification vrac",
-      "Packaging project": "Projet d’emballage",
-    },
+    unitPrice: "unité",
+    fees: "emballage, essais et logistique",
   },
   zh: {
-    tag: "近期履约记录",
-    title: "近期成交与履约记录。",
-    text: "以脱敏方式展示重点市场近三个月的 B2B 订单与履约活动，避免公开客户身份和敏感商业信息。",
+    tag: "示例履约台账",
+    title: "近期订单流程记录。",
+    text: "以脱敏示例展示 B2B 订单从确认、文件审核、生产、质检、包装、发运到送达的完整推进过程。",
     count: "条记录",
-    window: "个月时间范围",
-    markets: "个重点市场",
-    filters: ["全部市场", "美国", "加拿大", "巴西"],
+    window: "个月",
+    marketsLabel: "个目标市场",
     refresh: "刷新记录",
-    updated: "更新时间",
-    nextUpdate: "下次周期更新",
-    dataNote: "示例活动数据 · 每 7 天更新",
+    updated: "台账日期",
+    nextUpdate: "下次每日更新",
+    notice:
+      "示例履约流程数据 · 仅展示近 3 个月最多 100 条记录 · 每日更新 · 不作为真实客户成交证明。",
     loading: "正在读取近期记录…",
     error: "近期记录暂时无法加载。",
-    empty: "该时间范围内暂无公开记录。",
-    headers: ["日期", "记录编号", "目的地", "服务类型", "订单规模", "金额 (USD)", "状态"],
+    empty: "该时间范围内暂无记录。",
+    headers: [
+      "日期",
+      "记录编号",
+      "目的地",
+      "产品 / 规格",
+      "服务类型",
+      "准确数量",
+      "金额 (USD)",
+      "状态",
+    ],
+    allMarkets: "全部市场",
+    markets: {
+      "United States": "美国",
+      Canada: "加拿大",
+      Brazil: "巴西",
+      Mexico: "墨西哥",
+    },
     services: {
       catalogue: "目录产品供应",
       private_label: "贴牌服务",
@@ -218,34 +344,31 @@ const content = {
       custom: "定制项目",
     },
     statuses: {
-      completed: "已完成",
-      dispatched: "已发运",
+      confirmed: "订单已确认",
+      documentation_review: "文件审核中",
       in_production: "生产中",
+      quality_control: "质量检测",
+      packaging: "包装中",
+      dispatched: "已发运",
+      delivered: "已送达",
     },
-    profiles: {
-      "Pilot order": "小批量试单",
-      "10–50 kits": "10–50 盒",
-      "50–100 kits": "50–100 盒",
-      "100–300 kits": "100–300 盒",
-      "300–500 kits": "300–500 盒",
-      "500–1,000 kits": "500–1,000 盒",
-      "1,000–3,000 kits": "1,000–3,000 盒",
-      "3,000+ kits": "3,000 盒以上",
-      "Bulk specification": "大货规格",
-      "Packaging project": "包装项目",
-    },
+    unitPrice: "单价",
+    fees: "包装、检测及物流",
   },
 } as const;
 
-const marketValues = ["all", "United States", "Canada", "Brazil"] as const;
-
-function publicReference(reference: string) {
-  return reference.replace(/-[A-Z0-9]+-(\d{3})$/, "-$1");
-}
+const marketValues = [
+  "all",
+  "United States",
+  "Canada",
+  "Brazil",
+  "Mexico",
+] as const;
 
 export default function FulfillmentCases({ locale }: { locale: Locale }) {
   const [data, setData] = useState<ApiResponse | null>(null);
-  const [market, setMarket] = useState<(typeof marketValues)[number]>("all");
+  const [market, setMarket] =
+    useState<(typeof marketValues)[number]>("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const t = content[locale];
@@ -253,9 +376,10 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
   async function loadRecords() {
     setLoading(true);
     setError(false);
-
     try {
-      const response = await fetch("/api/fulfillment-cases", { cache: "no-store" });
+      const response = await fetch("/api/fulfillment-cases", {
+        cache: "no-store",
+      });
       if (!response.ok) throw new Error("Unable to load records");
       setData((await response.json()) as ApiResponse);
     } catch {
@@ -266,11 +390,8 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
   }
 
   useEffect(() => {
-    const loadFrame = window.requestAnimationFrame(() => {
-      void loadRecords();
-    });
-
-    return () => window.cancelAnimationFrame(loadFrame);
+    const frame = window.requestAnimationFrame(() => void loadRecords());
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const visibleRecords = useMemo(() => {
@@ -281,20 +402,35 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
   }, [data, market]);
 
   const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(localeCodes[locale], { month: "short", day: "2-digit", year: "numeric" }),
+    () =>
+      new Intl.DateTimeFormat(localeCodes[locale], {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }),
     [locale],
   );
   const amountFormatter = useMemo(
-    () => new Intl.NumberFormat(localeCodes[locale], {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }),
+    () =>
+      new Intl.NumberFormat(localeCodes[locale], {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [locale],
+  );
+  const numberFormatter = useMemo(
+    () => new Intl.NumberFormat(localeCodes[locale]),
     [locale],
   );
 
   return (
-    <section className="case-ledger section-shell" id="fulfillment" aria-labelledby="case-ledger-title">
+    <section
+      className="case-ledger section-shell"
+      id="fulfillment"
+      aria-labelledby="case-ledger-title"
+    >
       <div className="case-ledger-heading">
         <div>
           <p className="section-tag">{t.tag}</p>
@@ -302,15 +438,30 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
           <p>{t.text}</p>
         </div>
         <dl className="case-ledger-stats">
-          <div><dt>{data?.count ?? "—"}</dt><dd>{t.count}</dd></div>
-          <div><dt>3</dt><dd>{t.window}</dd></div>
-          <div><dt>3</dt><dd>{t.markets}</dd></div>
+          <div>
+            <dt>{data?.count ?? "—"}</dt>
+            <dd>{t.count}</dd>
+          </div>
+          <div>
+            <dt>3</dt>
+            <dd>{t.window}</dd>
+          </div>
+          <div>
+            <dt>4</dt>
+            <dd>{t.marketsLabel}</dd>
+          </div>
         </dl>
       </div>
 
+      <p className="case-ledger-notice">{t.notice}</p>
+
       <div className="case-ledger-toolbar">
-        <div className="case-market-filters" role="group" aria-label={t.headers[2]}>
-          {marketValues.map((value, index) => (
+        <div
+          className="case-market-filters"
+          role="group"
+          aria-label={t.headers[2]}
+        >
+          {marketValues.map((value) => (
             <button
               type="button"
               className={market === value ? "active" : undefined}
@@ -318,12 +469,18 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
               onClick={() => setMarket(value)}
               key={value}
             >
-              {t.filters[index]}
+              {value === "all" ? t.allMarkets : t.markets[value]}
             </button>
           ))}
         </div>
-        <button className="case-refresh" type="button" onClick={() => void loadRecords()} disabled={loading}>
-          <span aria-hidden="true">↻</span>{t.refresh}
+        <button
+          className="case-refresh"
+          type="button"
+          onClick={() => void loadRecords()}
+          disabled={loading}
+        >
+          <span aria-hidden="true">↻</span>
+          {t.refresh}
         </button>
       </div>
 
@@ -337,28 +494,76 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
         ) : (
           <table className="case-table">
             <thead>
-              <tr>{t.headers.map((header) => <th scope="col" key={header}>{header}</th>)}</tr>
+              <tr>
+                {t.headers.map((header) => (
+                  <th scope="col" key={header}>
+                    {header}
+                  </th>
+                ))}
+              </tr>
             </thead>
             <tbody>
-              {visibleRecords.map((record) => (
-                <tr key={record.id}>
-                  <td data-label={t.headers[0]}>{dateFormatter.format(new Date(`${record.occurredAt}T00:00:00Z`))}</td>
-                  <td data-label={t.headers[1]}>
-                    <code>{publicReference(record.reference)}</code>
-                  </td>
-                  <td data-label={t.headers[2]}>{t.filters[marketValues.indexOf(record.destination as (typeof marketValues)[number])]}</td>
-                  <td data-label={t.headers[3]}>{t.services[record.service as keyof typeof t.services] ?? record.service}</td>
-                  <td data-label={t.headers[4]}>{t.profiles[record.orderProfile as keyof typeof t.profiles] ?? record.orderProfile}</td>
-                  <td className="case-amount" data-label={t.headers[5]}>
-                    {amountFormatter.format(record.amountUsdCents / 100)}
-                  </td>
-                  <td data-label={t.headers[6]}>
-                    <span className={`case-status case-status-${record.status}`}>
-                      {t.statuses[record.status as keyof typeof t.statuses] ?? record.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {visibleRecords.map((record) => {
+                const fees =
+                  record.packagingFeeUsdCents +
+                  record.testingFeeUsdCents +
+                  record.logisticsFeeUsdCents;
+                return (
+                  <tr key={record.id}>
+                    <td data-label={t.headers[0]}>
+                      {dateFormatter.format(
+                        new Date(`${record.occurredAt}T00:00:00Z`),
+                      )}
+                    </td>
+                    <td data-label={t.headers[1]}>
+                      <code>{record.reference}</code>
+                    </td>
+                    <td data-label={t.headers[2]}>
+                      {t.markets[record.destination]}
+                    </td>
+                    <td className="case-product" data-label={t.headers[3]}>
+                      <strong>{record.productName}</strong>
+                      <small>{record.specification}</small>
+                    </td>
+                    <td className="case-service" data-label={t.headers[4]}>
+                      <strong>
+                        {t.services[
+                          record.service as keyof typeof t.services
+                        ] ?? record.service}
+                      </strong>
+                      <small>
+                        {profiles[locale][
+                          record.orderProfile as keyof (typeof profiles)[typeof locale]
+                        ] ?? record.orderProfile}
+                      </small>
+                    </td>
+                    <td className="case-quantity" data-label={t.headers[5]}>
+                      {numberFormatter.format(record.quantityUnits)}
+                    </td>
+                    <td className="case-amount" data-label={t.headers[6]}>
+                      <strong>
+                        {amountFormatter.format(record.amountUsdCents / 100)}
+                      </strong>
+                      <small>
+                        {amountFormatter.format(
+                          record.unitPriceUsdCents / 100,
+                        )}
+                        /{t.unitPrice} · {amountFormatter.format(fees / 100)}{" "}
+                        {t.fees}
+                      </small>
+                    </td>
+                    <td data-label={t.headers[7]}>
+                      <span
+                        className={`case-status case-status-${record.status}`}
+                      >
+                        {t.statuses[
+                          record.status as keyof typeof t.statuses
+                        ] ?? record.status}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
@@ -366,9 +571,10 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
 
       {data && (
         <p className="case-ledger-updated">
-          <span>{t.dataNote}</span>
+          <span>{t.notice}</span>
           <span>
-            {t.updated}: {dateFormatter.format(new Date(data.generatedAt))} · {t.nextUpdate}:{" "}
+            {t.updated}: {dateFormatter.format(new Date(data.generatedAt))} ·{" "}
+            {t.nextUpdate}:{" "}
             {dateFormatter.format(new Date(data.nextUpdateAt))}
           </span>
         </p>

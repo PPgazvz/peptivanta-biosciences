@@ -45,19 +45,29 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Français/);
   assert.match(html, /中文/);
   assert.match(html, /Professional-use and compliance notice/i);
-  assert.doesNotMatch(html, /Evidence first|Every batch|No direct online ordering/i);
+  assert.doesNotMatch(
+    html,
+    /Evidence first|Every batch|No direct online ordering/i,
+  );
   assert.doesNotMatch(html, /Add email in site\.config\.ts/i);
   assert.doesNotMatch(html, /\/images\/inventory\.jpg/);
   assert.doesNotMatch(html, /codex-preview|Your site is taking shape/i);
 });
 
-test("includes complete multilingual content", async () => {
-  const [homepage, fulfillmentCases, fulfillmentPage, legalDocument] = await Promise.all([
-    readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/FulfillmentCases.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/fulfillment/FulfillmentLedgerPage.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../app/LegalDocument.tsx", import.meta.url), "utf8"),
-  ]);
+test("includes complete multilingual ledger content", async () => {
+  const [homepage, ledger, fulfillmentPage, legalDocument] =
+    await Promise.all([
+      readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
+      readFile(new URL("../app/FulfillmentCases.tsx", import.meta.url), "utf8"),
+      readFile(
+        new URL(
+          "../app/fulfillment/FulfillmentLedgerPage.tsx",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+      readFile(new URL("../app/LegalDocument.tsx", import.meta.url), "utf8"),
+    ]);
 
   assert.match(homepage, /多肽供应，/);
   assert.match(homepage, /一条产线，五个清晰环节。/);
@@ -66,11 +76,13 @@ test("includes complete multilingual content", async () => {
   assert.match(homepage, /factory-flow-desktop-v2\.mp4/);
   assert.match(homepage, /FactoryWorkflow/);
   assert.match(homepage, /产品分类 · Products Categories/);
-  assert.match(fulfillmentCases, /近期成交与履约记录/);
-  assert.match(fulfillmentCases, /金额 \(USD\)/);
-  assert.match(fulfillmentCases, /个月时间范围/);
-  assert.doesNotMatch(fulfillmentCases, /当前为演示数据/);
-  assert.doesNotMatch(fulfillmentCases, /这些记录仅用于展示实时数据库结构/);
+  assert.match(ledger, /近期订单流程记录/);
+  assert.match(ledger, /示例履约流程数据/);
+  assert.match(ledger, /仅展示近 3 个月最多 100 条记录/);
+  assert.match(ledger, /Mexico/);
+  assert.match(ledger, /文件审核中/);
+  assert.match(ledger, /质量检测/);
+  assert.match(ledger, /已送达/);
   assert.match(fulfillmentPage, /返回网站/);
   assert.match(fulfillmentPage, /FulfillmentCases/);
   assert.match(homepage, /前往 WhatsApp 获取报价/);
@@ -85,35 +97,52 @@ test("includes complete multilingual content", async () => {
   );
 });
 
-test("configures durable recent fulfillment records", async () => {
-  const [hosting, route, generator, schema] = await Promise.all([
+test("configures a durable daily incremental ledger", async () => {
+  const [hosting, route, generator, schema, database] = await Promise.all([
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/fulfillment-cases/route.ts", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/fulfillment-cases/generator.ts", import.meta.url), "utf8"),
+    readFile(
+      new URL("../app/api/fulfillment-cases/route.ts", import.meta.url),
+      "utf8",
+    ),
+    readFile(
+      new URL("../app/api/fulfillment-cases/generator.ts", import.meta.url),
+      "utf8",
+    ),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../db/index.ts", import.meta.url), "utf8"),
   ]);
 
   assert.equal(JSON.parse(hosting).d1, "DB");
-  assert.match(route, /DISPLAY_LIMIT = 100/);
-  assert.match(route, /UPDATE_INTERVAL_DAYS = 7/);
-  assert.match(generator, /GENERATOR_VERSION = 5/);
-  assert.match(route, /cycleKey/);
-  assert.match(generator, /SERVICE_PROFILES/);
-  assert.match(generator, /3,000\+ kits/);
+  assert.match(generator, /DISPLAY_LIMIT = 100/);
+  assert.match(generator, /UPDATE_INTERVAL_DAYS = 1/);
+  assert.match(generator, /LEDGER_VERSION = "daily-v1"/);
+  assert.match(generator, /createBackfillRows/);
+  assert.match(generator, /createDailyRows/);
   assert.match(generator, /currentFulfillmentStatus/);
-  assert.match(generator, /ageDays >= 14/);
-  assert.match(generator, /ageDays >= 4/);
+  assert.match(generator, /documentation_review/);
+  assert.match(generator, /quality_control/);
+  assert.match(generator, /packaging/);
+  assert.match(generator, /Mexico/);
+  assert.match(route, /clearPreviousHistoryOnce/);
+  assert.match(route, /LAST_GENERATED_KEY/);
+  assert.match(route, /DELETE FROM fulfillment_cases/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
-  assert.match(schema, /fulfillment_cases/);
-  assert.match(schema, /amount_usd_cents/);
-  assert.match(schema, /cycle_key/);
+  assert.doesNotMatch(route, /eq\(fulfillmentCases\.cycleKey/);
+  assert.match(schema, /fulfillment_ledger_meta/);
+  assert.match(schema, /product_name/);
+  assert.match(schema, /quantity_units/);
+  assert.match(schema, /unit_price_usd_cents/);
+  assert.match(schema, /packaging_fee_usd_cents/);
+  assert.match(schema, /testing_fee_usd_cents/);
+  assert.match(schema, /logistics_fee_usd_cents/);
+  assert.match(database, /CREATE TABLE IF NOT EXISTS fulfillment_ledger_meta/);
 });
 
 test("renders the dedicated fulfillment page", async () => {
   const response = await render("/fulfillment");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Recent fulfillment activity/i);
+  assert.match(html, /Recent workflow activity/i);
   assert.match(html, /Loading recent records/i);
   assert.match(html, /Back to website/i);
   assert.match(html, /wa\.me\/19863059927/i);

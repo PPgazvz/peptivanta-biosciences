@@ -63,6 +63,8 @@ responseTime: "Within one business day",
 - `site.config.ts` — WhatsApp、邮箱、品牌和公司资料
 - `app/page.tsx` — 首页内容、多语言文字和产品目录
 - `app/globals.css` — 字体、颜色、版式和手机端样式
+- `app/ledger.css` — 履约台账的表格、提示和状态样式
+- `app/api/fulfillment-cases/generator.ts` — 每日订单结构、金额和状态推进规则
 - `public/images` — 网站照片素材
 - `app/privacy`、`app/terms`、`app/compliance` — 合规与法律页面
 
@@ -108,8 +110,11 @@ D1 数据库 ID 属于创建它的 Cloudflare 账号，不能跨账号共用。�
 4. 在 `site.config.ts` 修改朋友自己的 WhatsApp 和邮箱。
 5. 再按上面的构建、部署命令连接 GitHub。
 
-第一次访问“近期成交与履约”页面时，程序会在新 D1 中自动创建数据表，
-并生成该周固定的 100 条记录。记录每 7 天进入新周期，同一周期内不会乱跳。
+第一次访问履约页面时，程序会在新 D1 中建立最近三个月、最多 100 条的
+示例履约台账。之后每天只增量补充新日期的数据，已有记录不会每周整体更换；
+状态根据真实经过的工作日从订单确认、文件审核、生产、质检、包装、发运推进到
+送达。页面必须保留“示例履约流程数据”的提示，不应把系统生成数据描述为真实
+客户成交证明。
 
 > 不要把 `peptivanta.com` 当前的 D1 ID直接用于朋友的 Cloudflare 账号，
 > 否则部署会因账号不匹配而失败。

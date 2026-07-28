@@ -1,48 +1,183 @@
-export const GENERATOR_VERSION = 5;
+export const LEDGER_VERSION = "daily-v1";
+export const DISPLAY_LIMIT = 100;
+export const UPDATE_INTERVAL_DAYS = 1;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type FulfillmentService = "catalogue" | "private_label" | "bulk" | "custom";
-export type FulfillmentStatus = "completed" | "dispatched" | "in_production";
+export type FulfillmentMarket =
+  | "United States"
+  | "Canada"
+  | "Brazil"
+  | "Mexico";
 
-type OrderProfile = {
+export type FulfillmentService =
+  | "catalogue"
+  | "private_label"
+  | "bulk"
+  | "custom";
+
+export type FulfillmentStatus =
+  | "confirmed"
+  | "documentation_review"
+  | "in_production"
+  | "quality_control"
+  | "packaging"
+  | "dispatched"
+  | "delivered";
+
+type Weighted<T> = T & { weight: number };
+
+type QuantityProfile = Weighted<{
   label: string;
   minimum: number;
   maximum: number;
+}>;
+
+type Product = Weighted<{
+  name: string;
+  specification: string;
+  unitPriceUsdCents: number;
+}>;
+
+export type GenerationContext = {
+  lastBulkAt: string | null;
+  lastMegaBulkAt: string | null;
+};
+
+export type GeneratedFulfillmentRow = {
+  reference: string;
+  occurredAt: string;
+  destination: FulfillmentMarket;
+  service: FulfillmentService;
+  orderProfile: string;
+  productName: string;
+  specification: string;
+  quantityUnits: number;
+  unitPriceUsdCents: number;
+  packagingFeeUsdCents: number;
+  testingFeeUsdCents: number;
+  logisticsFeeUsdCents: number;
+  amountUsdCents: number;
+  status: FulfillmentStatus;
+  cycleKey: string;
+  isSample: true;
+  isPublished: true;
 };
 
 /**
- * Quantity and value bands are tied to the selected service.
- *
- * Keeping these profiles service-specific prevents combinations such as
- * "Bulk supply / 10–50 kits". Bulk supply always starts at 500 kits, while
- * catalogue and custom work may use smaller commercial or pilot quantities.
+ * Profiles are weighted within each service. Small catalogue and pilot orders
+ * are intentionally common; high-volume orders are intentionally rare.
  */
 export const SERVICE_PROFILES = {
   catalogue: [
-    { label: "10–50 kits", minimum: 2500, maximum: 12000 },
-    { label: "50–100 kits", minimum: 7000, maximum: 25000 },
+    { label: "10–50 kits", minimum: 10, maximum: 50, weight: 72 },
+    { label: "50–100 kits", minimum: 51, maximum: 100, weight: 28 },
   ],
   private_label: [
-    { label: "100–300 kits", minimum: 15000, maximum: 45000 },
-    { label: "300–500 kits", minimum: 25000, maximum: 70000 },
-    { label: "500–1,000 kits", minimum: 40000, maximum: 110000 },
+    { label: "100–300 kits", minimum: 100, maximum: 300, weight: 64 },
+    { label: "300–500 kits", minimum: 301, maximum: 500, weight: 28 },
+    { label: "500–1,000 kits", minimum: 501, maximum: 1000, weight: 8 },
   ],
   bulk: [
-    { label: "500–1,000 kits", minimum: 35000, maximum: 95000 },
-    { label: "1,000–3,000 kits", minimum: 80000, maximum: 230000 },
-    { label: "3,000+ kits", minimum: 180000, maximum: 480000 },
+    { label: "500–1,000 kits", minimum: 500, maximum: 1000, weight: 73 },
+    { label: "1,000–3,000 kits", minimum: 1001, maximum: 3000, weight: 23 },
+    { label: "3,000+ kits", minimum: 3001, maximum: 4800, weight: 4 },
   ],
   custom: [
-    { label: "Pilot order", minimum: 4000, maximum: 15000 },
-    { label: "10–50 kits", minimum: 10000, maximum: 28000 },
-    { label: "50–100 kits", minimum: 18000, maximum: 52000 },
-    { label: "100–300 kits", minimum: 40000, maximum: 100000 },
+    { label: "Pilot order", minimum: 5, maximum: 20, weight: 43 },
+    { label: "10–50 kits", minimum: 21, maximum: 50, weight: 34 },
+    { label: "50–100 kits", minimum: 51, maximum: 100, weight: 18 },
+    { label: "100–300 kits", minimum: 101, maximum: 300, weight: 5 },
   ],
-} as const satisfies Record<FulfillmentService, readonly OrderProfile[]>;
+} as const satisfies Record<
+  FulfillmentService,
+  readonly QuantityProfile[]
+>;
+
+const MARKET_WEIGHTS: readonly Weighted<{ value: FulfillmentMarket }>[] = [
+  { value: "United States", weight: 48 },
+  { value: "Canada", weight: 25 },
+  { value: "Brazil", weight: 17 },
+  { value: "Mexico", weight: 10 },
+];
+
+const SERVICE_WEIGHTS: Record<
+  FulfillmentMarket,
+  readonly Weighted<{ value: FulfillmentService }>[]
+> = {
+  "United States": [
+    { value: "catalogue", weight: 67 },
+    { value: "private_label", weight: 14 },
+    { value: "custom", weight: 14 },
+    { value: "bulk", weight: 5 },
+  ],
+  Canada: [
+    { value: "catalogue", weight: 71 },
+    { value: "private_label", weight: 13 },
+    { value: "custom", weight: 12 },
+    { value: "bulk", weight: 4 },
+  ],
+  Brazil: [
+    { value: "catalogue", weight: 57 },
+    { value: "private_label", weight: 18 },
+    { value: "custom", weight: 17 },
+    { value: "bulk", weight: 8 },
+  ],
+  Mexico: [
+    { value: "catalogue", weight: 64 },
+    { value: "private_label", weight: 14 },
+    { value: "custom", weight: 16 },
+    { value: "bulk", weight: 6 },
+  ],
+};
+
+const CATALOGUE_PRODUCTS: readonly Product[] = [
+  { name: "BPC-157", specification: "5 mg · 10 vials", unitPriceUsdCents: 7425, weight: 19 },
+  { name: "TB-500", specification: "10 mg · 10 vials", unitPriceUsdCents: 8660, weight: 14 },
+  { name: "CJC-1295", specification: "5 mg · 10 vials", unitPriceUsdCents: 9875, weight: 12 },
+  { name: "Ipamorelin", specification: "10 mg · 10 vials", unitPriceUsdCents: 7215, weight: 12 },
+  { name: "MOTS-C", specification: "20 mg · 10 vials", unitPriceUsdCents: 12940, weight: 9 },
+  { name: "GHK-Cu", specification: "50 mg · 10 vials", unitPriceUsdCents: 5830, weight: 9 },
+  { name: "Semaglutide", specification: "5 mg · 10 vials", unitPriceUsdCents: 9580, weight: 10 },
+  { name: "Tirzepatide", specification: "10 mg · 10 vials", unitPriceUsdCents: 14850, weight: 9 },
+  { name: "Retatrutide", specification: "10 mg · 10 vials", unitPriceUsdCents: 17530, weight: 6 },
+];
+
+const CUSTOM_PRODUCTS: readonly Product[] = [
+  {
+    name: "Custom peptide sequence",
+    specification: "Specification-led pilot lot",
+    unitPriceUsdCents: 21450,
+    weight: 42,
+  },
+  {
+    name: "Custom vial configuration",
+    specification: "Lyophilized · customer-defined strength",
+    unitPriceUsdCents: 18675,
+    weight: 34,
+  },
+  {
+    name: "Multi-peptide configuration",
+    specification: "Customer-defined composition",
+    unitPriceUsdCents: 23780,
+    weight: 24,
+  },
+];
 
 function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
+}
+
+function startOfUtcDay(date: Date) {
+  const result = new Date(date);
+  result.setUTCHours(0, 0, 0, 0);
+  return result;
+}
+
+function addUtcDays(date: Date, days: number) {
+  const result = startOfUtcDay(date);
+  result.setUTCDate(result.getUTCDate() + days);
+  return result;
 }
 
 function hashSeed(value: string) {
@@ -65,163 +200,428 @@ function createSeededRandom(seed: number) {
   };
 }
 
-/**
- * Resolve a weekly snapshot status from age and genuine order scale.
- *
- * Normal orders leave production after 3–4 days. Bulk orders use scale-aware
- * thresholds, and even the 3,000+ tier leaves production by day six.
- */
-function requiredStatusForAge(
-  ageDays: number,
-  service: FulfillmentService,
-  orderProfile: string,
-): FulfillmentStatus | null {
-  if (service === "bulk" && orderProfile === "3,000+ kits") {
-    if (ageDays >= 14) return "completed";
-    if (ageDays >= 6) return "dispatched";
-    return null;
+function pickWeighted<T extends { weight: number }>(
+  values: readonly T[],
+  random: () => number,
+) {
+  const total = values.reduce((sum, item) => sum + item.weight, 0);
+  let draw = random() * total;
+  for (const item of values) {
+    draw -= item.weight;
+    if (draw <= 0) return item;
   }
-
-  if (service === "bulk" && orderProfile === "1,000–3,000 kits") {
-    if (ageDays >= 12) return "completed";
-    if (ageDays >= 5) return "dispatched";
-    return null;
-  }
-
-  if (service === "bulk") {
-    if (ageDays >= 9) return "completed";
-    if (ageDays >= 4) return "dispatched";
-    return null;
-  }
-
-  if (service === "private_label" || service === "custom") {
-    if (ageDays >= 8) return "completed";
-    if (ageDays >= 4) return "dispatched";
-    return null;
-  }
-
-  if (ageDays >= 6) return "completed";
-  if (ageDays >= 3) return "dispatched";
-  return null;
+  return values[values.length - 1];
 }
 
-export function fulfillmentStatus({
-  occurredAt,
-  service,
-  orderProfile,
-  cycleStart,
-  random,
-}: {
-  occurredAt: Date;
-  service: FulfillmentService;
-  orderProfile: string;
-  cycleStart: Date;
-  random: () => number;
-}): FulfillmentStatus {
-  const ageAtSnapshotDays = Math.max(
-    0,
-    Math.floor((cycleStart.getTime() - occurredAt.getTime()) / DAY_MS),
+function randomInteger(minimum: number, maximum: number, random: () => number) {
+  return minimum + Math.floor(random() * (maximum - minimum + 1));
+}
+
+function daysBetween(left: string | null, right: Date) {
+  if (!left) return Number.POSITIVE_INFINITY;
+  return Math.floor(
+    (startOfUtcDay(right).getTime() - Date.parse(`${left}T00:00:00.000Z`)) /
+      DAY_MS,
   );
+}
+
+const QUIET_DATES = new Set([
+  "01-01",
+  "07-01",
+  "07-04",
+  "09-07",
+  "09-16",
+  "12-25",
+]);
+
+function dailyOrderCount(date: Date, random: () => number) {
+  const day = date.getUTCDay();
+  const monthDay = isoDate(date).slice(5);
+
+  if (day === 0 || day === 6) {
+    return random() < 0.07 ? 1 : 0;
+  }
+
+  if (QUIET_DATES.has(monthDay)) {
+    return random() < 0.2 ? 1 : 0;
+  }
+
   const draw = random();
-  const requiredStatus = requiredStatusForAge(
-    ageAtSnapshotDays,
-    service,
-    orderProfile,
-  );
-
-  if (requiredStatus) {
-    return requiredStatus;
+  if (day === 1) {
+    if (draw < 0.12) return 0;
+    if (draw < 0.62) return 1;
+    if (draw < 0.92) return 2;
+    return 3;
   }
 
-  if (service === "bulk" && orderProfile === "3,000+ kits") {
-    if (draw < 0.08) return "completed";
-    if (draw < 0.28) return "dispatched";
-    return "in_production";
+  if (day >= 2 && day <= 4) {
+    if (draw < 0.05) return 0;
+    if (draw < 0.4) return 1;
+    if (draw < 0.82) return 2;
+    return 3;
   }
 
+  if (draw < 0.18) return 0;
+  if (draw < 0.75) return 1;
+  if (draw < 0.96) return 2;
+  return 3;
+}
+
+function serviceProduct(
+  service: FulfillmentService,
+  random: () => number,
+) {
+  if (service === "custom") {
+    return pickWeighted(CUSTOM_PRODUCTS, random);
+  }
+  return pickWeighted(CATALOGUE_PRODUCTS, random);
+}
+
+function serviceSpecification(
+  service: FulfillmentService,
+  product: Product,
+) {
+  if (service === "private_label") {
+    return `${product.specification} · private-label packaging`;
+  }
   if (service === "bulk") {
-    if (draw < 0.12) return "completed";
-    if (draw < 0.38) return "dispatched";
-    return "in_production";
+    return `${product.specification} · commercial lot`;
+  }
+  return product.specification;
+}
+
+function servicePriceMultiplier(
+  service: FulfillmentService,
+  quantity: number,
+) {
+  if (service === "private_label") return 0.94;
+  if (service === "custom") return 1.18;
+  if (service === "bulk") {
+    if (quantity > 3000) return 0.64;
+    if (quantity > 1000) return 0.72;
+    return 0.8;
+  }
+  return quantity > 50 ? 0.96 : 1;
+}
+
+function orderFees(
+  service: FulfillmentService,
+  destination: FulfillmentMarket,
+  quantity: number,
+  random: () => number,
+) {
+  const packagingRanges: Record<FulfillmentService, [number, number]> = {
+    catalogue: [4500, 18000],
+    private_label: [50000, 180000],
+    bulk: [25000, 120000],
+    custom: [35000, 140000],
+  };
+  const logisticsBase: Record<FulfillmentMarket, [number, number]> = {
+    "United States": [18000, 68000],
+    Canada: [22000, 82000],
+    Brazil: [45000, 165000],
+    Mexico: [30000, 110000],
+  };
+  const [packagingMinimum, packagingMaximum] = packagingRanges[service];
+  const [logisticsMinimum, logisticsMaximum] = logisticsBase[destination];
+  const packagingFeeUsdCents = randomInteger(
+    packagingMinimum,
+    packagingMaximum,
+    random,
+  );
+  const testingFeeUsdCents =
+    random() < (service === "catalogue" ? 0.38 : 0.72)
+      ? randomInteger(18500, service === "bulk" ? 125000 : 78000, random)
+      : 0;
+  const logisticsFeeUsdCents =
+    randomInteger(logisticsMinimum, logisticsMaximum, random) +
+    Math.round(quantity * (service === "bulk" ? 23 : 61));
+
+  return {
+    packagingFeeUsdCents,
+    testingFeeUsdCents,
+    logisticsFeeUsdCents,
+  };
+}
+
+function createOrder(
+  date: Date,
+  index: number,
+  context: GenerationContext,
+  random: () => number,
+  forcedService?: FulfillmentService,
+) {
+  const destination = pickWeighted(MARKET_WEIGHTS, random).value;
+  let service =
+    forcedService ?? pickWeighted(SERVICE_WEIGHTS[destination], random).value;
+
+  // Keep high-volume orders spaced apart. A blocked bulk draw becomes the
+  // common catalogue workflow rather than being silently dropped.
+  if (service === "bulk" && daysBetween(context.lastBulkAt, date) < 9) {
+    service = "catalogue";
   }
 
-  if (service === "private_label" || service === "custom") {
-    if (draw < 0.08) return "completed";
-    if (draw < 0.42) return "dispatched";
-    return "in_production";
+  const profiles = SERVICE_PROFILES[service];
+  let profile = pickWeighted(profiles, random);
+  if (
+    service === "bulk" &&
+    profile.label === "3,000+ kits" &&
+    daysBetween(context.lastMegaBulkAt, date) < 30
+  ) {
+    profile = profiles[0];
   }
 
-  if (draw < 0.15) return "completed";
-  if (draw < 0.65) return "dispatched";
-  return "in_production";
+  const quantityUnits = randomInteger(profile.minimum, profile.maximum, random);
+  const product = serviceProduct(service, random);
+  const priceVariation = 0.96 + random() * 0.08;
+  const unitPriceUsdCents = Math.max(
+    1,
+    Math.round(
+      product.unitPriceUsdCents *
+        servicePriceMultiplier(service, quantityUnits) *
+        priceVariation,
+    ),
+  );
+  const fees = orderFees(service, destination, quantityUnits, random);
+  const amountUsdCents =
+    quantityUnits * unitPriceUsdCents +
+    fees.packagingFeeUsdCents +
+    fees.testingFeeUsdCents +
+    fees.logisticsFeeUsdCents;
+  const dateKey = isoDate(date);
+  const marketCode: Record<FulfillmentMarket, string> = {
+    "United States": "US",
+    Canada: "CA",
+    Brazil: "BR",
+    Mexico: "MX",
+  };
+  const serviceCode: Record<FulfillmentService, string> = {
+    catalogue: "C",
+    private_label: "P",
+    bulk: "B",
+    custom: "X",
+  };
+  const checksum = String(10 + Math.floor(random() * 90));
+
+  const row: GeneratedFulfillmentRow = {
+    reference: `PV-${dateKey.replaceAll("-", "")}-${marketCode[destination]}${serviceCode[service]}-${String(index + 1).padStart(2, "0")}${checksum}`,
+    occurredAt: dateKey,
+    destination,
+    service,
+    orderProfile: profile.label,
+    productName: product.name,
+    specification: serviceSpecification(service, product),
+    quantityUnits,
+    unitPriceUsdCents,
+    ...fees,
+    amountUsdCents,
+    status: "confirmed",
+    cycleKey: `${LEDGER_VERSION}:${dateKey}`,
+    isSample: true,
+    isPublished: true,
+  };
+
+  const nextContext = { ...context };
+  if (service === "bulk") {
+    nextContext.lastBulkAt = dateKey;
+    if (profile.label === "3,000+ kits") {
+      nextContext.lastMegaBulkAt = dateKey;
+    }
+  }
+
+  return { row, context: nextContext };
+}
+
+export function createDailyRows(
+  date: Date,
+  context: GenerationContext = {
+    lastBulkAt: null,
+    lastMegaBulkAt: null,
+  },
+) {
+  const orderDate = startOfUtcDay(date);
+  const random = createSeededRandom(
+    hashSeed(`peptivanta-${LEDGER_VERSION}-${isoDate(orderDate)}`),
+  );
+  const count = dailyOrderCount(orderDate, random);
+  const rows: GeneratedFulfillmentRow[] = [];
+  let nextContext = { ...context };
+
+  for (let index = 0; index < count; index += 1) {
+    const result = createOrder(orderDate, index, nextContext, random);
+    rows.push(result.row);
+    nextContext = result.context;
+  }
+
+  return { rows, context: nextContext };
+}
+
+export function createBackfillRows(
+  count: number,
+  asOf: Date,
+) {
+  const end = startOfUtcDay(asOf);
+  const start = new Date(end);
+  start.setUTCMonth(start.getUTCMonth() - 3);
+  const rows: GeneratedFulfillmentRow[] = [];
+  let context: GenerationContext = {
+    lastBulkAt: null,
+    lastMegaBulkAt: null,
+  };
+
+  for (
+    let date = startOfUtcDay(start);
+    date.getTime() <= end.getTime();
+    date = addUtcDays(date, 1)
+  ) {
+    const result = createDailyRows(date, context);
+    rows.push(...result.rows);
+    context = result.context;
+  }
+
+  // The weighted workday schedule normally produces more than 100 rows. This
+  // fallback keeps a new empty database useful if a shorter window is requested.
+  let supplementIndex = 0;
+  while (rows.length < count) {
+    const date = addUtcDays(start, supplementIndex % 60);
+    const day = date.getUTCDay();
+    if (day !== 0 && day !== 6) {
+      const random = createSeededRandom(
+        hashSeed(`supplement-${LEDGER_VERSION}-${isoDate(date)}-${supplementIndex}`),
+      );
+      const result = createOrder(
+        date,
+        20 + supplementIndex,
+        context,
+        random,
+        "catalogue",
+      );
+      rows.push(result.row);
+      context = result.context;
+    }
+    supplementIndex += 1;
+  }
+
+  return rows
+    .sort(
+      (left, right) =>
+        left.occurredAt.localeCompare(right.occurredAt) ||
+        left.reference.localeCompare(right.reference),
+    )
+    .slice(-count);
+}
+
+const COUNTRY_HOLIDAYS: Record<FulfillmentMarket, ReadonlySet<string>> = {
+  "United States": new Set(["01-01", "07-04", "12-25"]),
+  Canada: new Set(["01-01", "07-01", "12-25"]),
+  Brazil: new Set(["01-01", "09-07", "12-25"]),
+  Mexico: new Set(["01-01", "09-16", "12-25"]),
+};
+
+function businessDaysBetween(
+  occurredAt: Date,
+  asOf: Date,
+  destination: FulfillmentMarket,
+) {
+  const end = startOfUtcDay(asOf);
+  let cursor = startOfUtcDay(occurredAt);
+  let count = 0;
+
+  while (cursor.getTime() < end.getTime()) {
+    cursor = addUtcDays(cursor, 1);
+    const day = cursor.getUTCDay();
+    const isWeekend = day === 0 || day === 6;
+    const isHoliday = COUNTRY_HOLIDAYS[destination].has(isoDate(cursor).slice(5));
+    if (!isWeekend && !isHoliday) count += 1;
+  }
+
+  return count;
+}
+
+function workflowDurations(
+  service: FulfillmentService,
+  quantityUnits: number,
+  destination: FulfillmentMarket,
+) {
+  const transitDays: Record<FulfillmentMarket, number> = {
+    "United States": 4,
+    Canada: 5,
+    Brazil: 9,
+    Mexico: 7,
+  };
+
+  if (service === "catalogue") {
+    return {
+      documentation: 2,
+      production: quantityUnits <= 50 ? 4 : 6,
+      quality: 2,
+      packaging: 1,
+      transit: transitDays[destination],
+    };
+  }
+  if (service === "private_label") {
+    return {
+      documentation: 4,
+      production: quantityUnits <= 300 ? 12 : quantityUnits <= 500 ? 16 : 20,
+      quality: 3,
+      packaging: 3,
+      transit: transitDays[destination],
+    };
+  }
+  if (service === "bulk") {
+    return {
+      documentation: 4,
+      production: quantityUnits <= 1000 ? 14 : quantityUnits <= 3000 ? 21 : 30,
+      quality: 4,
+      packaging: 3,
+      transit: transitDays[destination],
+    };
+  }
+  return {
+    documentation: 5,
+    production: quantityUnits <= 50 ? 10 : quantityUnits <= 100 ? 15 : 20,
+    quality: 3,
+    packaging: 2,
+    transit: transitDays[destination],
+  };
 }
 
 /**
- * Keep the generated order stable for seven days while allowing its visible
- * fulfillment state to advance with real elapsed time. The state can only move
- * forward: production -> dispatched -> completed.
+ * Visible status is derived from elapsed business days. It never uses a random
+ * draw, never skips ahead on a new order, and advances automatically each day.
  */
-export function currentFulfillmentStatus({
-  occurredAt,
-  service,
-  orderProfile,
-  storedStatus,
-  asOf,
-}: {
-  occurredAt: Date;
-  service: FulfillmentService;
-  orderProfile: string;
-  storedStatus: FulfillmentStatus;
-  asOf: Date;
-}): FulfillmentStatus {
-  const ageDays = Math.max(
-    0,
-    Math.floor((asOf.getTime() - occurredAt.getTime()) / DAY_MS),
+export function currentFulfillmentStatus(
+  record: Pick<
+    GeneratedFulfillmentRow,
+    "occurredAt" | "destination" | "service" | "quantityUnits"
+  >,
+  asOf: Date,
+): FulfillmentStatus {
+  const businessDays = businessDaysBetween(
+    new Date(`${record.occurredAt}T00:00:00.000Z`),
+    asOf,
+    record.destination,
   );
-  const requiredStatus = requiredStatusForAge(ageDays, service, orderProfile);
+  const duration = workflowDurations(
+    record.service,
+    record.quantityUnits,
+    record.destination,
+  );
 
-  if (requiredStatus === "completed") return "completed";
-  if (requiredStatus === "dispatched" && storedStatus === "in_production") {
-    return "dispatched";
-  }
-  return storedStatus;
-}
+  if (businessDays === 0) return "confirmed";
+  if (businessDays <= duration.documentation) return "documentation_review";
 
-export function createWeeklyRows(count: number, cycleStart: Date, cycleKey: string) {
-  const destinations = ["United States", "Canada", "Brazil"] as const;
-  const services = ["catalogue", "private_label", "bulk", "custom"] as const;
-  const random = createSeededRandom(hashSeed(`peptivanta-${cycleKey}`));
+  const productionEnd = duration.documentation + duration.production;
+  if (businessDays <= productionEnd) return "in_production";
 
-  return Array.from({ length: count }, (_, index) => {
-    const occurredAt = new Date(cycleStart);
-    occurredAt.setUTCDate(occurredAt.getUTCDate() - Math.floor(random() * 83));
-    const dateKey = isoDate(occurredAt).replaceAll("-", "");
-    const destination = destinations[Math.floor(random() * destinations.length)];
-    const service = services[Math.floor(random() * services.length)];
-    const profiles = SERVICE_PROFILES[service];
-    const profile = profiles[Math.floor(random() * profiles.length)];
-    const status = fulfillmentStatus({
-      occurredAt,
-      service,
-      orderProfile: profile.label,
-      cycleStart,
-      random,
-    });
-    const amountUsd = Math.round(
-      (profile.minimum + random() * (profile.maximum - profile.minimum)) / 10,
-    ) * 10;
+  const qualityEnd = productionEnd + duration.quality;
+  if (businessDays <= qualityEnd) return "quality_control";
 
-    return {
-      reference: `PV-${cycleKey.replaceAll("-", "")}-${dateKey}-${String(index + 1).padStart(3, "0")}`,
-      occurredAt: isoDate(occurredAt),
-      destination,
-      service,
-      orderProfile: profile.label,
-      amountUsdCents: amountUsd * 100,
-      status,
-      cycleKey,
-      isSample: true,
-      isPublished: true,
-    };
-  });
+  const packagingEnd = qualityEnd + duration.packaging;
+  if (businessDays <= packagingEnd) return "packaging";
+
+  const deliveryEnd = packagingEnd + duration.transit;
+  if (businessDays <= deliveryEnd) return "dispatched";
+
+  return "delivered";
 }
