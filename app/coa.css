@@ -81,7 +81,7 @@
 }
 
 .coa-filter-section {
-  padding-block: 78px 48px;
+  padding-block: 78px 0;
   border-top: 1px solid var(--line);
 }
 
@@ -227,11 +227,11 @@
 }
 
 .coa-gallery {
-  padding-block: 42px 92px;
+  padding-block: 0 92px;
 }
 
 .coa-product-group {
-  padding-block: 52px 82px;
+  padding-block: 28px 72px;
   border-top: 1px solid var(--line);
   content-visibility: auto;
   contain-intrinsic-size: 1100px;
@@ -735,7 +735,7 @@
   }
 
   .coa-filter-section {
-    padding-block: 64px 36px;
+    padding-block: 64px 0;
   }
 
   .coa-product-filters {
@@ -775,7 +775,7 @@
   }
 
   .coa-product-group {
-    padding-block: 42px 64px;
+    padding-block: 26px 60px;
   }
 
   .coa-product-heading {
