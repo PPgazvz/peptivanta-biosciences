@@ -164,7 +164,7 @@ test("renders the dedicated multilingual analytical report library", async () =>
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /Reports, organised/i);
-  assert.match(html, /Choose product categories/i);
+  assert.match(html, /Choose a product/i);
   assert.match(html, /All reports/i);
   assert.match(html, /Retatrutide/i);
   assert.match(html, /BPC-157/i);
@@ -181,6 +181,7 @@ test("renders the dedicated multilingual analytical report library", async () =>
   assert.match(source, /Bibliothèque de rapports analytiques/);
   assert.match(source, /View full report/);
   assert.match(source, /aria-modal="true"/);
+  assert.match(source, /setSelectedProduct\(\(current\) => current === product \? null : product\)/);
 });
 
 test("every published analytical report preview exists", async () => {

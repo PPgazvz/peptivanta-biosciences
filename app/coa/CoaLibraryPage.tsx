@@ -27,8 +27,8 @@ const pageCopy = {
       "Browse the analytical reports currently on file. Every report is displayed directly on this page and grouped by product, so professional buyers can review the available document coverage before requesting a batch-matched file.",
     filesLabel: "reports displayed",
     productsLabel: "product groups",
-    filterTitle: "Choose product categories",
-    filterHint: "Select one or several product names to switch the report list instantly.",
+    filterTitle: "Choose a product",
+    filterHint: "Select a product name to show its reports. Choosing another product replaces the previous selection.",
     all: "All reports",
     search: "Search a product or strength",
     searchLabel: "Search analytical reports",
@@ -58,8 +58,8 @@ const pageCopy = {
       "Consulte os relatórios analíticos atualmente arquivados. Cada relatório aparece diretamente nesta página e é agrupado por produto para facilitar a revisão antes de solicitar o documento correspondente ao lote.",
     filesLabel: "relatórios exibidos",
     productsLabel: "grupos de produtos",
-    filterTitle: "Escolha as categorias de produto",
-    filterHint: "Selecione um ou vários nomes para alternar a lista imediatamente.",
+    filterTitle: "Escolha um produto",
+    filterHint: "Selecione um produto para ver os relatórios. Uma nova escolha substitui a anterior.",
     all: "Todos os relatórios",
     search: "Buscar produto ou concentração",
     searchLabel: "Buscar relatórios analíticos",
@@ -89,8 +89,8 @@ const pageCopy = {
       "Consulte los informes analíticos archivados actualmente. Cada informe se muestra directamente en esta página y está agrupado por producto para facilitar la revisión antes de solicitar el documento del lote.",
     filesLabel: "informes mostrados",
     productsLabel: "grupos de productos",
-    filterTitle: "Elija categorías de producto",
-    filterHint: "Seleccione uno o varios nombres para cambiar la lista al instante.",
+    filterTitle: "Elija un producto",
+    filterHint: "Seleccione un producto para ver sus informes. Una nueva elección sustituye la anterior.",
     all: "Todos los informes",
     search: "Buscar producto o concentración",
     searchLabel: "Buscar informes analíticos",
@@ -120,8 +120,8 @@ const pageCopy = {
       "Consultez les rapports analytiques actuellement archivés. Chaque rapport est affiché directement sur cette page et regroupé par produit afin de faciliter l’examen avant de demander le document correspondant au lot.",
     filesLabel: "rapports affichés",
     productsLabel: "groupes de produits",
-    filterTitle: "Choisissez les catégories de produits",
-    filterHint: "Sélectionnez un ou plusieurs noms pour modifier instantanément la liste.",
+    filterTitle: "Choisissez un produit",
+    filterHint: "Sélectionnez un produit pour afficher ses rapports. Un nouveau choix remplace le précédent.",
     all: "Tous les rapports",
     search: "Rechercher un produit ou un dosage",
     searchLabel: "Rechercher des rapports analytiques",
@@ -151,8 +151,8 @@ const pageCopy = {
       "这里直接展示目前已整理的检测报告，并按照产品名称分组。专业采购客户可以先查看现有文件覆盖情况，再联系我们核对当前批次所对应的报告。",
     filesLabel: "份检测报告",
     productsLabel: "个产品分类",
-    filterTitle: "选择产品品类",
-    filterHint: "可以同时选择一个或多个产品名称，报告列表会立即切换。",
+    filterTitle: "选择一个产品",
+    filterHint: "点击产品名称后只显示该产品报告；点击另一个产品时会自动替换原来的选择。",
     all: "全部报告",
     search: "搜索产品或规格",
     searchLabel: "搜索检测报告",
@@ -248,7 +248,7 @@ function ReportCard({
 export default function CoaLibraryPage() {
   const [locale, setLocale] = useState<SiteLocale>("en");
   const [query, setQuery] = useState("");
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [activeDocument, setActiveDocument] = useState<CoaDocument | null>(null);
   const t = pageCopy[locale];
 
@@ -282,15 +282,15 @@ export default function CoaLibraryPage() {
     const normalized = query.trim().toLowerCase();
     return coaDocuments.filter((document) => {
       const productMatch =
-        selectedProducts.length === 0 ||
-        selectedProducts.includes(document.product);
+        selectedProduct === null ||
+        selectedProduct === document.product;
       const queryMatch =
         !normalized ||
         document.product.toLowerCase().includes(normalized) ||
         document.strength.toLowerCase().includes(normalized);
       return productMatch && queryMatch;
     });
-  }, [query, selectedProducts]);
+  }, [query, selectedProduct]);
 
   const groupedDocuments = useMemo(() => {
     return coaProductOptions
@@ -302,11 +302,7 @@ export default function CoaLibraryPage() {
   }, [filteredDocuments]);
 
   function toggleProduct(product: string) {
-    setSelectedProducts((current) =>
-      current.includes(product)
-        ? current.filter((item) => item !== product)
-        : [...current, product],
-    );
+    setSelectedProduct((current) => current === product ? null : product);
   }
 
   return (
@@ -374,14 +370,14 @@ export default function CoaLibraryPage() {
         <div className="coa-product-filters" aria-label={t.filterTitle}>
           <button
             type="button"
-            className={selectedProducts.length === 0 ? "is-active" : ""}
-            aria-pressed={selectedProducts.length === 0}
-            onClick={() => setSelectedProducts([])}
+            className={selectedProduct === null ? "is-active" : ""}
+            aria-pressed={selectedProduct === null}
+            onClick={() => setSelectedProduct(null)}
           >
             {t.all}<span>{coaDocuments.length}</span>
           </button>
           {coaProductOptions.map(({ product, count }) => {
-            const active = selectedProducts.includes(product);
+            const active = selectedProduct === product;
             return (
               <button
                 type="button"
@@ -399,11 +395,11 @@ export default function CoaLibraryPage() {
         <div className="coa-filter-summary" aria-live="polite">
           <strong>{filteredDocuments.length}</strong>
           <span>{filteredDocuments.length === 1 ? t.report : t.reports}</span>
-          {selectedProducts.length > 0 && (
+          {selectedProduct !== null && (
             <>
               <span className="coa-summary-divider">·</span>
-              <span>{selectedProducts.length} {t.selected}</span>
-              <button type="button" onClick={() => setSelectedProducts([])}>
+              <span>{selectedProduct}</span>
+              <button type="button" onClick={() => setSelectedProduct(null)}>
                 {t.clear}
               </button>
             </>
@@ -445,7 +441,7 @@ export default function CoaLibraryPage() {
               type="button"
               onClick={() => {
                 setQuery("");
-                setSelectedProducts([]);
+                setSelectedProduct(null);
               }}
             >
               {t.clear}
