@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import CoaLibraryPage from "./CoaLibraryPage";
 
 export const metadata: Metadata = {
-  title: "COA Documents",
+  title: "Analytical Report Library",
   description:
-    "Review current COA document coverage by peptide family and request a product-, specification-, and batch-matched document.",
+    "Browse peptide analytical reports organised by product name, then request the document matched to the current specification and batch.",
 };
 
 export default function CoaPage() {

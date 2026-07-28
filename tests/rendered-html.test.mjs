@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
 async function render(pathname = "/") {
@@ -159,24 +159,45 @@ test("renders the dedicated fulfillment page", async () => {
   assert.match(html, /wa\.me\/19863059927/i);
 });
 
-test("renders the dedicated multilingual COA index", async () => {
+test("renders the dedicated multilingual analytical report library", async () => {
   const response = await render("/coa");
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Find the right COA/i);
-  assert.match(html, /Direct match found/i);
-  assert.match(html, /Acetyl Hexapeptide-8/i);
-  assert.match(html, /One report should never stand in for every lot/i);
+  assert.match(html, /Reports, organised/i);
+  assert.match(html, /Choose product categories/i);
+  assert.match(html, /All reports/i);
+  assert.match(html, /Retatrutide/i);
+  assert.match(html, /BPC-157/i);
+  assert.match(html, /101.*reports displayed/is);
   assert.match(html, /wa\.me\/19863059927/i);
 
   const source = await readFile(
     new URL("../app/coa/CoaLibraryPage.tsx", import.meta.url),
     "utf8",
   );
-  assert.match(source, /先找到对应 COA/);
-  assert.match(source, /COAs e relatórios analíticos/);
-  assert.match(source, /Los COA e informes analíticos/);
-  assert.match(source, /Les COA et rapports analytiques/);
+  assert.match(source, /检测报告按/);
+  assert.match(source, /Biblioteca de relatórios analíticos/);
+  assert.match(source, /Biblioteca de informes analíticos/);
+  assert.match(source, /Bibliothèque de rapports analytiques/);
+  assert.match(source, /View full report/);
+  assert.match(source, /aria-modal="true"/);
+});
+
+test("every published analytical report preview exists", async () => {
+  const source = await readFile(
+    new URL("../app/coa/coa-documents.generated.ts", import.meta.url),
+    "utf8",
+  );
+  const previewHrefs = [
+    ...source.matchAll(/"previewHref": "([^"]+)"/g),
+  ].map((match) => match[1]);
+
+  assert.equal(previewHrefs.length, 101);
+  assert.equal(new Set(previewHrefs).size, previewHrefs.length);
+
+  for (const href of previewHrefs) {
+    await access(new URL(`../public${href}`, import.meta.url));
+  }
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {

@@ -10,276 +10,246 @@ import {
   LOCALE_STORAGE_KEY,
   type SiteLocale,
 } from "../i18n";
-
-type CoverageStatus = "direct" | "blend" | "gap";
-
-type CoaProduct = {
-  product: string;
-  coverage: string;
-  status: CoverageStatus;
-};
-
-const coaProducts: CoaProduct[] = [
-  { product: "Retatrutide", coverage: "5 / 10 / 15 / 20 / 30 mg", status: "direct" },
-  { product: "Tirzepatide", coverage: "10 / 15 / 30 / 60 mg", status: "direct" },
-  { product: "Semaglutide", coverage: "5 / 10 / 30 mg", status: "direct" },
-  { product: "BPC-157", coverage: "5 / 10 / 20 mg", status: "direct" },
-  { product: "TB-500", coverage: "10 mg · BPC-157 blend", status: "direct" },
-  { product: "CJC-1295", coverage: "CJC / Ipamorelin blend only", status: "blend" },
-  { product: "Ipamorelin", coverage: "10 mg · CJC blend", status: "direct" },
-  { product: "MOTS-C", coverage: "10 / 40 mg", status: "direct" },
-  { product: "GHK-Cu", coverage: "50 / 100 mg · raw material", status: "direct" },
-  { product: "Acetyl Hexapeptide-8", coverage: "No direct match in current index", status: "gap" },
-];
-
-const additionalFamilies = [
-  "5-Amino-1MQ",
-  "AHK-Cu",
-  "AOD-9604",
-  "Cagrilintide",
-  "DSIP",
-  "Epithalon",
-  "Glow blend",
-  "Glutathione",
-  "HCG",
-  "HGH / Somatropin",
-  "IGF-LR3",
-  "KLOW",
-  "KPV",
-  "Melanotan-2",
-  "NAD+",
-  "PT-141",
-  "Selank",
-  "Semax",
-  "Sermorelin",
-  "SS-31",
-  "Tesamorelin",
-  "Thymosin Alpha-1",
-  "Thymosin Beta-4",
-];
+import {
+  coaDocuments,
+  coaProductOptions,
+  type CoaDocument,
+} from "./coa-documents.generated";
 
 const pageCopy = {
   en: {
     back: "Back to website",
     language: "Language",
-    eyebrow: "Analytical document index",
-    titleA: "Find the right COA.",
-    titleB: "Then match the batch.",
+    eyebrow: "Analytical report library",
+    titleA: "Reports, organised",
+    titleB: "by product name.",
     intro:
-      "This index shows current document coverage by product family. The applicable report is confirmed against the requested specification, source, and batch before it is shared.",
-    metrics: ["catalogue families mapped", "direct document matches", "standalone match to confirm"],
-    search: "Search product or specification",
-    searchLabel: "Search the COA index",
-    tableProduct: "Product",
-    tableCoverage: "Current document coverage",
-    tableStatus: "Index status",
-    tableAction: "Request",
-    statuses: {
-      direct: "Direct match found",
-      blend: "Blend document only",
-      gap: "Match to confirm",
-    },
-    request: "Request matched COA",
-    empty: "No matching product found.",
-    additionalTag: "Additional document families",
-    additionalTitle: "A broader analytical archive is available by request.",
-    additionalText:
-      "These families appear in the reviewed archive but are outside the selected public catalogue. Availability and suitability still require individual review.",
-    methodTag: "Document matching",
-    methodTitle: "One report should never stand in for every lot.",
-    steps: [
-      ["01", "Confirm identity", "Match the exact product name, blend composition, and requested strength."],
-      ["02", "Confirm source and batch", "Review the report date, laboratory, lot or batch reference, and sample identity."],
-      ["03", "Share the applicable file", "Provide the document that corresponds to the available supply, not a generic substitute."],
-    ],
+      "Browse the analytical reports currently on file. Every report is displayed directly on this page and grouped by product, so professional buyers can review the available document coverage before requesting a batch-matched file.",
+    filesLabel: "reports displayed",
+    productsLabel: "product groups",
+    filterTitle: "Choose product categories",
+    filterHint: "Select one or several product names to switch the report list instantly.",
+    all: "All reports",
+    search: "Search a product or strength",
+    searchLabel: "Search analytical reports",
+    selected: "selected",
+    clear: "Clear selection",
+    report: "report",
+    reports: "reports",
+    imageReport: "Image report",
+    pdfReport: "PDF report preview",
+    view: "View full report",
+    close: "Close report",
+    empty: "No reports match the current selection.",
     notice:
-      "COAs and analytical reports are batch- and sample-specific. Inclusion in this index does not establish regulatory approval, destination eligibility, or suitability for human or veterinary use.",
-    ctaTitle: "Need a product-specific document check?",
+      "These are sample- or batch-specific analytical reports. A report shown here must not be treated as proof for every lot. Ask us to confirm the product, specification, current batch, and matching document before procurement.",
+    ctaTitle: "Need the report for a current batch?",
     ctaText:
-      "Send the product, specification, destination, and intended professional use. We will confirm which current document can be matched.",
+      "Send the product name, specification, destination, and intended professional use. We will check the current supply against the applicable report.",
     cta: "Check on WhatsApp",
   },
   pt: {
     back: "Voltar ao site",
     language: "Idioma",
-    eyebrow: "Índice de documentos analíticos",
-    titleA: "Encontre o COA correto.",
-    titleB: "Depois, confirme o lote.",
+    eyebrow: "Biblioteca de relatórios analíticos",
+    titleA: "Relatórios organizados",
+    titleB: "por nome do produto.",
     intro:
-      "Este índice mostra a cobertura documental atual por família. O relatório aplicável é confirmado com a especificação, a origem e o lote antes do envio.",
-    metrics: ["famílias do catálogo mapeadas", "correspondências diretas", "correspondência isolada a confirmar"],
-    search: "Buscar produto ou especificação",
-    searchLabel: "Buscar no índice COA",
-    tableProduct: "Produto",
-    tableCoverage: "Cobertura documental atual",
-    tableStatus: "Status do índice",
-    tableAction: "Solicitar",
-    statuses: {
-      direct: "Correspondência direta",
-      blend: "Somente documento de blend",
-      gap: "Correspondência a confirmar",
-    },
-    request: "Solicitar COA correspondente",
-    empty: "Nenhum produto correspondente.",
-    additionalTag: "Outras famílias documentais",
-    additionalTitle: "Um arquivo analítico mais amplo está disponível sob consulta.",
-    additionalText:
-      "Estas famílias aparecem no arquivo revisado, mas estão fora do catálogo público selecionado. A disponibilidade exige revisão individual.",
-    methodTag: "Correspondência documental",
-    methodTitle: "Um relatório não deve representar todos os lotes.",
-    steps: [
-      ["01", "Confirmar identidade", "Conferir produto, composição do blend e concentração solicitada."],
-      ["02", "Confirmar origem e lote", "Revisar data, laboratório, lote e identificação da amostra."],
-      ["03", "Enviar o arquivo aplicável", "Fornecer o documento ligado ao fornecimento disponível, sem substituição genérica."],
-    ],
+      "Consulte os relatórios analíticos atualmente arquivados. Cada relatório aparece diretamente nesta página e é agrupado por produto para facilitar a revisão antes de solicitar o documento correspondente ao lote.",
+    filesLabel: "relatórios exibidos",
+    productsLabel: "grupos de produtos",
+    filterTitle: "Escolha as categorias de produto",
+    filterHint: "Selecione um ou vários nomes para alternar a lista imediatamente.",
+    all: "Todos os relatórios",
+    search: "Buscar produto ou concentração",
+    searchLabel: "Buscar relatórios analíticos",
+    selected: "selecionados",
+    clear: "Limpar seleção",
+    report: "relatório",
+    reports: "relatórios",
+    imageReport: "Relatório em imagem",
+    pdfReport: "Prévia do relatório PDF",
+    view: "Ver relatório completo",
+    close: "Fechar relatório",
+    empty: "Nenhum relatório corresponde à seleção atual.",
     notice:
-      "COAs e relatórios analíticos são específicos de lote e amostra. A inclusão neste índice não estabelece aprovação regulatória, elegibilidade de destino ou adequação para uso humano ou veterinário.",
-    ctaTitle: "Precisa verificar um documento específico?",
+      "Estes relatórios são específicos de amostra ou lote. Um documento exibido aqui não comprova todos os lotes. Confirme conosco produto, especificação, lote atual e documento correspondente antes da compra.",
+    ctaTitle: "Precisa do relatório do lote atual?",
     ctaText:
-      "Envie produto, especificação, destino e uso profissional pretendido. Confirmaremos o documento atual correspondente.",
+      "Envie o produto, a especificação, o destino e o uso profissional pretendido. Verificaremos o fornecimento atual e o relatório aplicável.",
     cta: "Verificar no WhatsApp",
   },
   es: {
     back: "Volver al sitio",
     language: "Idioma",
-    eyebrow: "Índice de documentos analíticos",
-    titleA: "Encuentre el COA correcto.",
-    titleB: "Después, confirme el lote.",
+    eyebrow: "Biblioteca de informes analíticos",
+    titleA: "Informes organizados",
+    titleB: "por nombre de producto.",
     intro:
-      "Este índice muestra la cobertura documental actual por familia. El informe aplicable se confirma con la especificación, el origen y el lote antes de compartirlo.",
-    metrics: ["familias del catálogo revisadas", "coincidencias directas", "coincidencia individual por confirmar"],
-    search: "Buscar producto o especificación",
-    searchLabel: "Buscar en el índice COA",
-    tableProduct: "Producto",
-    tableCoverage: "Cobertura documental actual",
-    tableStatus: "Estado del índice",
-    tableAction: "Solicitar",
-    statuses: {
-      direct: "Coincidencia directa",
-      blend: "Solo documento de mezcla",
-      gap: "Coincidencia por confirmar",
-    },
-    request: "Solicitar COA correspondiente",
-    empty: "No se encontró un producto.",
-    additionalTag: "Otras familias documentales",
-    additionalTitle: "Hay un archivo analítico más amplio disponible bajo consulta.",
-    additionalText:
-      "Estas familias aparecen en el archivo revisado, pero están fuera del catálogo público seleccionado. La disponibilidad requiere revisión individual.",
-    methodTag: "Correspondencia documental",
-    methodTitle: "Un informe no debe representar todos los lotes.",
-    steps: [
-      ["01", "Confirmar identidad", "Verificar producto, composición de la mezcla y concentración solicitada."],
-      ["02", "Confirmar origen y lote", "Revisar fecha, laboratorio, lote e identidad de la muestra."],
-      ["03", "Compartir el archivo aplicable", "Entregar el documento ligado al suministro disponible, no un sustituto genérico."],
-    ],
+      "Consulte los informes analíticos archivados actualmente. Cada informe se muestra directamente en esta página y está agrupado por producto para facilitar la revisión antes de solicitar el documento del lote.",
+    filesLabel: "informes mostrados",
+    productsLabel: "grupos de productos",
+    filterTitle: "Elija categorías de producto",
+    filterHint: "Seleccione uno o varios nombres para cambiar la lista al instante.",
+    all: "Todos los informes",
+    search: "Buscar producto o concentración",
+    searchLabel: "Buscar informes analíticos",
+    selected: "seleccionados",
+    clear: "Borrar selección",
+    report: "informe",
+    reports: "informes",
+    imageReport: "Informe en imagen",
+    pdfReport: "Vista previa del informe PDF",
+    view: "Ver informe completo",
+    close: "Cerrar informe",
+    empty: "Ningún informe coincide con la selección actual.",
     notice:
-      "Los COA e informes analíticos son específicos de lote y muestra. Su inclusión no implica aprobación regulatoria, elegibilidad de destino ni idoneidad para uso humano o veterinario.",
-    ctaTitle: "¿Necesita comprobar un documento específico?",
+      "Estos informes son específicos de una muestra o un lote. Un documento mostrado aquí no demuestra todos los lotes. Confirme producto, especificación, lote actual y documento correspondiente antes de comprar.",
+    ctaTitle: "¿Necesita el informe de un lote actual?",
     ctaText:
-      "Envíe producto, especificación, destino y uso profesional previsto. Confirmaremos el documento actual correspondiente.",
+      "Envíe el producto, la especificación, el destino y el uso profesional previsto. Comprobaremos el suministro actual y el informe aplicable.",
     cta: "Comprobar por WhatsApp",
   },
   fr: {
     back: "Retour au site",
     language: "Langue",
-    eyebrow: "Index des documents analytiques",
-    titleA: "Trouvez le bon COA.",
-    titleB: "Puis vérifiez le lot.",
+    eyebrow: "Bibliothèque de rapports analytiques",
+    titleA: "Rapports classés",
+    titleB: "par nom de produit.",
     intro:
-      "Cet index présente la couverture documentaire actuelle par famille. Le rapport applicable est vérifié selon la spécification, la source et le lot avant transmission.",
-    metrics: ["familles du catalogue indexées", "correspondances directes", "correspondance autonome à confirmer"],
-    search: "Rechercher un produit ou une spécification",
-    searchLabel: "Rechercher dans l’index COA",
-    tableProduct: "Produit",
-    tableCoverage: "Couverture documentaire actuelle",
-    tableStatus: "Statut de l’index",
-    tableAction: "Demander",
-    statuses: {
-      direct: "Correspondance directe",
-      blend: "Document de mélange uniquement",
-      gap: "Correspondance à confirmer",
-    },
-    request: "Demander le COA correspondant",
-    empty: "Aucun produit correspondant.",
-    additionalTag: "Autres familles documentaires",
-    additionalTitle: "Une archive analytique plus large est disponible sur demande.",
-    additionalText:
-      "Ces familles figurent dans l’archive examinée, mais hors du catalogue public sélectionné. La disponibilité nécessite un examen individuel.",
-    methodTag: "Correspondance documentaire",
-    methodTitle: "Un rapport ne doit jamais représenter tous les lots.",
-    steps: [
-      ["01", "Confirmer l’identité", "Vérifier le produit, la composition du mélange et le dosage demandé."],
-      ["02", "Confirmer la source et le lot", "Examiner la date, le laboratoire, le lot et l’identité de l’échantillon."],
-      ["03", "Transmettre le fichier applicable", "Fournir le document lié à l’offre disponible, sans substitut générique."],
-    ],
+      "Consultez les rapports analytiques actuellement archivés. Chaque rapport est affiché directement sur cette page et regroupé par produit afin de faciliter l’examen avant de demander le document correspondant au lot.",
+    filesLabel: "rapports affichés",
+    productsLabel: "groupes de produits",
+    filterTitle: "Choisissez les catégories de produits",
+    filterHint: "Sélectionnez un ou plusieurs noms pour modifier instantanément la liste.",
+    all: "Tous les rapports",
+    search: "Rechercher un produit ou un dosage",
+    searchLabel: "Rechercher des rapports analytiques",
+    selected: "sélectionnés",
+    clear: "Effacer la sélection",
+    report: "rapport",
+    reports: "rapports",
+    imageReport: "Rapport image",
+    pdfReport: "Aperçu du rapport PDF",
+    view: "Voir le rapport complet",
+    close: "Fermer le rapport",
+    empty: "Aucun rapport ne correspond à la sélection actuelle.",
     notice:
-      "Les COA et rapports analytiques sont propres à un lot et à un échantillon. Leur présence dans cet index n’établit ni approbation réglementaire, ni admissibilité à destination, ni aptitude à un usage humain ou vétérinaire.",
-    ctaTitle: "Besoin de vérifier un document produit ?",
+      "Ces rapports sont propres à un échantillon ou à un lot. Un document affiché ici ne prouve pas tous les lots. Confirmez le produit, la spécification, le lot actuel et le document correspondant avant achat.",
+    ctaTitle: "Besoin du rapport d’un lot actuel ?",
     ctaText:
-      "Envoyez le produit, la spécification, la destination et l’usage professionnel prévu. Nous confirmerons le document actuel correspondant.",
+      "Envoyez le produit, la spécification, la destination et l’usage professionnel prévu. Nous vérifierons l’offre actuelle et le rapport applicable.",
     cta: "Vérifier sur WhatsApp",
   },
   zh: {
     back: "返回网站",
     language: "语言",
-    eyebrow: "分析文件索引",
-    titleA: "先找到对应 COA，",
-    titleB: "再核对实际批次。",
+    eyebrow: "检测报告库",
+    titleA: "检测报告按",
+    titleB: "产品名称分类。",
     intro:
-      "本页按产品系列展示当前文件覆盖情况。实际提供前仍需根据产品规格、文件来源和具体批次进行匹配，避免用一份通用报告代表所有批次。",
-    metrics: ["个网站目录产品已核对", "个产品有直接匹配文件", "个独立产品待补充确认"],
+      "这里直接展示目前已整理的检测报告，并按照产品名称分组。专业采购客户可以先查看现有文件覆盖情况，再联系我们核对当前批次所对应的报告。",
+    filesLabel: "份检测报告",
+    productsLabel: "个产品分类",
+    filterTitle: "选择产品品类",
+    filterHint: "可以同时选择一个或多个产品名称，报告列表会立即切换。",
+    all: "全部报告",
     search: "搜索产品或规格",
-    searchLabel: "搜索 COA 文件索引",
-    tableProduct: "产品",
-    tableCoverage: "当前文件覆盖",
-    tableStatus: "索引状态",
-    tableAction: "索取文件",
-    statuses: {
-      direct: "已找到直接匹配",
-      blend: "目前仅有复配文件",
-      gap: "待补充匹配",
-    },
-    request: "索取对应 COA",
-    empty: "没有找到匹配产品。",
-    additionalTag: "其他文件系列",
-    additionalTitle: "另有更多分析文件可按需核对。",
-    additionalText:
-      "以下产品在已检查的文件库中出现，但不属于当前网站精选目录。是否可供应、文件是否适用仍需逐项确认。",
-    methodTag: "文件匹配原则",
-    methodTitle: "一份报告不能代表所有批次。",
-    steps: [
-      ["01", "核对产品身份", "确认准确产品名称、复配组成及所需规格。"],
-      ["02", "核对来源与批次", "检查报告日期、检测机构、批号以及样品身份。"],
-      ["03", "提供适用文件", "只提供与当前可供应产品相匹配的文件，不用通用报告替代。"],
-    ],
+    searchLabel: "搜索检测报告",
+    selected: "项已选择",
+    clear: "清除选择",
+    report: "份报告",
+    reports: "份报告",
+    imageReport: "图片检测报告",
+    pdfReport: "PDF 检测报告预览",
+    view: "查看完整报告",
+    close: "关闭报告",
+    empty: "当前筛选条件下没有检测报告。",
     notice:
-      "COA 与分析报告仅对应特定批次或样品。本索引不代表监管批准、目的地准入，也不表示产品适用于人用或兽用。",
-    ctaTitle: "需要核对某个产品的文件？",
+      "页面中的报告仅对应特定样品或批次，不能代表所有批次。采购前请联系我们核对产品名称、规格、当前批次及其对应检测文件。",
+    ctaTitle: "需要核对当前批次的检测报告？",
     ctaText:
-      "请发送产品、规格、目的国家或地区以及预期专业用途，我们会确认当前可以匹配的文件。",
+      "请发送产品名称、规格、目的国家或地区以及预期专业用途，我们会核对当前供应批次及适用报告。",
     cta: "通过 WhatsApp 核对",
   },
 } as const;
 
-function requestMessage(locale: SiteLocale, product: string, coverage: string) {
+function reportMessage(locale: SiteLocale, product: string) {
   if (locale === "zh") {
-    return `您好，我想核对 ${product}（当前索引：${coverage}）的 COA。请确认可供应规格、批次以及对应文件。`;
+    return `您好，我想核对 ${product} 当前供应批次的检测报告，请确认可供规格、批次及对应文件。`;
   }
   if (locale === "pt") {
-    return `Olá, gostaria de verificar o COA de ${product} (${coverage}). Confirme a especificação disponível, o lote e o documento correspondente.`;
+    return `Olá, gostaria de verificar o relatório analítico do lote atual de ${product}. Confirme a especificação, o lote e o documento correspondente.`;
   }
   if (locale === "es") {
-    return `Hola, quisiera verificar el COA de ${product} (${coverage}). Confirme la especificación disponible, el lote y el documento correspondiente.`;
+    return `Hola, quisiera verificar el informe analítico del lote actual de ${product}. Confirme la especificación, el lote y el documento correspondiente.`;
   }
   if (locale === "fr") {
-    return `Bonjour, je souhaite vérifier le COA de ${product} (${coverage}). Merci de confirmer la spécification disponible, le lot et le document correspondant.`;
+    return `Bonjour, je souhaite vérifier le rapport analytique du lot actuel de ${product}. Merci de confirmer la spécification, le lot et le document correspondant.`;
   }
-  return `Hello, I would like to verify the COA for ${product} (${coverage}). Please confirm the available specification, batch, and matching document.`;
+  return `Hello, I would like to verify the analytical report for the current ${product} batch. Please confirm the specification, batch, and matching document.`;
+}
+
+function ReportCard({
+  document,
+  reportNumber,
+  locale,
+  onOpen,
+}: {
+  document: CoaDocument;
+  reportNumber: number;
+  locale: SiteLocale;
+  onOpen: (document: CoaDocument) => void;
+}) {
+  const t = pageCopy[locale];
+
+  return (
+    <article className="coa-report-card">
+      <header>
+        <div>
+          <span className="coa-report-number">
+            {String(reportNumber).padStart(2, "0")}
+          </span>
+          <div>
+            <h3>{document.product}</h3>
+            <p>{document.strength}</p>
+          </div>
+        </div>
+        <span className="coa-report-format">
+          {document.format === "pdf" ? t.pdfReport : t.imageReport}
+        </span>
+      </header>
+      <button
+        className="coa-report-preview"
+        type="button"
+        onClick={() => onOpen(document)}
+        aria-label={`${t.view}: ${document.product} ${document.strength}`}
+      >
+        <img
+          src={document.previewHref}
+          alt={`${document.product} ${document.strength} analytical report`}
+          loading="lazy"
+          decoding="async"
+        />
+        <span>{t.view}</span>
+      </button>
+      <footer>
+        <button
+          type="button"
+          onClick={() => onOpen(document)}
+        >
+          {t.view}<span aria-hidden="true">↗</span>
+        </button>
+      </footer>
+    </article>
+  );
 }
 
 export default function CoaLibraryPage() {
   const [locale, setLocale] = useState<SiteLocale>("en");
   const [query, setQuery] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [activeDocument, setActiveDocument] = useState<CoaDocument | null>(null);
   const t = pageCopy[locale];
 
   useEffect(() => {
@@ -292,15 +262,52 @@ export default function CoaLibraryPage() {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
   }, [locale]);
 
-  const filteredProducts = useMemo(() => {
+  useEffect(() => {
+    if (!activeDocument) return;
+
+    const previousOverflow = document.body.style.overflow;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveDocument(null);
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [activeDocument]);
+
+  const filteredDocuments = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return coaProducts;
-    return coaProducts.filter(
-      (item) =>
-        item.product.toLowerCase().includes(normalized) ||
-        item.coverage.toLowerCase().includes(normalized),
+    return coaDocuments.filter((document) => {
+      const productMatch =
+        selectedProducts.length === 0 ||
+        selectedProducts.includes(document.product);
+      const queryMatch =
+        !normalized ||
+        document.product.toLowerCase().includes(normalized) ||
+        document.strength.toLowerCase().includes(normalized);
+      return productMatch && queryMatch;
+    });
+  }, [query, selectedProducts]);
+
+  const groupedDocuments = useMemo(() => {
+    return coaProductOptions
+      .map(({ product }) => ({
+        product,
+        reports: filteredDocuments.filter((document) => document.product === product),
+      }))
+      .filter((group) => group.reports.length > 0);
+  }, [filteredDocuments]);
+
+  function toggleProduct(product: string) {
+    setSelectedProducts((current) =>
+      current.includes(product)
+        ? current.filter((item) => item !== product)
+        : [...current, product],
     );
-  }, [query]);
+  }
 
   return (
     <main className={`coa-page lang-${locale}`}>
@@ -339,17 +346,17 @@ export default function CoaLibraryPage() {
           <p>{t.intro}</p>
         </div>
         <dl className="coa-metrics">
-          <div><dt>10</dt><dd>{t.metrics[0]}</dd></div>
-          <div><dt>8</dt><dd>{t.metrics[1]}</dd></div>
-          <div><dt>1</dt><dd>{t.metrics[2]}</dd></div>
+          <div><dt>{coaDocuments.length}</dt><dd>{t.filesLabel}</dd></div>
+          <div><dt>{coaProductOptions.length}</dt><dd>{t.productsLabel}</dd></div>
         </dl>
       </section>
 
-      <section className="coa-index section-shell" aria-labelledby="coa-index-title">
-        <div className="coa-index-heading">
+      <section className="coa-filter-section section-shell" aria-labelledby="coa-filter-title">
+        <div className="coa-filter-heading">
           <div>
-            <p className="section-tag">COA / HPLC / MS</p>
-            <h2 id="coa-index-title">{t.tableCoverage}</h2>
+            <p className="section-tag">PRODUCT FILTER</p>
+            <h2 id="coa-filter-title">{t.filterTitle}</h2>
+            <p>{t.filterHint}</p>
           </div>
           <label className="coa-search">
             <span aria-hidden="true">⌕</span>
@@ -364,76 +371,97 @@ export default function CoaLibraryPage() {
           </label>
         </div>
 
-        <div className="coa-table-shell">
-          <table className="coa-table">
-            <thead>
-              <tr>
-                <th scope="col">{t.tableProduct}</th>
-                <th scope="col">{t.tableCoverage}</th>
-                <th scope="col">{t.tableStatus}</th>
-                <th scope="col"><span className="sr-only">{t.tableAction}</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.map((item) => (
-                <tr key={item.product}>
-                  <td data-label={t.tableProduct}><strong>{item.product}</strong></td>
-                  <td data-label={t.tableCoverage}>{item.coverage}</td>
-                  <td data-label={t.tableStatus}>
-                    <span className={`coa-status coa-status-${item.status}`}>
-                      {t.statuses[item.status]}
-                    </span>
-                  </td>
-                  <td data-label={t.tableAction}>
-                    <a
-                      href={createWhatsAppUrl(requestMessage(locale, item.product, item.coverage))}
-                      target={siteConfig.whatsappNumber ? "_blank" : undefined}
-                      rel="noreferrer"
-                    >
-                      {t.request}<span aria-hidden="true">↗</span>
-                    </a>
-                  </td>
-                </tr>
+        <div className="coa-product-filters" aria-label={t.filterTitle}>
+          <button
+            type="button"
+            className={selectedProducts.length === 0 ? "is-active" : ""}
+            aria-pressed={selectedProducts.length === 0}
+            onClick={() => setSelectedProducts([])}
+          >
+            {t.all}<span>{coaDocuments.length}</span>
+          </button>
+          {coaProductOptions.map(({ product, count }) => {
+            const active = selectedProducts.includes(product);
+            return (
+              <button
+                type="button"
+                className={active ? "is-active" : ""}
+                aria-pressed={active}
+                onClick={() => toggleProduct(product)}
+                key={product}
+              >
+                {product}<span>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="coa-filter-summary" aria-live="polite">
+          <strong>{filteredDocuments.length}</strong>
+          <span>{filteredDocuments.length === 1 ? t.report : t.reports}</span>
+          {selectedProducts.length > 0 && (
+            <>
+              <span className="coa-summary-divider">·</span>
+              <span>{selectedProducts.length} {t.selected}</span>
+              <button type="button" onClick={() => setSelectedProducts([])}>
+                {t.clear}
+              </button>
+            </>
+          )}
+        </div>
+      </section>
+
+      <section className="coa-gallery section-shell" aria-label={t.eyebrow}>
+        {groupedDocuments.map((group) => (
+          <section className="coa-product-group" key={group.product}>
+            <header className="coa-product-heading">
+              <div>
+                <span>{group.product.slice(0, 1)}</span>
+                <h2>{group.product}</h2>
+              </div>
+              <p>
+                {group.reports.length}{" "}
+                {group.reports.length === 1 ? t.report : t.reports}
+              </p>
+            </header>
+            <div className="coa-report-grid">
+              {group.reports.map((document, index) => (
+                <ReportCard
+                  document={document}
+                  reportNumber={index + 1}
+                  locale={locale}
+                  onOpen={setActiveDocument}
+                  key={document.id}
+                />
               ))}
-            </tbody>
-          </table>
-          {!filteredProducts.length && <p className="coa-empty">{t.empty}</p>}
-        </div>
+            </div>
+          </section>
+        ))}
+
+        {groupedDocuments.length === 0 && (
+          <div className="coa-empty">
+            <p>{t.empty}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setSelectedProducts([]);
+              }}
+            >
+              {t.clear}
+            </button>
+          </div>
+        )}
       </section>
 
-      <section className="coa-additional section-shell">
-        <div>
-          <p className="section-tag">{t.additionalTag}</p>
-          <h2>{t.additionalTitle}</h2>
-          <p>{t.additionalText}</p>
-        </div>
-        <ul>
-          {additionalFamilies.map((family) => <li key={family}>{family}</li>)}
-        </ul>
-      </section>
-
-      <section className="coa-method">
-        <div className="section-shell">
-          <div className="coa-method-heading">
-            <p className="section-tag">{t.methodTag}</p>
-            <h2>{t.methodTitle}</h2>
-          </div>
-          <div className="coa-method-grid">
-            {t.steps.map(([number, title, text]) => (
-              <article key={number}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-                <p>{text}</p>
-              </article>
-            ))}
-          </div>
-          <p className="coa-notice">{t.notice}</p>
-        </div>
+      <section className="coa-library-notice section-shell">
+        <span aria-hidden="true">i</span>
+        <p>{t.notice}</p>
       </section>
 
       <section className="coa-cta section-shell">
         <div>
-          <p className="section-tag">DOCUMENT REQUEST</p>
+          <p className="section-tag">BATCH DOCUMENT CHECK</p>
           <h2>{t.ctaTitle}</h2>
           <p>{t.ctaText}</p>
         </div>
@@ -443,9 +471,54 @@ export default function CoaLibraryPage() {
           target={siteConfig.whatsappNumber ? "_blank" : undefined}
           rel="noreferrer"
         >
-          {t.cta}<span aria-hidden="true">↗</span>
+          {t.cta}<span aria-hidden="true">→</span>
         </a>
       </section>
+
+      {activeDocument && (
+        <div
+          className="coa-report-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="coa-report-modal-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setActiveDocument(null);
+          }}
+        >
+          <div className="coa-report-modal-panel">
+            <header>
+              <div>
+                <p>{activeDocument.format === "pdf" ? t.pdfReport : t.imageReport}</p>
+                <h2 id="coa-report-modal-title">{activeDocument.product}</h2>
+                <span>{activeDocument.strength}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveDocument(null)}
+                aria-label={t.close}
+              >
+                <span aria-hidden="true">×</span>
+              </button>
+            </header>
+            <div className="coa-report-modal-viewer">
+              <img
+                src={activeDocument.previewHref}
+                alt={`${activeDocument.product} ${activeDocument.strength} analytical report`}
+              />
+            </div>
+            <footer>
+              <p>{t.notice}</p>
+              <a
+                href={createWhatsAppUrl(reportMessage(locale, activeDocument.product))}
+                target={siteConfig.whatsappNumber ? "_blank" : undefined}
+                rel="noreferrer"
+              >
+                {t.cta}<span aria-hidden="true">→</span>
+              </a>
+            </footer>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
