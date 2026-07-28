@@ -14,7 +14,6 @@ type FulfillmentRecord = {
   orderProfile: string;
   productName: string;
   specification: string;
-  quantityUnits: number;
   unitPriceUsdCents: number;
   packagingFeeUsdCents: number;
   testingFeeUsdCents: number;
