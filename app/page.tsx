@@ -19,8 +19,8 @@ const INTRO_SESSION_KEY = "peptivanta-factory-intro-seen";
 
 const copy = {
   en: {
-    nav: ["Products", "Quality", "Private label", "Company", "Recent fulfillment"],
-    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
+    nav: ["Products", "Quality", "COA documents", "Private label", "Company", "Recent fulfillment"],
+    navIds: ["products", "quality", "coa", "private-label", "company", "fulfillment"],
     eyebrow: "Peptide catalogue · Private label · Export coordination",
     heroTitleA: "Peptide supply,",
     heroTitleB: "made clear.",
@@ -158,8 +158,8 @@ const copy = {
     navLabel: "Primary navigation",
   },
   pt: {
-    nav: ["Produtos", "Qualidade", "Marca própria", "Empresa", "Atividade recente"],
-    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
+    nav: ["Produtos", "Qualidade", "Documentos COA", "Marca própria", "Empresa", "Atividade recente"],
+    navIds: ["products", "quality", "coa", "private-label", "company", "fulfillment"],
     eyebrow: "Catálogo de peptídeos · Marca própria · Coordenação de exportação",
     heroTitleA: "Fornecimento de peptídeos,",
     heroTitleB: "com mais clareza.",
@@ -297,8 +297,8 @@ const copy = {
     navLabel: "Navegação principal",
   },
   es: {
-    nav: ["Productos", "Calidad", "Marca privada", "Empresa", "Actividad reciente"],
-    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
+    nav: ["Productos", "Calidad", "Documentos COA", "Marca privada", "Empresa", "Actividad reciente"],
+    navIds: ["products", "quality", "coa", "private-label", "company", "fulfillment"],
     eyebrow: "Catálogo de péptidos · Marca privada · Coordinación de exportación",
     heroTitleA: "Suministro de péptidos,",
     heroTitleB: "con mayor claridad.",
@@ -435,8 +435,8 @@ const copy = {
     navLabel: "Navegación principal",
   },
   fr: {
-    nav: ["Produits", "Qualité", "Marque blanche", "Entreprise", "Activité récente"],
-    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
+    nav: ["Produits", "Qualité", "Documents COA", "Marque blanche", "Entreprise", "Activité récente"],
+    navIds: ["products", "quality", "coa", "private-label", "company", "fulfillment"],
     eyebrow: "Catalogue de peptides · Marque blanche · Coordination export",
     heroTitleA: "L’approvisionnement en peptides,",
     heroTitleB: "en toute clarté.",
@@ -573,8 +573,8 @@ const copy = {
     navLabel: "Navigation principale",
   },
   zh: {
-    nav: ["产品目录", "质量体系", "贴牌服务", "品牌介绍", "近期履约"],
-    navIds: ["products", "quality", "private-label", "company", "fulfillment"],
+    nav: ["产品目录", "质量体系", "COA 文件", "贴牌服务", "品牌介绍", "近期履约"],
+    navIds: ["products", "quality", "coa", "private-label", "company", "fulfillment"],
     eyebrow: "多肽目录 · 贴牌服务 · 出口协调",
     heroTitleA: "多肽供应，",
     heroTitleB: "清晰可控。",
@@ -1040,7 +1040,12 @@ export default function Home() {
         <nav className={menuOpen ? "nav nav-open" : "nav"} aria-label={t.navLabel}>
           {t.nav.map((item, index) => {
             const sectionId = t.navIds[index];
-            const href = sectionId === "fulfillment" ? "/fulfillment" : `#${sectionId}`;
+            const href =
+              sectionId === "fulfillment"
+                ? "/fulfillment"
+                : sectionId === "coa"
+                  ? "/coa"
+                  : `#${sectionId}`;
 
             return (
               <Link key={item} href={href} onClick={() => setMenuOpen(false)}>{item}</Link>
@@ -1306,7 +1311,7 @@ export default function Home() {
           <Link className="company-ledger-link" href="/fulfillment">
             <span>100</span>
             <div>
-              <small>{t.nav[4]}</small>
+              <small>{t.nav[5]}</small>
               <strong aria-hidden="true">↗</strong>
             </div>
           </Link>

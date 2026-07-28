@@ -39,6 +39,8 @@ test("server-renders the finished website", async () => {
   assert.match(html, /Get quote on WhatsApp/i);
   assert.match(html, /Recent fulfillment/i);
   assert.match(html, /href="\/fulfillment"/i);
+  assert.match(html, /COA documents/i);
+  assert.match(html, /href="\/coa"/i);
   assert.match(html, /\/images\/inventory\.webp/);
   assert.match(html, /Português/);
   assert.match(html, /Español/);
@@ -155,6 +157,26 @@ test("renders the dedicated fulfillment page", async () => {
   assert.match(html, /Loading recent records/i);
   assert.match(html, /Back to website/i);
   assert.match(html, /wa\.me\/19863059927/i);
+});
+
+test("renders the dedicated multilingual COA index", async () => {
+  const response = await render("/coa");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Find the right COA/i);
+  assert.match(html, /Direct match found/i);
+  assert.match(html, /Acetyl Hexapeptide-8/i);
+  assert.match(html, /One report should never stand in for every lot/i);
+  assert.match(html, /wa\.me\/19863059927/i);
+
+  const source = await readFile(
+    new URL("../app/coa/CoaLibraryPage.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /先找到对应 COA/);
+  assert.match(source, /COAs e relatórios analíticos/);
+  assert.match(source, /Los COA e informes analíticos/);
+  assert.match(source, /Les COA et rapports analytiques/);
 });
 
 for (const pathname of ["/privacy", "/terms", "/compliance"]) {
