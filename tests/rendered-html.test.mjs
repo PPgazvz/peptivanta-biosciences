@@ -134,6 +134,7 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(route, /DELETE FROM fulfillment_cases/);
   assert.match(route, /onConflictDoNothing/);
   assert.doesNotMatch(route, /\.update\(fulfillmentCases\)/);
+  assert.match(route, /const \{ quantityUnits, \.\.\.publicRow \} = row/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.doesNotMatch(route, /eq\(fulfillmentCases\.cycleKey/);
   assert.match(schema, /fulfillment_ledger_meta/);

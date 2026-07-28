@@ -174,18 +174,21 @@ export async function GET() {
       )
       .limit(DISPLAY_LIMIT);
 
-    const records = rows.map((row) => ({
-      ...row,
-      status: currentFulfillmentStatus(
-        {
-          occurredAt: row.occurredAt,
-          destination: row.destination as FulfillmentMarket,
-          service: row.service as FulfillmentService,
-          quantityUnits: row.quantityUnits,
-        },
-        now,
-      ),
-    }));
+    const records = rows.map((row) => {
+      const { quantityUnits, ...publicRow } = row;
+      return {
+        ...publicRow,
+        status: currentFulfillmentStatus(
+          {
+            occurredAt: row.occurredAt,
+            destination: row.destination as FulfillmentMarket,
+            service: row.service as FulfillmentService,
+            quantityUnits,
+          },
+          now,
+        ),
+      };
+    });
     const nextUpdateAt = addUtcDays(startOfUtcDay(now), 1);
 
     return Response.json(
