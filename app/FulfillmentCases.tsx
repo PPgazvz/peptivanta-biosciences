@@ -126,7 +126,7 @@ const content = {
       "Destination",
       "Product / specification",
       "Service",
-      "Quantity",
+      "Order size",
       "Amount (USD)",
       "Status",
     ],
@@ -176,7 +176,7 @@ const content = {
       "Destino",
       "Produto / especificação",
       "Serviço",
-      "Quantidade",
+      "Faixa do pedido",
       "Valor (USD)",
       "Status",
     ],
@@ -226,7 +226,7 @@ const content = {
       "Destino",
       "Producto / especificación",
       "Servicio",
-      "Cantidad",
+      "Escala del pedido",
       "Importe (USD)",
       "Estado",
     ],
@@ -276,7 +276,7 @@ const content = {
       "Destination",
       "Produit / spécification",
       "Service",
-      "Quantité",
+      "Taille de commande",
       "Montant (USD)",
       "Statut",
     ],
@@ -326,7 +326,7 @@ const content = {
       "目的地",
       "产品 / 规格",
       "服务类型",
-      "准确数量",
+      "订单规模",
       "金额 (USD)",
       "状态",
     ],
@@ -420,11 +420,6 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
       }),
     [locale],
   );
-  const numberFormatter = useMemo(
-    () => new Intl.NumberFormat(localeCodes[locale]),
-    [locale],
-  );
-
   return (
     <section
       className="case-ledger section-shell"
@@ -531,14 +526,11 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                           record.service as keyof typeof t.services
                         ] ?? record.service}
                       </strong>
-                      <small>
-                        {profiles[locale][
-                          record.orderProfile as keyof (typeof profiles)[typeof locale]
-                        ] ?? record.orderProfile}
-                      </small>
                     </td>
                     <td className="case-quantity" data-label={t.headers[5]}>
-                      {numberFormatter.format(record.quantityUnits)}
+                      {profiles[locale][
+                        record.orderProfile as keyof (typeof profiles)[typeof locale]
+                      ] ?? record.orderProfile}
                     </td>
                     <td className="case-amount" data-label={t.headers[6]}>
                       <strong>

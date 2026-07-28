@@ -167,3 +167,33 @@ test("daily generation is stable and can produce a quiet day", () => {
   const weekend = createDailyRows(new Date("2026-07-26T00:00:00.000Z"));
   assert.ok(weekend.rows.length <= 1);
 });
+
+test("the next daily update appends records without rewriting prior orders", () => {
+  const priorRows = createBackfillRows(DISPLAY_LIMIT, asOf);
+  const immutableSnapshot = structuredClone(priorRows);
+  const lastBulk = priorRows.find((row) => row.service === "bulk");
+  const lastMegaBulk = priorRows.find(
+    (row) => row.service === "bulk" && row.quantityUnits >= 3000,
+  );
+
+  const nextDay = createDailyRows(new Date("2026-07-29T00:00:00.000Z"), {
+    lastBulkAt: lastBulk?.occurredAt ?? null,
+    lastMegaBulkAt: lastMegaBulk?.occurredAt ?? null,
+  });
+  const combinedRows = [...priorRows, ...nextDay.rows];
+
+  assert.deepEqual(priorRows, immutableSnapshot);
+  assert.ok(nextDay.rows.length > 0);
+  assert.ok(nextDay.rows.every((row) => row.occurredAt === "2026-07-29"));
+  assert.equal(
+    new Set(combinedRows.map((row) => row.reference)).size,
+    combinedRows.length,
+  );
+
+  for (const priorRow of priorRows) {
+    assert.deepEqual(
+      combinedRows.find((row) => row.reference === priorRow.reference),
+      priorRow,
+    );
+  }
+});

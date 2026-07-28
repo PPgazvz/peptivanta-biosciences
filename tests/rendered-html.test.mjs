@@ -80,6 +80,12 @@ test("includes complete multilingual ledger content", async () => {
   assert.match(ledger, /示例履约流程数据/);
   assert.match(ledger, /仅展示近 3 个月最多 100 条记录/);
   assert.match(ledger, /Mexico/);
+  assert.match(ledger, /Order size/);
+  assert.match(ledger, /Faixa do pedido/);
+  assert.match(ledger, /Escala del pedido/);
+  assert.match(ledger, /Taille de commande/);
+  assert.match(ledger, /订单规模/);
+  assert.doesNotMatch(ledger, /准确数量/);
   assert.match(ledger, /文件审核中/);
   assert.match(ledger, /质量检测/);
   assert.match(ledger, /已送达/);
@@ -126,6 +132,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(route, /clearPreviousHistoryOnce/);
   assert.match(route, /LAST_GENERATED_KEY/);
   assert.match(route, /DELETE FROM fulfillment_cases/);
+  assert.match(route, /onConflictDoNothing/);
+  assert.doesNotMatch(route, /\.update\(fulfillmentCases\)/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.doesNotMatch(route, /eq\(fulfillmentCases\.cycleKey/);
   assert.match(schema, /fulfillment_ledger_meta/);
