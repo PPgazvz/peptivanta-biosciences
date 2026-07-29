@@ -81,6 +81,14 @@
   white-space: normal;
 }
 
+.case-price-breakdown span {
+  display: block;
+}
+
+.case-price-breakdown span + span {
+  margin-top: 2px;
+}
+
 .case-quantity {
   color: white;
   font-family: var(--font-display);

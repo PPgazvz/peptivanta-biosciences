@@ -143,3 +143,21 @@ export function findCatalogVariant(
     ) ?? null
   );
 }
+
+/**
+ * Public illustrative rows predate the private admin and intentionally do not
+ * expose their SKU. Product name + specification is sufficient to recover the
+ * official quote price because that pair is unique in the workbook.
+ */
+export function findCatalogVariantByDescription(
+  productName: string,
+  specification: string,
+) {
+  return (
+    PRODUCT_CATALOG.find(
+      (item) =>
+        item.productName === productName &&
+        item.specification === specification,
+    ) ?? null
+  );
+}

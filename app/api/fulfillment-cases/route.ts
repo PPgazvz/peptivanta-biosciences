@@ -16,6 +16,8 @@ import {
   type GenerationContext,
   type GeneratedFulfillmentRow,
 } from "./generator";
+import { findCatalogVariantByDescription } from "../../../lib/product-catalog.ts";
+import { volumeDiscountBps } from "../../../lib/order-pricing.ts";
 
 const RESET_MARKER_KEY = `${LEDGER_VERSION}:history-cleared`;
 const LAST_GENERATED_KEY = `${LEDGER_VERSION}:last-generated-date`;
@@ -204,10 +206,19 @@ export async function GET() {
 
     const sampleRecords = sampleRows.map((row) => {
       const { quantityUnits, ...publicRow } = row;
+      const catalogItem = findCatalogVariantByDescription(
+        row.productName,
+        row.specification,
+      );
+      const discountBps =
+        row.service === "custom" ? 0 : volumeDiscountBps(quantityUnits);
       return {
         ...publicRow,
         id: `sample-${row.id}`,
         source: "sample" as const,
+        retailUnitPriceUsdCents:
+          catalogItem?.retailUsdCents ?? row.unitPriceUsdCents,
+        discountBps,
         status: currentFulfillmentStatus(
           {
             occurredAt: row.occurredAt,
@@ -229,10 +240,14 @@ export async function GET() {
       orderProfile: row.orderProfile,
       productName: row.productName,
       specification: row.specification,
-      unitPriceUsdCents: 0,
-      packagingFeeUsdCents: 0,
+      unitPriceUsdCents: Math.round(
+        (row.retailUnitPriceUsdCents * (10_000 - row.discountBps)) / 10_000,
+      ),
+      retailUnitPriceUsdCents: row.retailUnitPriceUsdCents,
+      discountBps: row.discountBps,
+      packagingFeeUsdCents: row.serviceFeeUsdCents,
       testingFeeUsdCents: 0,
-      logisticsFeeUsdCents: 0,
+      logisticsFeeUsdCents: row.shippingFeeUsdCents,
       amountUsdCents: row.amountUsdCents,
       status: row.status,
       isSample: false,

@@ -554,45 +554,75 @@ function workflowDurations(
   quantityUnits: number,
   destination: FulfillmentMarket,
 ) {
+  /*
+   * These are elapsed business-day windows, not promises to a customer.
+   *
+   * Catalogue orders are treated as stocked finished goods: they do not enter
+   * document review or production. They move through release checks, packing,
+   * dispatch and destination-specific transit.
+   *
+   * Private-label, bulk and custom work remains made-to-order, but production
+   * time scales with quantity instead of applying one long duration to every
+   * project.
+   */
   const transitDays: Record<FulfillmentMarket, number> = {
-    "United States": 4,
-    Canada: 5,
-    Brazil: 9,
-    Mexico: 7,
+    "United States": 3,
+    Canada: 4,
+    Brazil: 7,
+    Mexico: 5,
   };
 
   if (service === "catalogue") {
     return {
-      documentation: 2,
-      production: quantityUnits <= 50 ? 4 : 6,
-      quality: 2,
+      documentation: 0,
+      production: 0,
+      quality: 1,
       packaging: 1,
       transit: transitDays[destination],
     };
   }
   if (service === "private_label") {
     return {
-      documentation: 4,
-      production: quantityUnits <= 300 ? 12 : quantityUnits <= 500 ? 16 : 20,
-      quality: 3,
-      packaging: 3,
+      documentation: 1,
+      production:
+        quantityUnits <= 150
+          ? 5
+          : quantityUnits <= 300
+            ? 6
+            : quantityUnits <= 500
+              ? 7
+              : quantityUnits <= 1000
+                ? 10
+                : 14,
+      quality: 1,
+      packaging: 2,
       transit: transitDays[destination],
     };
   }
   if (service === "bulk") {
     return {
-      documentation: 4,
-      production: quantityUnits <= 1000 ? 14 : quantityUnits <= 3000 ? 21 : 30,
-      quality: 4,
-      packaging: 3,
+      documentation: 2,
+      production:
+        quantityUnits <= 1000 ? 10 : quantityUnits <= 3000 ? 15 : 22,
+      quality: 2,
+      packaging: 2,
       transit: transitDays[destination],
     };
   }
   return {
-    documentation: 5,
-    production: quantityUnits <= 50 ? 10 : quantityUnits <= 100 ? 15 : 20,
-    quality: 3,
-    packaging: 2,
+    documentation: 1,
+    production:
+      quantityUnits <= 5
+        ? 2
+        : quantityUnits <= 10
+          ? 3
+          : quantityUnits <= 50
+            ? 4
+            : quantityUnits <= 100
+              ? 6
+              : 10,
+    quality: 1,
+    packaging: 1,
     transit: transitDays[destination],
   };
 }

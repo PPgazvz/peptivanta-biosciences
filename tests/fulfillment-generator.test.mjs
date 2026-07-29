@@ -141,7 +141,7 @@ test("the official catalogue and market discount tiers remain auditable", () => 
   assert.equal(quote.amountUsdCents, 370_000);
 });
 
-test("new orders cannot skip ahead and statuses advance by business day", () => {
+test("stocked catalogue orders skip document review and production", () => {
   const record = {
     occurredAt: "2026-07-06",
     destination: "United States",
@@ -173,15 +173,17 @@ test("new orders cannot skip ahead and statuses advance by business day", () => 
   assert.equal(currentFulfillmentStatus(record, new Date("2026-07-06")), "confirmed");
   assert.equal(
     currentFulfillmentStatus(record, new Date("2026-07-07")),
-    "documentation_review",
+    "quality_control",
   );
+  assert.ok(!seen.has("documentation_review"));
+  assert.ok(!seen.has("in_production"));
   assert.ok(seen.has("quality_control"));
   assert.ok(seen.has("packaging"));
   assert.ok(seen.has("dispatched"));
   assert.ok(seen.has("delivered"));
 });
 
-test("large private-label and bulk projects retain realistic production time", () => {
+test("made-to-order timelines scale with service and quantity", () => {
   const privateLabel = {
     occurredAt: "2026-07-06",
     destination: "Canada",
@@ -197,7 +199,7 @@ test("large private-label and bulk projects retain realistic production time", (
 
   assert.equal(
     currentFulfillmentStatus(privateLabel, new Date("2026-07-20")),
-    "in_production",
+    "packaging",
   );
   assert.equal(
     currentFulfillmentStatus(bulk, new Date("2026-07-27")),
@@ -207,6 +209,44 @@ test("large private-label and bulk projects retain realistic production time", (
     currentFulfillmentStatus(bulk, new Date("2026-09-30")),
     "in_production",
   );
+});
+
+test("reported July examples follow inventory-aware workflow timing", () => {
+  const asOf = new Date("2026-07-29T12:00:00.000Z");
+  const examples = [
+    ["2026-07-08", "Brazil", "custom", 25, "delivered"],
+    ["2026-07-09", "United States", "private_label", 400, "dispatched"],
+    ["2026-07-10", "United States", "catalogue", 40, "delivered"],
+    ["2026-07-13", "United States", "private_label", 400, "dispatched"],
+    ["2026-07-15", "Canada", "custom", 4, "delivered"],
+    ["2026-07-16", "United States", "catalogue", 1, "delivered"],
+    ["2026-07-16", "Canada", "catalogue", 1, "delivered"],
+    ["2026-07-24", "United States", "catalogue", 4, "dispatched"],
+    ["2026-07-23", "United States", "catalogue", 1, "dispatched"],
+    ["2026-07-22", "United States", "private_label", 200, "in_production"],
+    ["2026-07-22", "Canada", "catalogue", 8, "dispatched"],
+    ["2026-07-21", "United States", "catalogue", 1, "delivered"],
+    ["2026-07-28", "United States", "private_label", 400, "documentation_review"],
+    ["2026-07-28", "Mexico", "catalogue", 4, "quality_control"],
+    ["2026-07-27", "United States", "catalogue", 1, "packaging"],
+  ];
+
+  for (const [
+    occurredAt,
+    destination,
+    service,
+    quantityUnits,
+    expected,
+  ] of examples) {
+    assert.equal(
+      currentFulfillmentStatus(
+        { occurredAt, destination, service, quantityUnits },
+        asOf,
+      ),
+      expected,
+      `${occurredAt} ${service} ${quantityUnits}`,
+    );
+  }
 });
 
 test("daily generation is stable and can produce a quiet day", () => {

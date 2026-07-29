@@ -15,6 +15,8 @@ type FulfillmentRecord = {
   productName: string;
   specification: string;
   unitPriceUsdCents: number;
+  retailUnitPriceUsdCents: number;
+  discountBps: number;
   packagingFeeUsdCents: number;
   testingFeeUsdCents: number;
   logisticsFeeUsdCents: number;
@@ -174,6 +176,10 @@ const content = {
       delivered: "Delivered",
     },
     unitPrice: "unit",
+    quoteRetail: "Quote retail",
+    settledUnit: "Discounted unit",
+    volumeDiscount: "volume discount",
+    perBox: "box",
     fees: "packaging, testing & logistics",
   },
   pt: {
@@ -224,6 +230,10 @@ const content = {
       delivered: "Entregue",
     },
     unitPrice: "unidade",
+    quoteRetail: "Preço de tabela",
+    settledUnit: "Preço com desconto",
+    volumeDiscount: "desconto por volume",
+    perBox: "caixa",
     fees: "embalagem, testes e logística",
   },
   es: {
@@ -274,6 +284,10 @@ const content = {
       delivered: "Entregado",
     },
     unitPrice: "unidad",
+    quoteRetail: "Precio de lista",
+    settledUnit: "Precio con descuento",
+    volumeDiscount: "descuento por volumen",
+    perBox: "caja",
     fees: "empaque, pruebas y logística",
   },
   fr: {
@@ -324,6 +338,10 @@ const content = {
       delivered: "Livré",
     },
     unitPrice: "unité",
+    quoteRetail: "Prix catalogue",
+    settledUnit: "Prix remisé",
+    volumeDiscount: "remise sur volume",
+    perBox: "boîte",
     fees: "emballage, essais et logistique",
   },
   zh: {
@@ -374,6 +392,10 @@ const content = {
       delivered: "已送达",
     },
     unitPrice: "单价",
+    quoteRetail: "报价表零售价",
+    settledUnit: "折后成交单价",
+    volumeDiscount: "数量折扣",
+    perBox: "盒",
     fees: "包装、检测及物流",
   },
 } as const;
@@ -563,12 +585,29 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                         {amountFormatter.format(record.amountUsdCents / 100)}
                       </strong>
                       {record.isSample ? (
-                        <small>
-                          {amountFormatter.format(
-                            record.unitPriceUsdCents / 100,
-                          )}
-                          /{t.unitPrice} · {amountFormatter.format(fees / 100)}{" "}
-                          {t.fees}
+                        <small className="case-price-breakdown">
+                          <span>
+                            {t.quoteRetail}{" "}
+                            {amountFormatter.format(
+                              record.retailUnitPriceUsdCents / 100,
+                            )}
+                            /{t.perBox}
+                            {record.discountBps > 0 && (
+                              <>
+                                {" · "}
+                                {t.volumeDiscount}{" "}
+                                {(record.discountBps / 100).toFixed(0)}%
+                              </>
+                            )}
+                          </span>
+                          <span>
+                            {t.settledUnit}{" "}
+                            {amountFormatter.format(
+                              record.unitPriceUsdCents / 100,
+                            )}
+                            /{t.perBox} · {amountFormatter.format(fees / 100)}{" "}
+                            {t.fees}
+                          </span>
                         </small>
                       ) : (
                         <small>{t.recordedOrder}</small>

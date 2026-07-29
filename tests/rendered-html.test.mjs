@@ -86,6 +86,8 @@ test("includes complete multilingual ledger content", async () => {
   assert.match(ledger, /Faixa do pedido/);
   assert.match(ledger, /Escala del pedido/);
   assert.match(ledger, /Taille de commande/);
+  assert.match(ledger, /Quote retail/);
+  assert.match(ledger, /volume discount/);
   assert.match(ledger, /订单规模/);
   assert.doesNotMatch(ledger, /准确数量/);
   assert.match(ledger, /文件审核中/);
@@ -127,6 +129,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(generator, /createBackfillRows/);
   assert.match(generator, /createDailyRows/);
   assert.match(generator, /currentFulfillmentStatus/);
+  assert.match(generator, /documentation: 0/);
+  assert.match(generator, /production: 0/);
   assert.match(generator, /documentation_review/);
   assert.match(generator, /quality_control/);
   assert.match(generator, /packaging/);
@@ -139,6 +143,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(route, /onConflictDoNothing/);
   assert.doesNotMatch(route, /\.update\(fulfillmentCases\)/);
   assert.match(route, /const \{ quantityUnits, \.\.\.publicRow \} = row/);
+  assert.match(route, /retailUnitPriceUsdCents/);
+  assert.match(route, /discountBps/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.doesNotMatch(route, /eq\(fulfillmentCases\.cycleKey/);
   assert.match(schema, /fulfillment_ledger_meta/);
