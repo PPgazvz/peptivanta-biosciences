@@ -98,6 +98,11 @@ test("amounts use the official quote catalogue and volume discount ladder", () =
           row.specification.startsWith(item.specification),
       );
       assert.ok(catalogueItem, `${row.productName} ${row.specification}`);
+      if (row.service === "catalogue") {
+        assert.equal(row.packagingFeeUsdCents, 0);
+        assert.equal(row.testingFeeUsdCents, 0);
+        assert.equal(row.logisticsFeeUsdCents, 0);
+      }
       const pricing = calculateOrderPricing({
         retailUnitPriceUsdCents: catalogueItem.retailUsdCents,
         quantityUnits: row.quantityUnits,
@@ -139,6 +144,22 @@ test("the official catalogue and market discount tiers remain auditable", () => 
   assert.equal(quote.retailSubtotalUsdCents, 510_000);
   assert.equal(quote.discountBps, 3000);
   assert.equal(quote.amountUsdCents, 370_000);
+});
+
+test("catalogue totals contain product value only", () => {
+  const rows = createBackfillRows(100, asOf).filter(
+    (row) => row.service === "catalogue",
+  );
+
+  for (const row of rows) {
+    assert.equal(row.packagingFeeUsdCents, 0);
+    assert.equal(row.testingFeeUsdCents, 0);
+    assert.equal(row.logisticsFeeUsdCents, 0);
+    assert.equal(
+      row.amountUsdCents,
+      row.unitPriceUsdCents * row.quantityUnits,
+    );
+  }
 });
 
 test("stocked catalogue orders skip document review and production", () => {

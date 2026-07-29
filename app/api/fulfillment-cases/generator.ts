@@ -305,23 +305,13 @@ function orderFees(
   random: () => number,
 ) {
   if (service === "catalogue") {
-    const logisticsRanges: Record<FulfillmentMarket, [number, number]> = {
-      "United States": [900, 3200],
-      Canada: [1400, 4200],
-      Brazil: [2400, 6200],
-      Mexico: [1800, 5000],
-    };
-    const [logisticsMinimum, logisticsMaximum] =
-      logisticsRanges[destination];
-
+    // Catalogue prices represent stocked product only. Packing, testing and
+    // freight are not added to catalogue order values; freight is quoted
+    // separately during the enquiry.
     return {
-      packagingFeeUsdCents:
-        random() < 0.48 ? randomInteger(0, 900, random) : 0,
-      testingFeeUsdCents:
-        random() < 0.03 ? randomInteger(3500, 8500, random) : 0,
-      logisticsFeeUsdCents:
-        randomInteger(logisticsMinimum, logisticsMaximum, random) +
-        Math.round(quantity * 35),
+      packagingFeeUsdCents: 0,
+      testingFeeUsdCents: 0,
+      logisticsFeeUsdCents: 0,
     };
   }
 

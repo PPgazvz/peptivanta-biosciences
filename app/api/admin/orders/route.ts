@@ -122,14 +122,18 @@ function validateInput(body: ManualOrderInput, includeId: boolean) {
     );
   }
 
-  const serviceFeeUsdCents = moneyField(
+  const requestedServiceFeeUsdCents = moneyField(
     body.serviceFeeUsdCents,
     "Service/packaging fee",
   );
-  const shippingFeeUsdCents = moneyField(
+  const requestedShippingFeeUsdCents = moneyField(
     body.shippingFeeUsdCents,
     "Shipping fee",
   );
+  const serviceFeeUsdCents =
+    service === "catalogue" ? 0 : requestedServiceFeeUsdCents;
+  const shippingFeeUsdCents =
+    service === "catalogue" ? 0 : requestedShippingFeeUsdCents;
   const deductionUsdCents = moneyField(
     body.deductionUsdCents,
     "Extra deduction",

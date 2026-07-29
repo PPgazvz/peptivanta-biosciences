@@ -145,6 +145,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(route, /const \{ quantityUnits, \.\.\.publicRow \} = row/);
   assert.match(route, /retailUnitPriceUsdCents/);
   assert.match(route, /discountBps/);
+  assert.match(route, /row\.service === "catalogue" \? 0/);
+  assert.match(route, /cataloguePricing\?\.amountUsdCents/);
   assert.match(route, /setUTCMonth\(cutoff\.getUTCMonth\(\) - 3\)/);
   assert.doesNotMatch(route, /eq\(fulfillmentCases\.cycleKey/);
   assert.match(schema, /fulfillment_ledger_meta/);
@@ -193,10 +195,13 @@ test("renders the private real-order administration page", async () => {
   assert.match(adminPage, /\/api\/admin\/orders/);
   assert.match(adminPage, /PRODUCT_CATALOG/);
   assert.match(adminPage, /自动计算总额/);
+  assert.match(adminPage, /目录产品仅计算产品金额/);
+  assert.match(adminPage, /disabled=\{catalogueDraft\}/);
   assert.match(adminRoute, /manual_fulfillment_orders/);
   assert.doesNotMatch(adminRoute, /fulfillmentCases/);
   assert.match(adminRoute, /findCatalogVariant/);
   assert.match(adminRoute, /calculateOrderPricing/);
+  assert.match(adminRoute, /service === "catalogue" \? 0/);
   assert.match(auth, /FULFILLMENT_ADMIN_KEY/);
   assert.match(auth, /Bearer/);
   assert.equal((catalogue.match(/\{ sku:/g) ?? []).length, 96);

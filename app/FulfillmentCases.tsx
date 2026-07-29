@@ -605,8 +605,13 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                             {amountFormatter.format(
                               record.unitPriceUsdCents / 100,
                             )}
-                            /{t.perBox} · {amountFormatter.format(fees / 100)}{" "}
-                            {t.fees}
+                            /{t.perBox}
+                            {fees > 0 && (
+                              <>
+                                {" · "}
+                                {amountFormatter.format(fees / 100)} {t.fees}
+                              </>
+                            )}
                           </span>
                         </small>
                       ) : (

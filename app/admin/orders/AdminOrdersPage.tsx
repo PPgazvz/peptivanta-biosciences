@@ -140,17 +140,23 @@ export default function AdminOrdersPage() {
       firstCatalogItem,
     [draft.sku, draftVariants],
   );
+  const catalogueDraft = draft.service === "catalogue";
   const draftPricing = useMemo(
     () =>
       calculateOrderPricing({
         retailUnitPriceUsdCents: selectedDraftProduct.retailUsdCents,
         quantityUnits: Number(draft.quantityUnits) || 1,
         service: draft.service,
-        serviceFeeUsdCents: usdToCents(draft.serviceFeeUsd),
-        shippingFeeUsdCents: usdToCents(draft.shippingFeeUsd),
+        serviceFeeUsdCents: catalogueDraft
+          ? 0
+          : usdToCents(draft.serviceFeeUsd),
+        shippingFeeUsdCents: catalogueDraft
+          ? 0
+          : usdToCents(draft.shippingFeeUsd),
         deductionUsdCents: usdToCents(draft.deductionUsd),
       }),
     [
+      catalogueDraft,
       draft.deductionUsd,
       draft.quantityUnits,
       draft.service,
@@ -217,8 +223,12 @@ export default function AdminOrdersPage() {
         productName: selectedDraftProduct.productName,
         specification: selectedDraftProduct.specification,
         quantityUnits: Number(draft.quantityUnits),
-        serviceFeeUsdCents: usdToCents(draft.serviceFeeUsd),
-        shippingFeeUsdCents: usdToCents(draft.shippingFeeUsd),
+        serviceFeeUsdCents: catalogueDraft
+          ? 0
+          : usdToCents(draft.serviceFeeUsd),
+        shippingFeeUsdCents: catalogueDraft
+          ? 0
+          : usdToCents(draft.shippingFeeUsd),
         deductionUsdCents: usdToCents(draft.deductionUsd),
       });
       setDraft(emptyDraft());
@@ -391,9 +401,15 @@ export default function AdminOrdersPage() {
               <select
                 value={draft.service}
                 onChange={(event) =>
-                  setDraft({
-                    ...draft,
-                    service: event.target.value as Service,
+                  setDraft((current) => {
+                    const service = event.target.value as Service;
+                    return {
+                      ...current,
+                      service,
+                      ...(service === "catalogue"
+                        ? { serviceFeeUsd: "0", shippingFeeUsd: "0" }
+                        : {}),
+                    };
                   })
                 }
               >
@@ -485,6 +501,7 @@ export default function AdminOrdersPage() {
                 max="10000000"
                 step="0.01"
                 value={draft.serviceFeeUsd}
+                disabled={catalogueDraft}
                 onChange={(event) =>
                   setDraft({ ...draft, serviceFeeUsd: event.target.value })
                 }
@@ -498,6 +515,7 @@ export default function AdminOrdersPage() {
                 max="10000000"
                 step="0.01"
                 value={draft.shippingFeeUsd}
+                disabled={catalogueDraft}
                 onChange={(event) =>
                   setDraft({ ...draft, shippingFeeUsd: event.target.value })
                 }
@@ -557,7 +575,9 @@ export default function AdminOrdersPage() {
                 </strong>
               </div>
               <small>
-                零售价小计 − 阶梯折扣 + 服务费 + 运费 − 额外减免
+                {catalogueDraft
+                  ? "目录产品仅计算产品金额；包装、检测和运费均不计入。"
+                  : "零售价小计 − 阶梯折扣 + 服务费 + 运费 − 额外减免"}
               </small>
             </div>
             <label className="admin-checkbox">
@@ -621,14 +641,23 @@ export default function AdminOrdersPage() {
                       <dt>数量折扣</dt>
                       <dd>{(order.discountBps / 100).toFixed(0)}%</dd>
                     </div>
-                    <div>
-                      <dt>费用/运费/减免</dt>
-                      <dd>
-                        {usdFormatter.format(order.serviceFeeUsdCents / 100)} /{" "}
-                        {usdFormatter.format(order.shippingFeeUsdCents / 100)} /{" "}
-                        {usdFormatter.format(order.deductionUsdCents / 100)}
-                      </dd>
-                    </div>
+                    {order.service !== "catalogue" && (
+                      <div>
+                        <dt>服务费/运费</dt>
+                        <dd>
+                          {usdFormatter.format(order.serviceFeeUsdCents / 100)} /{" "}
+                          {usdFormatter.format(order.shippingFeeUsdCents / 100)}
+                        </dd>
+                      </div>
+                    )}
+                    {order.deductionUsdCents > 0 && (
+                      <div>
+                        <dt>额外减免</dt>
+                        <dd>
+                          {usdFormatter.format(order.deductionUsdCents / 100)}
+                        </dd>
+                      </div>
+                    )}
                     <div>
                       <dt>公开状态</dt>
                       <dd>{order.isPublished ? "公开展示" : "后台保留"}</dd>
