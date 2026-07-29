@@ -6,7 +6,7 @@ import type { SiteLocale as Locale } from "./i18n";
 type Market = "United States" | "Canada" | "Brazil" | "Mexico";
 
 type FulfillmentRecord = {
-  id: number;
+  id: string;
   reference: string;
   occurredAt: string;
   destination: Market;
@@ -29,6 +29,7 @@ type FulfillmentRecord = {
     | "delivered"
     | string;
   isSample: boolean;
+  source: "sample" | "manual";
 };
 
 type ApiResponse = {
@@ -39,7 +40,8 @@ type ApiResponse = {
   generatedAt: string;
   nextUpdateAt: string;
   updateIntervalDays: number;
-  dataMode: "synthetic_sample";
+  realOrderCount: number;
+  dataMode: "mixed_workflow";
 };
 
 const localeCodes: Record<Locale, string> = {
@@ -52,6 +54,10 @@ const localeCodes: Record<Locale, string> = {
 
 const profiles = {
   en: {
+    "1–2 kits": "1–2 kits",
+    "3–5 kits": "3–5 kits",
+    "3–10 kits": "3–10 kits",
+    "6–10 kits": "6–10 kits",
     "Pilot order": "Pilot order",
     "10–50 kits": "10–50 kits",
     "50–100 kits": "50–100 kits",
@@ -62,6 +68,10 @@ const profiles = {
     "3,000+ kits": "3,000+ kits",
   },
   pt: {
+    "1–2 kits": "1–2 kits",
+    "3–5 kits": "3–5 kits",
+    "3–10 kits": "3–10 kits",
+    "6–10 kits": "6–10 kits",
     "Pilot order": "Pedido piloto",
     "10–50 kits": "10–50 kits",
     "50–100 kits": "50–100 kits",
@@ -72,6 +82,10 @@ const profiles = {
     "3,000+ kits": "Mais de 3.000 kits",
   },
   es: {
+    "1–2 kits": "1–2 kits",
+    "3–5 kits": "3–5 kits",
+    "3–10 kits": "3–10 kits",
+    "6–10 kits": "6–10 kits",
     "Pilot order": "Pedido piloto",
     "10–50 kits": "10–50 kits",
     "50–100 kits": "50–100 kits",
@@ -82,6 +96,10 @@ const profiles = {
     "3,000+ kits": "Más de 3.000 kits",
   },
   fr: {
+    "1–2 kits": "1–2 kits",
+    "3–5 kits": "3–5 kits",
+    "3–10 kits": "3–10 kits",
+    "6–10 kits": "6–10 kits",
     "Pilot order": "Commande pilote",
     "10–50 kits": "10–50 kits",
     "50–100 kits": "50–100 kits",
@@ -92,6 +110,10 @@ const profiles = {
     "3,000+ kits": "Plus de 3 000 kits",
   },
   zh: {
+    "1–2 kits": "1–2 盒",
+    "3–5 kits": "3–5 盒",
+    "3–10 kits": "3–10 盒",
+    "6–10 kits": "6–10 盒",
     "Pilot order": "小批量试单",
     "10–50 kits": "10–50 盒",
     "50–100 kits": "50–100 盒",
@@ -109,13 +131,13 @@ const content = {
     title: "Recent workflow activity.",
     text: "A privacy-conscious model of how B2B orders progress through documentation, production, quality review, packaging, dispatch, and delivery.",
     count: "records",
-    window: "month window",
+    window: "latest order limit",
     marketsLabel: "target markets",
     refresh: "Refresh records",
     updated: "Ledger date",
     nextUpdate: "Next daily update",
-    notice:
-      "Illustrative workflow data · showing up to 100 records from the latest 3 months · updated daily · not customer transaction proof.",
+    notice: "Illustrative workflow data, showing the latest 100 new orders.",
+    recordedOrder: "Recorded order",
     loading: "Loading recent records…",
     error: "Recent records are temporarily unavailable.",
     empty: "No published records are available for this period.",
@@ -159,13 +181,13 @@ const content = {
     title: "Atividade recente do fluxo.",
     text: "Um modelo sem identificação de como pedidos B2B avançam por documentação, produção, qualidade, embalagem, despacho e entrega.",
     count: "registros",
-    window: "meses",
+    window: "limite de pedidos recentes",
     marketsLabel: "mercados-alvo",
     refresh: "Atualizar",
     updated: "Data do registro",
     nextUpdate: "Próxima atualização diária",
-    notice:
-      "Dados ilustrativos de fluxo · até 100 registros dos últimos 3 meses · atualização diária · não são prova de transações de clientes.",
+    notice: "Dados ilustrativos do fluxo, mostrando os 100 pedidos mais recentes.",
+    recordedOrder: "Pedido registrado",
     loading: "Carregando registros…",
     error: "Os registros estão temporariamente indisponíveis.",
     empty: "Não há registros publicados para este período.",
@@ -209,13 +231,13 @@ const content = {
     title: "Actividad reciente del flujo.",
     text: "Un modelo anonimizado de cómo los pedidos B2B avanzan por documentación, producción, calidad, empaque, despacho y entrega.",
     count: "registros",
-    window: "meses",
+    window: "límite de pedidos recientes",
     marketsLabel: "mercados objetivo",
     refresh: "Actualizar",
     updated: "Fecha del registro",
     nextUpdate: "Próxima actualización diaria",
-    notice:
-      "Datos ilustrativos del flujo · hasta 100 registros de los últimos 3 meses · actualización diaria · no prueban transacciones de clientes.",
+    notice: "Datos ilustrativos del flujo, mostrando los 100 pedidos más recientes.",
+    recordedOrder: "Pedido registrado",
     loading: "Cargando registros…",
     error: "Los registros no están disponibles temporalmente.",
     empty: "No hay registros publicados para este período.",
@@ -259,13 +281,13 @@ const content = {
     title: "Activité récente du flux.",
     text: "Un modèle anonymisé de progression des commandes B2B entre documentation, production, qualité, emballage, expédition et livraison.",
     count: "enregistrements",
-    window: "mois",
+    window: "limite de commandes récentes",
     marketsLabel: "marchés cibles",
     refresh: "Actualiser",
     updated: "Date du registre",
     nextUpdate: "Prochaine mise à jour quotidienne",
-    notice:
-      "Données illustratives · jusqu’à 100 enregistrements sur 3 mois · actualisation quotidienne · ne prouvent pas des transactions clients.",
+    notice: "Données illustratives du flux, présentant les 100 commandes les plus récentes.",
+    recordedOrder: "Commande enregistrée",
     loading: "Chargement des enregistrements…",
     error: "Les enregistrements sont temporairement indisponibles.",
     empty: "Aucun enregistrement publié pour cette période.",
@@ -309,13 +331,13 @@ const content = {
     title: "近期订单流程记录。",
     text: "以脱敏示例展示 B2B 订单从确认、文件审核、生产、质检、包装、发运到送达的完整推进过程。",
     count: "条记录",
-    window: "个月",
+    window: "条新订单上限",
     marketsLabel: "个目标市场",
     refresh: "刷新记录",
     updated: "台账日期",
     nextUpdate: "下次每日更新",
-    notice:
-      "示例履约流程数据 · 仅展示近 3 个月最多 100 条记录 · 每日更新 · 不作为真实客户成交证明。",
+    notice: "示例履约流程数据，仅展示近100条新订单",
+    recordedOrder: "已登记订单",
     loading: "正在读取近期记录…",
     error: "近期记录暂时无法加载。",
     empty: "该时间范围内暂无记录。",
@@ -437,7 +459,7 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
             <dd>{t.count}</dd>
           </div>
           <div>
-            <dt>3</dt>
+            <dt>100</dt>
             <dd>{t.window}</dd>
           </div>
           <div>
@@ -511,6 +533,11 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                     </td>
                     <td data-label={t.headers[1]}>
                       <code>{record.reference}</code>
+                      {!record.isSample && (
+                        <span className="case-recorded-badge">
+                          {t.recordedOrder}
+                        </span>
+                      )}
                     </td>
                     <td data-label={t.headers[2]}>
                       {t.markets[record.destination]}
@@ -535,13 +562,17 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                       <strong>
                         {amountFormatter.format(record.amountUsdCents / 100)}
                       </strong>
-                      <small>
-                        {amountFormatter.format(
-                          record.unitPriceUsdCents / 100,
-                        )}
-                        /{t.unitPrice} · {amountFormatter.format(fees / 100)}{" "}
-                        {t.fees}
-                      </small>
+                      {record.isSample ? (
+                        <small>
+                          {amountFormatter.format(
+                            record.unitPriceUsdCents / 100,
+                          )}
+                          /{t.unitPrice} · {amountFormatter.format(fees / 100)}{" "}
+                          {t.fees}
+                        </small>
+                      ) : (
+                        <small>{t.recordedOrder}</small>
+                      )}
                     </td>
                     <td data-label={t.headers[7]}>
                       <span

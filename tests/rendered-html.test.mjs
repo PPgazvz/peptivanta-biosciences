@@ -80,7 +80,7 @@ test("includes complete multilingual ledger content", async () => {
   assert.match(homepage, /产品分类 · Products Categories/);
   assert.match(ledger, /近期订单流程记录/);
   assert.match(ledger, /示例履约流程数据/);
-  assert.match(ledger, /仅展示近 3 个月最多 100 条记录/);
+  assert.match(ledger, /示例履约流程数据，仅展示近100条新订单/);
   assert.match(ledger, /Mexico/);
   assert.match(ledger, /Order size/);
   assert.match(ledger, /Faixa do pedido/);
@@ -123,7 +123,7 @@ test("configures a durable daily incremental ledger", async () => {
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.match(generator, /DISPLAY_LIMIT = 100/);
   assert.match(generator, /UPDATE_INTERVAL_DAYS = 1/);
-  assert.match(generator, /LEDGER_VERSION = "daily-v1"/);
+  assert.match(generator, /LEDGER_VERSION = "daily-v2-small-order"/);
   assert.match(generator, /createBackfillRows/);
   assert.match(generator, /createDailyRows/);
   assert.match(generator, /currentFulfillmentStatus/);
@@ -133,7 +133,9 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(generator, /Mexico/);
   assert.match(route, /clearPreviousHistoryOnce/);
   assert.match(route, /LAST_GENERATED_KEY/);
-  assert.match(route, /DELETE FROM fulfillment_cases/);
+  assert.match(route, /DELETE FROM fulfillment_cases WHERE is_sample = 1/);
+  assert.match(route, /manualFulfillmentOrders/);
+  assert.match(route, /dataMode: "mixed_workflow"/);
   assert.match(route, /onConflictDoNothing/);
   assert.doesNotMatch(route, /\.update\(fulfillmentCases\)/);
   assert.match(route, /const \{ quantityUnits, \.\.\.publicRow \} = row/);
@@ -146,7 +148,10 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(schema, /packaging_fee_usd_cents/);
   assert.match(schema, /testing_fee_usd_cents/);
   assert.match(schema, /logistics_fee_usd_cents/);
+  assert.match(schema, /manual_fulfillment_orders/);
+  assert.match(schema, /is_published/);
   assert.match(database, /CREATE TABLE IF NOT EXISTS fulfillment_ledger_meta/);
+  assert.match(database, /CREATE TABLE IF NOT EXISTS manual_fulfillment_orders/);
 });
 
 test("renders the dedicated fulfillment page", async () => {
@@ -157,6 +162,29 @@ test("renders the dedicated fulfillment page", async () => {
   assert.match(html, /Loading recent records/i);
   assert.match(html, /Back to website/i);
   assert.match(html, /wa\.me\/19863059927/i);
+});
+
+test("renders the private real-order administration page", async () => {
+  const response = await render("/admin/orders");
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /真实订单后台/);
+  assert.match(html, /模拟器不会覆盖/);
+  assert.match(html, /name="robots" content="noindex, nofollow, nocache"/i);
+
+  const [adminPage, adminRoute, auth] = await Promise.all([
+    readFile(
+      new URL("../app/admin/orders/AdminOrdersPage.tsx", import.meta.url),
+      "utf8",
+    ),
+    readFile(new URL("../app/api/admin/orders/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/admin/auth.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(adminPage, /\/api\/admin\/orders/);
+  assert.match(adminRoute, /manual_fulfillment_orders/);
+  assert.doesNotMatch(adminRoute, /fulfillmentCases/);
+  assert.match(auth, /FULFILLMENT_ADMIN_KEY/);
+  assert.match(auth, /Bearer/);
 });
 
 test("renders the dedicated multilingual analytical report library", async () => {

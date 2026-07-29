@@ -16,7 +16,7 @@ test("daily ledger backfill is deterministic and limited to 100 records", () => 
   const first = createBackfillRows(DISPLAY_LIMIT, asOf);
   const second = createBackfillRows(DISPLAY_LIMIT, asOf);
 
-  assert.equal(LEDGER_VERSION, "daily-v1");
+  assert.equal(LEDGER_VERSION, "daily-v2-small-order");
   assert.equal(UPDATE_INTERVAL_DAYS, 1);
   assert.equal(first.length, 100);
   assert.deepEqual(first, second);
@@ -37,14 +37,20 @@ test("service, size, and market weights resemble a catalogue-led business", () =
       rows.filter((row) => row.destination === market).length,
     ]),
   );
-  const smallOrders = rows.filter((row) => row.quantityUnits <= 50);
+  const smallOrders = rows.filter((row) => row.quantityUnits <= 10);
+  const ordersUnder500Usd = rows.filter((row) => row.amountUsdCents < 50_000);
+  const ordersUnder1000Usd = rows.filter((row) => row.amountUsdCents < 100_000);
+  const ordersOver5000Usd = rows.filter((row) => row.amountUsdCents >= 500_000);
   const megaBulk = rows.filter(
     (row) => row.service === "bulk" && row.orderProfile === "3,000+ kits",
   );
 
-  assert.ok(serviceCount.catalogue >= 55, serviceCount);
-  assert.ok(serviceCount.bulk <= 8, serviceCount);
-  assert.ok(smallOrders.length >= 45);
+  assert.ok(serviceCount.catalogue >= 80, serviceCount);
+  assert.ok(serviceCount.bulk <= 3, serviceCount);
+  assert.ok(smallOrders.length >= 70);
+  assert.ok(ordersUnder500Usd.length >= 55);
+  assert.ok(ordersUnder1000Usd.length >= 75);
+  assert.ok(ordersOver5000Usd.length <= 12);
   assert.ok(megaBulk.length <= 2);
   assert.ok(marketCount["United States"] > marketCount.Canada, marketCount);
   assert.ok(marketCount.Canada > marketCount.Mexico, marketCount);
@@ -67,7 +73,7 @@ test("bulk orders are separated and weekend orders stay exceptional", () => {
       (Date.parse(`${bulkRows[index].occurredAt}T00:00:00.000Z`) -
         Date.parse(`${bulkRows[index - 1].occurredAt}T00:00:00.000Z`)) /
       86_400_000;
-    assert.ok(gap >= 9, `bulk gap was ${gap} days`);
+    assert.ok(gap >= 20, `bulk gap was ${gap} days`);
   }
   assert.ok(weekendRows.length <= 5);
 });

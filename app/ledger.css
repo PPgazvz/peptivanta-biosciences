@@ -46,6 +46,21 @@
   padding-inline: 14px;
 }
 
+.case-recorded-badge {
+  width: fit-content;
+  margin-top: 6px;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: rgba(25, 216, 170, 0.14);
+  color: #7ff1d5;
+  display: block;
+  font-size: 8px;
+  font-weight: 760;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .case-product strong,
 .case-service strong {
   display: block;

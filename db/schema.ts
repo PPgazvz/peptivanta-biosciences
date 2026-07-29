@@ -53,3 +53,33 @@ export const fulfillmentLedgerMeta = sqliteTable(
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
 );
+
+/**
+ * Real orders are intentionally stored separately from generated sample rows.
+ * The simulator never inserts, updates, expires, or deletes records in this
+ * table. Public routes may merge published rows from both tables for display.
+ */
+export const manualFulfillmentOrders = sqliteTable(
+  "manual_fulfillment_orders",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    reference: text("reference").notNull().unique(),
+    occurredAt: text("occurred_at").notNull(),
+    destination: text("destination").notNull(),
+    service: text("service").notNull(),
+    orderProfile: text("order_profile").notNull(),
+    productName: text("product_name").notNull(),
+    specification: text("specification").notNull().default(""),
+    amountUsdCents: integer("amount_usd_cents").notNull(),
+    status: text("status").notNull(),
+    isPublished: integer("is_published", { mode: "boolean" })
+      .notNull()
+      .default(true),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index("manual_fulfillment_orders_occurred_at_idx").on(table.occurredAt),
+    index("manual_fulfillment_orders_published_idx").on(table.isPublished),
+  ],
+);

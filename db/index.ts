@@ -93,11 +93,34 @@ export async function ensureFulfillmentSchema() {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
       )
     `),
+    d1.prepare(`
+      CREATE TABLE IF NOT EXISTS manual_fulfillment_orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        reference TEXT NOT NULL UNIQUE,
+        occurred_at TEXT NOT NULL,
+        destination TEXT NOT NULL,
+        service TEXT NOT NULL,
+        order_profile TEXT NOT NULL,
+        product_name TEXT NOT NULL,
+        specification TEXT DEFAULT '' NOT NULL,
+        amount_usd_cents INTEGER NOT NULL,
+        status TEXT NOT NULL,
+        is_published INTEGER DEFAULT 1 NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL
+      )
+    `),
     d1.prepare(
       "CREATE INDEX IF NOT EXISTS fulfillment_cases_occurred_at_idx ON fulfillment_cases (occurred_at)",
     ),
     d1.prepare(
       "CREATE INDEX IF NOT EXISTS fulfillment_cases_published_idx ON fulfillment_cases (is_published)",
+    ),
+    d1.prepare(
+      "CREATE INDEX IF NOT EXISTS manual_fulfillment_orders_occurred_at_idx ON manual_fulfillment_orders (occurred_at)",
+    ),
+    d1.prepare(
+      "CREATE INDEX IF NOT EXISTS manual_fulfillment_orders_published_idx ON manual_fulfillment_orders (is_published)",
     ),
   ]);
 

@@ -125,6 +125,32 @@ Worker 部署成功后，在 Cloudflare 中为它添加自定义域名。根域�
 建议只保留一个正式入口，另一个使用重定向规则跳转。网站使用的 MX、SPF、
 DKIM 等邮箱记录与 Worker 网站记录相互独立，不要在绑定网站时删除邮箱记录。
 
+## 真实订单后台
+
+后台地址：
+
+```text
+https://你的域名/admin/orders
+```
+
+后台用来登记真实订单并手动推进“订单已确认 → 文件审核中 → 生产中 → 质量检测 →
+包装中 → 已发运 → 已送达”的状态。真实订单保存在
+`manual_fulfillment_orders` 表中；每日模拟器只会维护
+`fulfillment_cases` 表，绝不会覆盖、修改或删除后台录入的真实订单。
+
+在 Cloudflare 中为每个 Worker 单独设置管理密钥：
+
+```bash
+npx wrangler secret put FULFILLMENT_ADMIN_KEY
+```
+
+请使用足够长的随机密钥，并且不要把真实密钥写入源码、`wrangler.jsonc`、README
+或提交到 GitHub。朋友复制网站到自己的 Cloudflare 账号后，也必须设置他自己的
+`FULFILLMENT_ADMIN_KEY`。
+
+公开页面会把“已公开”的真实订单和模拟订单按日期合并，只显示最新 100 条。
+在后台关闭“公开展示”只会将真实订单从公开页面隐藏，记录仍会保存在数据库中。
+
 ## 网站内容定位
 
 网站采用专业客户询盘模式，不提供在线直接结账，也不在公开页面提供剂量、

@@ -1,6 +1,9 @@
-import { desc, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { ensureFulfillmentSchema, getD1, getDb } from "../../../db";
-import { fulfillmentCases } from "../../../db/schema";
+import {
+  fulfillmentCases,
+  manualFulfillmentOrders,
+} from "../../../db/schema";
 import {
   createBackfillRows,
   createDailyRows,
@@ -63,9 +66,8 @@ async function setMeta(key: string, value: string) {
 }
 
 /**
- * The user explicitly requested that the previous generated history be
- * removed. This versioned marker makes that destructive reset happen once,
- * then leaves the new daily ledger untouched on every later request.
+ * A generator-version change may replace old illustrative rows once. Manual
+ * orders live in their own table and are never touched by this reset.
  */
 async function clearPreviousHistoryOnce() {
   const d1 = await getD1();
@@ -73,8 +75,10 @@ async function clearPreviousHistoryOnce() {
   if (marker === "done") return;
 
   await d1.batch([
-    d1.prepare("DELETE FROM fulfillment_cases"),
-    d1.prepare("DELETE FROM fulfillment_ledger_meta"),
+    d1.prepare("DELETE FROM fulfillment_cases WHERE is_sample = 1"),
+    d1.prepare(
+      "DELETE FROM fulfillment_ledger_meta WHERE key LIKE 'daily-%'",
+    ),
     d1
       .prepare(
         `INSERT INTO fulfillment_ledger_meta (key, value, updated_at)
@@ -103,7 +107,12 @@ async function generationContext(): Promise<GenerationContext> {
       orderProfile: fulfillmentCases.orderProfile,
     })
     .from(fulfillmentCases)
-    .where(eq(fulfillmentCases.service, "bulk"))
+    .where(
+      and(
+        eq(fulfillmentCases.isSample, true),
+        eq(fulfillmentCases.service, "bulk"),
+      ),
+    )
     .orderBy(desc(fulfillmentCases.occurredAt))
     .limit(40);
 
@@ -121,6 +130,7 @@ async function advanceDailyLedger(now: Date) {
   const countResult = await db
     .select({ id: fulfillmentCases.id })
     .from(fulfillmentCases)
+    .where(eq(fulfillmentCases.isSample, true))
     .limit(1);
   let lastGenerated = await getMeta(LAST_GENERATED_KEY);
 
@@ -159,25 +169,45 @@ export async function GET() {
     const generatedAt = await advanceDailyLedger(now);
     const d1 = await getD1();
     await d1
-      .prepare("DELETE FROM fulfillment_cases WHERE occurred_at < ?")
+      .prepare(
+        "DELETE FROM fulfillment_cases WHERE is_sample = 1 AND occurred_at < ?",
+      )
       .bind(windowStart)
       .run();
 
     const db = await getDb();
-    const rows = await db
+    const sampleRows = await db
       .select()
       .from(fulfillmentCases)
-      .where(gte(fulfillmentCases.occurredAt, windowStart))
+      .where(
+        and(
+          eq(fulfillmentCases.isSample, true),
+          eq(fulfillmentCases.isPublished, true),
+          gte(fulfillmentCases.occurredAt, windowStart),
+        ),
+      )
       .orderBy(
         desc(fulfillmentCases.occurredAt),
         desc(fulfillmentCases.id),
       )
       .limit(DISPLAY_LIMIT);
 
-    const records = rows.map((row) => {
+    const manualRows = await db
+      .select()
+      .from(manualFulfillmentOrders)
+      .where(eq(manualFulfillmentOrders.isPublished, true))
+      .orderBy(
+        desc(manualFulfillmentOrders.occurredAt),
+        desc(manualFulfillmentOrders.id),
+      )
+      .limit(DISPLAY_LIMIT);
+
+    const sampleRecords = sampleRows.map((row) => {
       const { quantityUnits, ...publicRow } = row;
       return {
         ...publicRow,
+        id: `sample-${row.id}`,
+        source: "sample" as const,
         status: currentFulfillmentStatus(
           {
             occurredAt: row.occurredAt,
@@ -189,6 +219,35 @@ export async function GET() {
         ),
       };
     });
+
+    const manualRecords = manualRows.map((row) => ({
+      id: `manual-${row.id}`,
+      reference: row.reference,
+      occurredAt: row.occurredAt,
+      destination: row.destination,
+      service: row.service,
+      orderProfile: row.orderProfile,
+      productName: row.productName,
+      specification: row.specification,
+      unitPriceUsdCents: 0,
+      packagingFeeUsdCents: 0,
+      testingFeeUsdCents: 0,
+      logisticsFeeUsdCents: 0,
+      amountUsdCents: row.amountUsdCents,
+      status: row.status,
+      isSample: false,
+      isPublished: row.isPublished,
+      createdAt: row.createdAt,
+      source: "manual" as const,
+    }));
+
+    const records = [...manualRecords, ...sampleRecords]
+      .sort((left, right) => {
+        const dateDelta = right.occurredAt.localeCompare(left.occurredAt);
+        if (dateDelta !== 0) return dateDelta;
+        return right.createdAt.localeCompare(left.createdAt);
+      })
+      .slice(0, DISPLAY_LIMIT);
     const nextUpdateAt = addUtcDays(startOfUtcDay(now), 1);
 
     return Response.json(
@@ -200,7 +259,8 @@ export async function GET() {
         generatedAt: `${generatedAt}T00:00:00.000Z`,
         nextUpdateAt: nextUpdateAt.toISOString(),
         updateIntervalDays: UPDATE_INTERVAL_DAYS,
-        dataMode: "synthetic_sample",
+        realOrderCount: records.filter((record) => !record.isSample).length,
+        dataMode: "mixed_workflow",
       },
       {
         headers: {

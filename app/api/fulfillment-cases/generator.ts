@@ -1,4 +1,4 @@
-export const LEDGER_VERSION = "daily-v1";
+export const LEDGER_VERSION = "daily-v2-small-order";
 export const DISPLAY_LIMIT = 100;
 export const UPDATE_INTERVAL_DAYS = 1;
 
@@ -70,8 +70,10 @@ export type GeneratedFulfillmentRow = {
  */
 export const SERVICE_PROFILES = {
   catalogue: [
-    { label: "10–50 kits", minimum: 10, maximum: 50, weight: 72 },
-    { label: "50–100 kits", minimum: 51, maximum: 100, weight: 28 },
+    { label: "1–2 kits", minimum: 1, maximum: 2, weight: 44 },
+    { label: "3–5 kits", minimum: 3, maximum: 5, weight: 32 },
+    { label: "6–10 kits", minimum: 6, maximum: 10, weight: 18 },
+    { label: "10–50 kits", minimum: 11, maximum: 50, weight: 6 },
   ],
   private_label: [
     { label: "100–300 kits", minimum: 100, maximum: 300, weight: 64 },
@@ -84,10 +86,10 @@ export const SERVICE_PROFILES = {
     { label: "3,000+ kits", minimum: 3001, maximum: 4800, weight: 4 },
   ],
   custom: [
-    { label: "Pilot order", minimum: 5, maximum: 20, weight: 43 },
-    { label: "10–50 kits", minimum: 21, maximum: 50, weight: 34 },
-    { label: "50–100 kits", minimum: 51, maximum: 100, weight: 18 },
-    { label: "100–300 kits", minimum: 101, maximum: 300, weight: 5 },
+    { label: "Pilot order", minimum: 1, maximum: 3, weight: 54 },
+    { label: "3–10 kits", minimum: 4, maximum: 10, weight: 30 },
+    { label: "10–50 kits", minimum: 11, maximum: 50, weight: 13 },
+    { label: "50–100 kits", minimum: 51, maximum: 100, weight: 3 },
   ],
 } as const satisfies Record<
   FulfillmentService,
@@ -106,28 +108,28 @@ const SERVICE_WEIGHTS: Record<
   readonly Weighted<{ value: FulfillmentService }>[]
 > = {
   "United States": [
-    { value: "catalogue", weight: 67 },
-    { value: "private_label", weight: 14 },
-    { value: "custom", weight: 14 },
-    { value: "bulk", weight: 5 },
+    { value: "catalogue", weight: 87 },
+    { value: "private_label", weight: 6 },
+    { value: "custom", weight: 5 },
+    { value: "bulk", weight: 2 },
   ],
   Canada: [
-    { value: "catalogue", weight: 71 },
-    { value: "private_label", weight: 13 },
-    { value: "custom", weight: 12 },
-    { value: "bulk", weight: 4 },
+    { value: "catalogue", weight: 89 },
+    { value: "private_label", weight: 5 },
+    { value: "custom", weight: 4 },
+    { value: "bulk", weight: 2 },
   ],
   Brazil: [
-    { value: "catalogue", weight: 57 },
-    { value: "private_label", weight: 18 },
-    { value: "custom", weight: 17 },
-    { value: "bulk", weight: 8 },
+    { value: "catalogue", weight: 83 },
+    { value: "private_label", weight: 7 },
+    { value: "custom", weight: 7 },
+    { value: "bulk", weight: 3 },
   ],
   Mexico: [
-    { value: "catalogue", weight: 64 },
-    { value: "private_label", weight: 14 },
-    { value: "custom", weight: 16 },
-    { value: "bulk", weight: 6 },
+    { value: "catalogue", weight: 86 },
+    { value: "private_label", weight: 6 },
+    { value: "custom", weight: 6 },
+    { value: "bulk", weight: 2 },
   ],
 };
 
@@ -310,8 +312,29 @@ function orderFees(
   quantity: number,
   random: () => number,
 ) {
+  if (service === "catalogue") {
+    const logisticsRanges: Record<FulfillmentMarket, [number, number]> = {
+      "United States": [900, 3200],
+      Canada: [1400, 4200],
+      Brazil: [2400, 6200],
+      Mexico: [1800, 5000],
+    };
+    const [logisticsMinimum, logisticsMaximum] =
+      logisticsRanges[destination];
+
+    return {
+      packagingFeeUsdCents:
+        random() < 0.48 ? randomInteger(0, 900, random) : 0,
+      testingFeeUsdCents:
+        random() < 0.03 ? randomInteger(3500, 8500, random) : 0,
+      logisticsFeeUsdCents:
+        randomInteger(logisticsMinimum, logisticsMaximum, random) +
+        Math.round(quantity * 35),
+    };
+  }
+
   const packagingRanges: Record<FulfillmentService, [number, number]> = {
-    catalogue: [4500, 18000],
+    catalogue: [0, 0],
     private_label: [50000, 180000],
     bulk: [25000, 120000],
     custom: [35000, 140000],
@@ -330,7 +353,7 @@ function orderFees(
     random,
   );
   const testingFeeUsdCents =
-    random() < (service === "catalogue" ? 0.38 : 0.72)
+    random() < 0.72
       ? randomInteger(18500, service === "bulk" ? 125000 : 78000, random)
       : 0;
   const logisticsFeeUsdCents =
@@ -357,7 +380,7 @@ function createOrder(
 
   // Keep high-volume orders spaced apart. A blocked bulk draw becomes the
   // common catalogue workflow rather than being silently dropped.
-  if (service === "bulk" && daysBetween(context.lastBulkAt, date) < 9) {
+  if (service === "bulk" && daysBetween(context.lastBulkAt, date) < 20) {
     service = "catalogue";
   }
 
@@ -366,7 +389,7 @@ function createOrder(
   if (
     service === "bulk" &&
     profile.label === "3,000+ kits" &&
-    daysBetween(context.lastMegaBulkAt, date) < 30
+    daysBetween(context.lastMegaBulkAt, date) < 60
   ) {
     profile = profiles[0];
   }
