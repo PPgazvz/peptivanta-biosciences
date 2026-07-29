@@ -549,6 +549,12 @@ function businessDaysBetween(
   return count;
 }
 
+function calendarDaysBetween(occurredAt: Date, asOf: Date) {
+  const milliseconds =
+    startOfUtcDay(asOf).getTime() - startOfUtcDay(occurredAt).getTime();
+  return Math.max(0, Math.floor(milliseconds / 86_400_000));
+}
+
 function workflowDurations(
   service: FulfillmentService,
   quantityUnits: number,
@@ -576,7 +582,9 @@ function workflowDurations(
     return {
       documentation: 0,
       production: 0,
-      quality: 1,
+      // Stocked 1-10 box orders are released during the confirmation day.
+      // Larger catalogue lots retain one separate release-check workday.
+      quality: quantityUnits <= 10 ? 0 : 1,
       packaging: 1,
       transit: transitDays[destination],
     };
@@ -638,8 +646,22 @@ export function currentFulfillmentStatus(
   >,
   asOf: Date,
 ): FulfillmentStatus {
+  const occurredAt = new Date(`${record.occurredAt}T00:00:00.000Z`);
+
+  /*
+   * Commercial display guardrail: every non-bulk order is complete after
+   * fourteen full calendar days. Bulk projects are the only exception because
+   * their production quantity can legitimately require a longer lead time.
+   */
+  if (
+    record.service !== "bulk" &&
+    calendarDaysBetween(occurredAt, asOf) > 14
+  ) {
+    return "delivered";
+  }
+
   const businessDays = businessDaysBetween(
-    new Date(`${record.occurredAt}T00:00:00.000Z`),
+    occurredAt,
     asOf,
     record.destination,
   );

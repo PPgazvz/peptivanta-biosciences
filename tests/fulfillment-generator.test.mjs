@@ -215,9 +215,9 @@ test("reported July examples follow inventory-aware workflow timing", () => {
   const asOf = new Date("2026-07-29T12:00:00.000Z");
   const examples = [
     ["2026-07-08", "Brazil", "custom", 25, "delivered"],
-    ["2026-07-09", "United States", "private_label", 400, "dispatched"],
+    ["2026-07-09", "United States", "private_label", 400, "delivered"],
     ["2026-07-10", "United States", "catalogue", 40, "delivered"],
-    ["2026-07-13", "United States", "private_label", 400, "dispatched"],
+    ["2026-07-13", "United States", "private_label", 400, "delivered"],
     ["2026-07-15", "Canada", "custom", 4, "delivered"],
     ["2026-07-16", "United States", "catalogue", 1, "delivered"],
     ["2026-07-16", "Canada", "catalogue", 1, "delivered"],
@@ -227,8 +227,8 @@ test("reported July examples follow inventory-aware workflow timing", () => {
     ["2026-07-22", "Canada", "catalogue", 8, "dispatched"],
     ["2026-07-21", "United States", "catalogue", 1, "delivered"],
     ["2026-07-28", "United States", "private_label", 400, "documentation_review"],
-    ["2026-07-28", "Mexico", "catalogue", 4, "quality_control"],
-    ["2026-07-27", "United States", "catalogue", 1, "packaging"],
+    ["2026-07-28", "Mexico", "catalogue", 4, "packaging"],
+    ["2026-07-27", "United States", "catalogue", 1, "dispatched"],
   ];
 
   for (const [
@@ -247,6 +247,37 @@ test("reported July examples follow inventory-aware workflow timing", () => {
       `${occurredAt} ${service} ${quantityUnits}`,
     );
   }
+});
+
+test("non-bulk orders cannot remain open beyond fourteen calendar days", () => {
+  const asOf = new Date("2026-07-29T12:00:00.000Z");
+  for (const service of ["catalogue", "private_label", "custom"]) {
+    assert.equal(
+      currentFulfillmentStatus(
+        {
+          occurredAt: "2026-07-14",
+          destination: "Brazil",
+          service,
+          quantityUnits: service === "private_label" ? 900 : 40,
+        },
+        asOf,
+      ),
+      "delivered",
+    );
+  }
+
+  assert.equal(
+    currentFulfillmentStatus(
+      {
+        occurredAt: "2026-07-14",
+        destination: "Brazil",
+        service: "bulk",
+        quantityUnits: 3600,
+      },
+      asOf,
+    ),
+    "in_production",
+  );
 });
 
 test("daily generation is stable and can produce a quiet day", () => {
