@@ -1,4 +1,9 @@
 import { ensureFulfillmentSchema, getD1 } from "../../../../db";
+import { findCatalogVariant } from "../../../../lib/product-catalog.ts";
+import {
+  calculateOrderPricing,
+  orderProfileForQuantity,
+} from "../../../../lib/order-pricing.ts";
 import { requireFulfillmentAdmin } from "../auth";
 
 const markets = new Set([
@@ -29,10 +34,13 @@ type ManualOrderInput = {
   occurredAt?: unknown;
   destination?: unknown;
   service?: unknown;
-  orderProfile?: unknown;
+  sku?: unknown;
   productName?: unknown;
   specification?: unknown;
-  amountUsdCents?: unknown;
+  quantityUnits?: unknown;
+  serviceFeeUsdCents?: unknown;
+  shippingFeeUsdCents?: unknown;
+  deductionUsdCents?: unknown;
   status?: unknown;
   isPublished?: unknown;
 };
@@ -86,18 +94,56 @@ function validateInput(body: ManualOrderInput, includeId: boolean) {
   if (!services.has(service)) throw new Error("Service is invalid.");
   if (!statuses.has(status)) throw new Error("Status is invalid.");
 
-  const amountUsdCents = Number(body.amountUsdCents);
+  const quantityUnits = Number(body.quantityUnits);
   if (
-    !Number.isSafeInteger(amountUsdCents) ||
-    amountUsdCents < 1 ||
-    amountUsdCents > 1_000_000_000
+    !Number.isSafeInteger(quantityUnits) ||
+    quantityUnits < 1 ||
+    quantityUnits > 100_000
   ) {
-    throw new Error("Amount must be between US$0.01 and US$10,000,000.");
+    throw new Error("Quantity must be a whole number between 1 and 100,000.");
   }
 
   const id = Number(body.id);
   if (includeId && (!Number.isSafeInteger(id) || id < 1)) {
     throw new Error("Order id is invalid.");
+  }
+
+  const sku = textField(body.sku, "SKU", 40);
+  const productName = textField(body.productName, "Product name", 120);
+  const specification = textField(
+    body.specification,
+    "Specification",
+    180,
+  );
+  const catalogItem = findCatalogVariant(sku, productName, specification);
+  if (!catalogItem) {
+    throw new Error(
+      "The selected product specification does not match the official quote catalogue.",
+    );
+  }
+
+  const serviceFeeUsdCents = moneyField(
+    body.serviceFeeUsdCents,
+    "Service/packaging fee",
+  );
+  const shippingFeeUsdCents = moneyField(
+    body.shippingFeeUsdCents,
+    "Shipping fee",
+  );
+  const deductionUsdCents = moneyField(
+    body.deductionUsdCents,
+    "Extra deduction",
+  );
+  const pricing = calculateOrderPricing({
+    retailUnitPriceUsdCents: catalogItem.retailUsdCents,
+    quantityUnits,
+    service: service as "catalogue" | "private_label" | "bulk" | "custom",
+    serviceFeeUsdCents,
+    shippingFeeUsdCents,
+    deductionUsdCents,
+  });
+  if (pricing.amountUsdCents < 1) {
+    throw new Error("The calculated order total must be greater than US$0.");
   }
 
   return {
@@ -106,16 +152,32 @@ function validateInput(body: ManualOrderInput, includeId: boolean) {
     occurredAt,
     destination,
     service,
-    orderProfile: textField(body.orderProfile, "Order size", 60),
-    productName: textField(body.productName, "Product name", 120),
-    specification:
-      typeof body.specification === "string"
-        ? body.specification.trim().slice(0, 180)
-        : "",
-    amountUsdCents,
+    orderProfile: orderProfileForQuantity(quantityUnits),
+    sku: catalogItem.sku,
+    productName: catalogItem.productName,
+    specification: catalogItem.specification,
+    quantityUnits,
+    retailUnitPriceUsdCents: catalogItem.retailUsdCents,
+    discountBps: pricing.discountBps,
+    serviceFeeUsdCents,
+    shippingFeeUsdCents,
+    deductionUsdCents,
+    amountUsdCents: pricing.amountUsdCents,
     status,
     isPublished: body.isPublished === false ? 0 : 1,
   };
+}
+
+function moneyField(value: unknown, name: string) {
+  const amount = Number(value ?? 0);
+  if (
+    !Number.isSafeInteger(amount) ||
+    amount < 0 ||
+    amount > 1_000_000_000
+  ) {
+    throw new Error(`${name} must be between US$0 and US$10,000,000.`);
+  }
+  return amount;
 }
 
 async function readOrders() {
@@ -129,8 +191,15 @@ async function readOrders() {
          destination,
          service,
          order_profile AS orderProfile,
+         sku,
          product_name AS productName,
          specification,
+         quantity_units AS quantityUnits,
+         retail_unit_price_usd_cents AS retailUnitPriceUsdCents,
+         discount_bps AS discountBps,
+         service_fee_usd_cents AS serviceFeeUsdCents,
+         shipping_fee_usd_cents AS shippingFeeUsdCents,
+         deduction_usd_cents AS deductionUsdCents,
          amount_usd_cents AS amountUsdCents,
          status,
          is_published AS isPublished,
@@ -174,13 +243,20 @@ export async function POST(request: Request) {
            destination,
            service,
            order_profile,
+           sku,
            product_name,
            specification,
+           quantity_units,
+           retail_unit_price_usd_cents,
+           discount_bps,
+           service_fee_usd_cents,
+           shipping_fee_usd_cents,
+           deduction_usd_cents,
            amount_usd_cents,
            status,
            is_published,
            updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
       )
       .bind(
         order.reference,
@@ -188,8 +264,15 @@ export async function POST(request: Request) {
         order.destination,
         order.service,
         order.orderProfile,
+        order.sku,
         order.productName,
         order.specification,
+        order.quantityUnits,
+        order.retailUnitPriceUsdCents,
+        order.discountBps,
+        order.serviceFeeUsdCents,
+        order.shippingFeeUsdCents,
+        order.deductionUsdCents,
         order.amountUsdCents,
         order.status,
         order.isPublished,
@@ -230,8 +313,15 @@ export async function PATCH(request: Request) {
            destination = ?,
            service = ?,
            order_profile = ?,
+           sku = ?,
            product_name = ?,
            specification = ?,
+           quantity_units = ?,
+           retail_unit_price_usd_cents = ?,
+           discount_bps = ?,
+           service_fee_usd_cents = ?,
+           shipping_fee_usd_cents = ?,
+           deduction_usd_cents = ?,
            amount_usd_cents = ?,
            status = ?,
            is_published = ?,
@@ -244,8 +334,15 @@ export async function PATCH(request: Request) {
         order.destination,
         order.service,
         order.orderProfile,
+        order.sku,
         order.productName,
         order.specification,
+        order.quantityUnits,
+        order.retailUnitPriceUsdCents,
+        order.discountBps,
+        order.serviceFeeUsdCents,
+        order.shippingFeeUsdCents,
+        order.deductionUsdCents,
         order.amountUsdCents,
         order.status,
         order.isPublished,

@@ -123,7 +123,7 @@ test("configures a durable daily incremental ledger", async () => {
   assert.equal(JSON.parse(hosting).d1, "DB");
   assert.match(generator, /DISPLAY_LIMIT = 100/);
   assert.match(generator, /UPDATE_INTERVAL_DAYS = 1/);
-  assert.match(generator, /LEDGER_VERSION = "daily-v2-small-order"/);
+  assert.match(generator, /LEDGER_VERSION = "daily-v3-quote-pricing"/);
   assert.match(generator, /createBackfillRows/);
   assert.match(generator, /createDailyRows/);
   assert.match(generator, /currentFulfillmentStatus/);
@@ -150,6 +150,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(schema, /logistics_fee_usd_cents/);
   assert.match(schema, /manual_fulfillment_orders/);
   assert.match(schema, /is_published/);
+  assert.match(schema, /retail_unit_price_usd_cents/);
+  assert.match(schema, /discount_bps/);
   assert.match(database, /CREATE TABLE IF NOT EXISTS fulfillment_ledger_meta/);
   assert.match(database, /CREATE TABLE IF NOT EXISTS manual_fulfillment_orders/);
 });
@@ -172,19 +174,28 @@ test("renders the private real-order administration page", async () => {
   assert.match(html, /模拟器不会覆盖/);
   assert.match(html, /name="robots" content="noindex, nofollow, nocache"/i);
 
-  const [adminPage, adminRoute, auth] = await Promise.all([
+  const [adminPage, adminRoute, auth, catalogue, pricing] = await Promise.all([
     readFile(
       new URL("../app/admin/orders/AdminOrdersPage.tsx", import.meta.url),
       "utf8",
     ),
     readFile(new URL("../app/api/admin/orders/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/admin/auth.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/product-catalog.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/order-pricing.ts", import.meta.url), "utf8"),
   ]);
   assert.match(adminPage, /\/api\/admin\/orders/);
+  assert.match(adminPage, /PRODUCT_CATALOG/);
+  assert.match(adminPage, /自动计算总额/);
   assert.match(adminRoute, /manual_fulfillment_orders/);
   assert.doesNotMatch(adminRoute, /fulfillmentCases/);
+  assert.match(adminRoute, /findCatalogVariant/);
+  assert.match(adminRoute, /calculateOrderPricing/);
   assert.match(auth, /FULFILLMENT_ADMIN_KEY/);
   assert.match(auth, /Bearer/);
+  assert.equal((catalogue.match(/\{ sku:/g) ?? []).length, 96);
+  assert.match(pricing, /VOLUME_DISCOUNT_TIERS/);
+  assert.match(pricing, /discountBps: 4000/);
 });
 
 test("renders the dedicated multilingual analytical report library", async () => {

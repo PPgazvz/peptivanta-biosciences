@@ -60,6 +60,37 @@ const addedColumns = [
   },
 ] as const;
 
+const manualOrderAddedColumns = [
+  {
+    name: "sku",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN sku TEXT DEFAULT '' NOT NULL",
+  },
+  {
+    name: "quantity_units",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN quantity_units INTEGER DEFAULT 1 NOT NULL",
+  },
+  {
+    name: "retail_unit_price_usd_cents",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN retail_unit_price_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "discount_bps",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN discount_bps INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "service_fee_usd_cents",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN service_fee_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "shipping_fee_usd_cents",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN shipping_fee_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+  {
+    name: "deduction_usd_cents",
+    sql: "ALTER TABLE manual_fulfillment_orders ADD COLUMN deduction_usd_cents INTEGER DEFAULT 0 NOT NULL",
+  },
+] as const;
+
 export async function ensureFulfillmentSchema() {
   const d1 = await getD1Binding();
   await d1.batch([
@@ -101,8 +132,15 @@ export async function ensureFulfillmentSchema() {
         destination TEXT NOT NULL,
         service TEXT NOT NULL,
         order_profile TEXT NOT NULL,
+        sku TEXT DEFAULT '' NOT NULL,
         product_name TEXT NOT NULL,
         specification TEXT DEFAULT '' NOT NULL,
+        quantity_units INTEGER DEFAULT 1 NOT NULL,
+        retail_unit_price_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        discount_bps INTEGER DEFAULT 0 NOT NULL,
+        service_fee_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        shipping_fee_usd_cents INTEGER DEFAULT 0 NOT NULL,
+        deduction_usd_cents INTEGER DEFAULT 0 NOT NULL,
         amount_usd_cents INTEGER NOT NULL,
         status TEXT NOT NULL,
         is_published INTEGER DEFAULT 1 NOT NULL,
@@ -131,6 +169,19 @@ export async function ensureFulfillmentSchema() {
 
   for (const column of addedColumns) {
     if (!columns.has(column.name)) {
+      await d1.prepare(column.sql).run();
+    }
+  }
+
+  const manualTableInfo = await d1
+    .prepare("PRAGMA table_info(manual_fulfillment_orders)")
+    .all<{ name: string }>();
+  const manualColumns = new Set(
+    manualTableInfo.results.map((column) => column.name),
+  );
+
+  for (const column of manualOrderAddedColumns) {
+    if (!manualColumns.has(column.name)) {
       await d1.prepare(column.sql).run();
     }
   }

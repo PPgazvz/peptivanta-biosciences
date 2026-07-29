@@ -68,8 +68,23 @@ export const manualFulfillmentOrders = sqliteTable(
     destination: text("destination").notNull(),
     service: text("service").notNull(),
     orderProfile: text("order_profile").notNull(),
+    sku: text("sku").notNull().default(""),
     productName: text("product_name").notNull(),
     specification: text("specification").notNull().default(""),
+    quantityUnits: integer("quantity_units").notNull().default(1),
+    retailUnitPriceUsdCents: integer("retail_unit_price_usd_cents")
+      .notNull()
+      .default(0),
+    discountBps: integer("discount_bps").notNull().default(0),
+    serviceFeeUsdCents: integer("service_fee_usd_cents")
+      .notNull()
+      .default(0),
+    shippingFeeUsdCents: integer("shipping_fee_usd_cents")
+      .notNull()
+      .default(0),
+    deductionUsdCents: integer("deduction_usd_cents")
+      .notNull()
+      .default(0),
     amountUsdCents: integer("amount_usd_cents").notNull(),
     status: text("status").notNull(),
     isPublished: integer("is_published", { mode: "boolean" })

@@ -1,4 +1,10 @@
-export const LEDGER_VERSION = "daily-v2-small-order";
+import { PRODUCT_CATALOG } from "../../../lib/product-catalog.ts";
+import {
+  calculateOrderPricing,
+  orderProfileForQuantity,
+} from "../../../lib/order-pricing.ts";
+
+export const LEDGER_VERSION = "daily-v3-quote-pricing";
 export const DISPLAY_LIMIT = 100;
 export const UPDATE_INTERVAL_DAYS = 1;
 
@@ -133,17 +139,24 @@ const SERVICE_WEIGHTS: Record<
   ],
 };
 
-const CATALOGUE_PRODUCTS: readonly Product[] = [
-  { name: "BPC-157", specification: "5 mg · 10 vials", unitPriceUsdCents: 7425, weight: 19 },
-  { name: "TB-500", specification: "10 mg · 10 vials", unitPriceUsdCents: 8660, weight: 14 },
-  { name: "CJC-1295", specification: "5 mg · 10 vials", unitPriceUsdCents: 9875, weight: 12 },
-  { name: "Ipamorelin", specification: "10 mg · 10 vials", unitPriceUsdCents: 7215, weight: 12 },
-  { name: "MOTS-C", specification: "20 mg · 10 vials", unitPriceUsdCents: 12940, weight: 9 },
-  { name: "GHK-Cu", specification: "50 mg · 10 vials", unitPriceUsdCents: 5830, weight: 9 },
-  { name: "Semaglutide", specification: "5 mg · 10 vials", unitPriceUsdCents: 9580, weight: 10 },
-  { name: "Tirzepatide", specification: "10 mg · 10 vials", unitPriceUsdCents: 14850, weight: 9 },
-  { name: "Retatrutide", specification: "10 mg · 10 vials", unitPriceUsdCents: 17530, weight: 6 },
-];
+const CATALOGUE_PRODUCTS: readonly Product[] = PRODUCT_CATALOG.map((item) => ({
+  name: item.productName,
+  specification: item.specification,
+  unitPriceUsdCents: item.retailUsdCents,
+  // Common catalogue lines remain more visible without excluding any SKU.
+  weight:
+    item.productName === "Tirzepatide"
+      ? 5
+      : item.productName === "Retatrutide" ||
+          item.productName === "Semaglutide"
+        ? 4
+        : item.productName === "BPC 157" ||
+            item.productName === "TB500" ||
+            item.productName === "GHK-Cu" ||
+            item.productName === "MOTS-c"
+          ? 3
+          : 1,
+}));
 
 const CUSTOM_PRODUCTS: readonly Product[] = [
   {
@@ -279,31 +292,10 @@ function serviceProduct(
   return pickWeighted(CATALOGUE_PRODUCTS, random);
 }
 
-function serviceSpecification(
-  service: FulfillmentService,
-  product: Product,
-) {
-  if (service === "private_label") {
-    return `${product.specification} · private-label packaging`;
-  }
-  if (service === "bulk") {
-    return `${product.specification} · commercial lot`;
-  }
+function serviceSpecification(product: Product) {
+  // Packaging/service type is shown in its own column. The specification stays
+  // byte-for-byte aligned with the official quotation workbook.
   return product.specification;
-}
-
-function servicePriceMultiplier(
-  service: FulfillmentService,
-  quantity: number,
-) {
-  if (service === "private_label") return 0.94;
-  if (service === "custom") return 1.18;
-  if (service === "bulk") {
-    if (quantity > 3000) return 0.64;
-    if (quantity > 1000) return 0.72;
-    return 0.8;
-  }
-  return quantity > 50 ? 0.96 : 1;
 }
 
 function orderFees(
@@ -396,21 +388,17 @@ function createOrder(
 
   const quantityUnits = randomInteger(profile.minimum, profile.maximum, random);
   const product = serviceProduct(service, random);
-  const priceVariation = 0.96 + random() * 0.08;
-  const unitPriceUsdCents = Math.max(
-    1,
-    Math.round(
-      product.unitPriceUsdCents *
-        servicePriceMultiplier(service, quantityUnits) *
-        priceVariation,
-    ),
-  );
   const fees = orderFees(service, destination, quantityUnits, random);
-  const amountUsdCents =
-    quantityUnits * unitPriceUsdCents +
-    fees.packagingFeeUsdCents +
-    fees.testingFeeUsdCents +
-    fees.logisticsFeeUsdCents;
+  const pricing = calculateOrderPricing({
+    retailUnitPriceUsdCents: product.unitPriceUsdCents,
+    quantityUnits,
+    service,
+    serviceFeeUsdCents:
+      fees.packagingFeeUsdCents + fees.testingFeeUsdCents,
+    shippingFeeUsdCents: fees.logisticsFeeUsdCents,
+  });
+  const unitPriceUsdCents = pricing.discountedUnitPriceUsdCents;
+  const amountUsdCents = pricing.amountUsdCents;
   const dateKey = isoDate(date);
   const marketCode: Record<FulfillmentMarket, string> = {
     "United States": "US",
@@ -431,9 +419,9 @@ function createOrder(
     occurredAt: dateKey,
     destination,
     service,
-    orderProfile: profile.label,
+    orderProfile: orderProfileForQuantity(quantityUnits),
     productName: product.name,
-    specification: serviceSpecification(service, product),
+    specification: serviceSpecification(product),
     quantityUnits,
     unitPriceUsdCents,
     ...fees,

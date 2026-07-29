@@ -2,6 +2,14 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import {
+  PRODUCT_CATALOG,
+  PRODUCT_CATEGORY_LABELS,
+} from "../../../lib/product-catalog.ts";
+import {
+  calculateOrderPricing,
+  orderProfileForQuantity,
+} from "../../../lib/order-pricing.ts";
 import { siteConfig } from "../../../site.config";
 
 type Market = "United States" | "Canada" | "Brazil" | "Mexico";
@@ -22,8 +30,15 @@ type ManualOrder = {
   destination: Market;
   service: Service;
   orderProfile: string;
+  sku: string;
   productName: string;
   specification: string;
+  quantityUnits: number;
+  retailUnitPriceUsdCents: number;
+  discountBps: number;
+  serviceFeeUsdCents: number;
+  shippingFeeUsdCents: number;
+  deductionUsdCents: number;
   amountUsdCents: number;
   status: Status;
   isPublished: boolean | number;
@@ -37,6 +52,10 @@ type OrderResponse = {
 };
 
 const SESSION_KEY = "peptivanta_fulfillment_admin_key";
+const usdFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
 
 const markets: { value: Market; label: string }[] = [
   { value: "United States", label: "美国" },
@@ -62,18 +81,30 @@ const statuses: { value: Status; label: string }[] = [
   { value: "delivered", label: "已送达" },
 ];
 
+const firstCatalogItem = PRODUCT_CATALOG[0];
+const productNames = Array.from(
+  new Set(PRODUCT_CATALOG.map((item) => item.productName)),
+).sort((left, right) => left.localeCompare(right, "en"));
+
 const emptyDraft = () => ({
   reference: "",
   occurredAt: new Date().toISOString().slice(0, 10),
   destination: "United States" as Market,
   service: "catalogue" as Service,
-  orderProfile: "1–2 kits",
-  productName: "",
-  specification: "",
-  amountUsd: "",
+  sku: firstCatalogItem.sku,
+  productName: firstCatalogItem.productName,
+  quantityUnits: "1",
+  serviceFeeUsd: "0",
+  shippingFeeUsd: "0",
+  deductionUsd: "0",
   status: "confirmed" as Status,
   isPublished: true,
 });
+
+function usdToCents(value: string) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.round(parsed * 100)) : 0;
+}
 
 export default function AdminOrdersPage() {
   const [adminKey, setAdminKey] = useState("");
@@ -86,12 +117,47 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     const stored = window.sessionStorage.getItem(SESSION_KEY);
+    // Hydrate the tab-scoped credential only after the client is available.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setAdminKey(stored);
   }, []);
 
   const publishedCount = useMemo(
     () => orders.filter((order) => Boolean(order.isPublished)).length,
     [orders],
+  );
+  const draftVariants = useMemo(
+    () =>
+      PRODUCT_CATALOG.filter(
+        (item) => item.productName === draft.productName,
+      ),
+    [draft.productName],
+  );
+  const selectedDraftProduct = useMemo(
+    () =>
+      draftVariants.find((item) => item.sku === draft.sku) ??
+      draftVariants[0] ??
+      firstCatalogItem,
+    [draft.sku, draftVariants],
+  );
+  const draftPricing = useMemo(
+    () =>
+      calculateOrderPricing({
+        retailUnitPriceUsdCents: selectedDraftProduct.retailUsdCents,
+        quantityUnits: Number(draft.quantityUnits) || 1,
+        service: draft.service,
+        serviceFeeUsdCents: usdToCents(draft.serviceFeeUsd),
+        shippingFeeUsdCents: usdToCents(draft.shippingFeeUsd),
+        deductionUsdCents: usdToCents(draft.deductionUsd),
+      }),
+    [
+      draft.deductionUsd,
+      draft.quantityUnits,
+      draft.service,
+      draft.serviceFeeUsd,
+      draft.shippingFeeUsd,
+      selectedDraftProduct,
+    ],
   );
 
   async function adminRequest(
@@ -145,10 +211,15 @@ export default function AdminOrdersPage() {
     setError("");
     setMessage("");
     try {
-      const amountUsdCents = Math.round(Number(draft.amountUsd) * 100);
       await adminRequest("POST", {
         ...draft,
-        amountUsdCents,
+        sku: selectedDraftProduct.sku,
+        productName: selectedDraftProduct.productName,
+        specification: selectedDraftProduct.specification,
+        quantityUnits: Number(draft.quantityUnits),
+        serviceFeeUsdCents: usdToCents(draft.serviceFeeUsd),
+        shippingFeeUsdCents: usdToCents(draft.shippingFeeUsd),
+        deductionUsdCents: usdToCents(draft.deductionUsd),
       });
       setDraft(emptyDraft());
       setMessage("真实订单已保存，并已按照公开状态加入近期履约页面。");
@@ -345,60 +416,104 @@ export default function AdminOrdersPage() {
             </label>
             <label>
               <span>产品名称</span>
-              <input
+              <select
                 value={draft.productName}
-                onChange={(event) =>
-                  setDraft({ ...draft, productName: event.target.value })
-                }
-                placeholder="例如 BPC-157"
-                required
-              />
+                onChange={(event) => {
+                  const productName = event.target.value;
+                  const firstVariant = PRODUCT_CATALOG.find(
+                    (item) => item.productName === productName,
+                  );
+                  if (firstVariant) {
+                    setDraft({
+                      ...draft,
+                      productName,
+                      sku: firstVariant.sku,
+                    });
+                  }
+                }}
+              >
+                {productNames.map((productName) => {
+                  const item = PRODUCT_CATALOG.find(
+                    (entry) => entry.productName === productName,
+                  );
+                  return (
+                    <option value={productName} key={productName}>
+                      {productName}
+                      {item
+                        ? ` · ${PRODUCT_CATEGORY_LABELS[item.category]}`
+                        : ""}
+                    </option>
+                  );
+                })}
+              </select>
             </label>
             <label>
-              <span>规格</span>
-              <input
-                value={draft.specification}
+              <span>报价单规格与零售价</span>
+              <select
+                value={selectedDraftProduct.sku}
                 onChange={(event) =>
-                  setDraft({ ...draft, specification: event.target.value })
+                  setDraft({ ...draft, sku: event.target.value })
                 }
-                placeholder="例如 10 mg · 10 vials"
-              />
+              >
+                {draftVariants.map((item) => (
+                  <option value={item.sku} key={`${item.sku}-${item.specification}`}>
+                    {item.specification} · {item.sku} ·{" "}
+                    {usdFormatter.format(item.retailUsdCents / 100)}/盒
+                  </option>
+                ))}
+              </select>
             </label>
             <label>
-              <span>订单规模</span>
-              <input
-                value={draft.orderProfile}
-                onChange={(event) =>
-                  setDraft({ ...draft, orderProfile: event.target.value })
-                }
-                list="order-profile-options"
-                required
-              />
-              <datalist id="order-profile-options">
-                <option value="1–2 kits" />
-                <option value="3–5 kits" />
-                <option value="6–10 kits" />
-                <option value="10–50 kits" />
-                <option value="50–100 kits" />
-                <option value="100–300 kits" />
-                <option value="500–1,000 kits" />
-                <option value="1,000–3,000 kits" />
-                <option value="3,000+ kits" />
-              </datalist>
-            </label>
-            <label>
-              <span>订单金额（USD）</span>
+              <span>数量（盒，每盒10瓶）</span>
               <input
                 type="number"
-                min="0.01"
+                min="1"
+                max="100000"
+                step="1"
+                value={draft.quantityUnits}
+                onChange={(event) =>
+                  setDraft({ ...draft, quantityUnits: event.target.value })
+                }
+                required
+              />
+            </label>
+            <label>
+              <span>贴牌/包装/检测费（USD）</span>
+              <input
+                type="number"
+                min="0"
                 max="10000000"
                 step="0.01"
-                value={draft.amountUsd}
+                value={draft.serviceFeeUsd}
                 onChange={(event) =>
-                  setDraft({ ...draft, amountUsd: event.target.value })
+                  setDraft({ ...draft, serviceFeeUsd: event.target.value })
                 }
-                placeholder="例如 286.50"
-                required
+              />
+            </label>
+            <label>
+              <span>运费（USD，报价单不含运费）</span>
+              <input
+                type="number"
+                min="0"
+                max="10000000"
+                step="0.01"
+                value={draft.shippingFeeUsd}
+                onChange={(event) =>
+                  setDraft({ ...draft, shippingFeeUsd: event.target.value })
+                }
+              />
+            </label>
+            <label>
+              <span>额外减免（USD，可选）</span>
+              <input
+                type="number"
+                min="0"
+                max="10000000"
+                step="0.01"
+                value={draft.deductionUsd}
+                onChange={(event) =>
+                  setDraft({ ...draft, deductionUsd: event.target.value })
+                }
               />
             </label>
             <label>
@@ -416,6 +531,35 @@ export default function AdminOrdersPage() {
                 ))}
               </select>
             </label>
+            <div className="admin-pricing-preview">
+              <div>
+                <span>零售价小计</span>
+                <strong>
+                  {usdFormatter.format(
+                    draftPricing.retailSubtotalUsdCents / 100,
+                  )}
+                </strong>
+              </div>
+              <div>
+                <span>数量阶梯折扣</span>
+                <strong>{(draftPricing.discountBps / 100).toFixed(0)}%</strong>
+              </div>
+              <div>
+                <span>订单规模</span>
+                <strong>
+                  {orderProfileForQuantity(Number(draft.quantityUnits) || 1)}
+                </strong>
+              </div>
+              <div className="is-total">
+                <span>自动计算总额</span>
+                <strong>
+                  {usdFormatter.format(draftPricing.amountUsdCents / 100)}
+                </strong>
+              </div>
+              <small>
+                零售价小计 − 阶梯折扣 + 服务费 + 运费 − 额外减免
+              </small>
+            </div>
             <label className="admin-checkbox">
               <input
                 type="checkbox"
@@ -453,14 +597,11 @@ export default function AdminOrdersPage() {
                     <div>
                       <code>{order.reference}</code>
                       <h3>{order.productName}</h3>
-                      <p>{order.specification || "未填写规格"}</p>
+                      <p>
+                        {order.specification || "未填写规格"} · SKU {order.sku}
+                      </p>
                     </div>
-                    <strong>
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      }).format(order.amountUsdCents / 100)}
-                    </strong>
+                    <strong>{usdFormatter.format(order.amountUsdCents / 100)}</strong>
                   </header>
                   <dl>
                     <div><dt>订单日期</dt><dd>{order.occurredAt}</dd></div>
@@ -468,7 +609,26 @@ export default function AdminOrdersPage() {
                       <dt>目的地</dt>
                       <dd>{markets.find((item) => item.value === order.destination)?.label}</dd>
                     </div>
-                    <div><dt>订单规模</dt><dd>{order.orderProfile}</dd></div>
+                    <div>
+                      <dt>数量与规模</dt>
+                      <dd>{order.quantityUnits.toLocaleString()} 盒 · {order.orderProfile}</dd>
+                    </div>
+                    <div>
+                      <dt>报价单零售价</dt>
+                      <dd>{usdFormatter.format(order.retailUnitPriceUsdCents / 100)}/盒</dd>
+                    </div>
+                    <div>
+                      <dt>数量折扣</dt>
+                      <dd>{(order.discountBps / 100).toFixed(0)}%</dd>
+                    </div>
+                    <div>
+                      <dt>费用/运费/减免</dt>
+                      <dd>
+                        {usdFormatter.format(order.serviceFeeUsdCents / 100)} /{" "}
+                        {usdFormatter.format(order.shippingFeeUsdCents / 100)} /{" "}
+                        {usdFormatter.format(order.deductionUsdCents / 100)}
+                      </dd>
+                    </div>
                     <div>
                       <dt>公开状态</dt>
                       <dd>{order.isPublished ? "公开展示" : "后台保留"}</dd>

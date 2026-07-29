@@ -9,6 +9,12 @@ import {
   LEDGER_VERSION,
   UPDATE_INTERVAL_DAYS,
 } from "../app/api/fulfillment-cases/generator.ts";
+import { PRODUCT_CATALOG } from "../lib/product-catalog.ts";
+import {
+  calculateOrderPricing,
+  orderProfileForQuantity,
+  volumeDiscountBps,
+} from "../lib/order-pricing.ts";
 
 const asOf = new Date("2026-07-28T00:00:00.000Z");
 
@@ -16,7 +22,7 @@ test("daily ledger backfill is deterministic and limited to 100 records", () => 
   const first = createBackfillRows(DISPLAY_LIMIT, asOf);
   const second = createBackfillRows(DISPLAY_LIMIT, asOf);
 
-  assert.equal(LEDGER_VERSION, "daily-v2-small-order");
+  assert.equal(LEDGER_VERSION, "daily-v3-quote-pricing");
   assert.equal(UPDATE_INTERVAL_DAYS, 1);
   assert.equal(first.length, 100);
   assert.deepEqual(first, second);
@@ -78,23 +84,61 @@ test("bulk orders are separated and weekend orders stay exceptional", () => {
   assert.ok(weekendRows.length <= 5);
 });
 
-test("amounts are derived from quantity, unit price, and named fees", () => {
+test("amounts use the official quote catalogue and volume discount ladder", () => {
   const rows = createBackfillRows(100, asOf);
   let nonRoundedAmounts = 0;
 
   for (const row of rows) {
-    const expected =
-      row.quantityUnits * row.unitPriceUsdCents +
-      row.packagingFeeUsdCents +
-      row.testingFeeUsdCents +
-      row.logisticsFeeUsdCents;
-    assert.equal(row.amountUsdCents, expected);
     assert.ok(row.productName.length > 0);
     assert.ok(row.specification.length > 0);
+    if (row.service !== "custom") {
+      const catalogueItem = PRODUCT_CATALOG.find(
+        (item) =>
+          item.productName === row.productName &&
+          row.specification.startsWith(item.specification),
+      );
+      assert.ok(catalogueItem, `${row.productName} ${row.specification}`);
+      const pricing = calculateOrderPricing({
+        retailUnitPriceUsdCents: catalogueItem.retailUsdCents,
+        quantityUnits: row.quantityUnits,
+        service: row.service,
+        serviceFeeUsdCents:
+          row.packagingFeeUsdCents + row.testingFeeUsdCents,
+        shippingFeeUsdCents: row.logisticsFeeUsdCents,
+      });
+      assert.equal(row.unitPriceUsdCents, pricing.discountedUnitPriceUsdCents);
+      assert.equal(row.amountUsdCents, pricing.amountUsdCents);
+    }
     if (row.amountUsdCents % 1000 !== 0) nonRoundedAmounts += 1;
   }
 
   assert.ok(nonRoundedAmounts >= 80);
+});
+
+test("the official catalogue and market discount tiers remain auditable", () => {
+  assert.equal(PRODUCT_CATALOG.length, 96);
+  assert.equal(
+    new Set(PRODUCT_CATALOG.map((item) => item.productName)).size,
+    46,
+  );
+  assert.equal(volumeDiscountBps(1), 0);
+  assert.equal(volumeDiscountBps(10), 1000);
+  assert.equal(volumeDiscountBps(100), 3000);
+  assert.equal(volumeDiscountBps(500), 3500);
+  assert.equal(volumeDiscountBps(2500), 4000);
+  assert.equal(orderProfileForQuantity(501), "500–1,000 kits");
+
+  const quote = calculateOrderPricing({
+    retailUnitPriceUsdCents: 5100,
+    quantityUnits: 100,
+    service: "private_label",
+    serviceFeeUsdCents: 10_000,
+    shippingFeeUsdCents: 5_000,
+    deductionUsdCents: 2_000,
+  });
+  assert.equal(quote.retailSubtotalUsdCents, 510_000);
+  assert.equal(quote.discountBps, 3000);
+  assert.equal(quote.amountUsdCents, 370_000);
 });
 
 test("new orders cannot skip ahead and statuses advance by business day", () => {
