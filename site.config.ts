@@ -29,7 +29,7 @@ export const siteConfig = {
    *
    * 网站会自动生成 wa.me 链接，并自动带上客户选择的产品和询盘内容。
    */
-  whatsappNumber: "19863059927",
+  whatsappNumber: "85253430085",
 
   /**
    * 企业邮箱修改说明：
@@ -39,7 +39,7 @@ export const siteConfig = {
    * 目前留空，所以网站不会显示邮箱地址。
    * 企业邮箱准备好后，只需要修改下面这一行。
    */
-  salesEmail: "sales@peptivanta.com",
+  salesEmail: "sales@peptivanta.net",
 
   // 公司运营地区。请只填写能够由公司资料支持的真实信息。
   operatingRegion: "Hong Kong SAR · Sales & Export Coordination",
