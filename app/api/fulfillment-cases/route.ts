@@ -202,7 +202,7 @@ export async function GET() {
       .from(manualFulfillmentOrders)
       .where(eq(manualFulfillmentOrders.isPublished, true))
       .orderBy(
-        desc(manualFulfillmentOrders.occurredAt),
+        desc(manualFulfillmentOrders.createdAt),
         desc(manualFulfillmentOrders.id),
       )
       .limit(DISPLAY_LIMIT);
@@ -278,13 +278,15 @@ export async function GET() {
       source: "manual" as const,
     }));
 
-    const records = [...manualRecords, ...sampleRecords]
-      .sort((left, right) => {
-        const dateDelta = right.occurredAt.localeCompare(left.occurredAt);
-        if (dateDelta !== 0) return dateDelta;
-        return right.createdAt.localeCompare(left.createdAt);
-      })
-      .slice(0, DISPLAY_LIMIT);
+    /*
+     * Newly registered real orders always lead the public list. Within that
+     * section they are ordered by database creation time, while illustrative
+     * rows retain their normal fulfillment-date order.
+     */
+    const records = [...manualRecords, ...sampleRecords].slice(
+      0,
+      DISPLAY_LIMIT,
+    );
     const nextUpdateAt = addUtcDays(startOfUtcDay(now), 1);
 
     return Response.json(

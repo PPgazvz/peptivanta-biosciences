@@ -139,7 +139,6 @@ const content = {
     updated: "Ledger date",
     nextUpdate: "Next daily update",
     notice: "Illustrative workflow data, showing the latest 100 new orders.",
-    recordedOrder: "Recorded order",
     loading: "Loading recent records…",
     error: "Recent records are temporarily unavailable.",
     empty: "No published records are available for this period.",
@@ -193,7 +192,6 @@ const content = {
     updated: "Data do registro",
     nextUpdate: "Próxima atualização diária",
     notice: "Dados ilustrativos do fluxo, mostrando os 100 pedidos mais recentes.",
-    recordedOrder: "Pedido registrado",
     loading: "Carregando registros…",
     error: "Os registros estão temporariamente indisponíveis.",
     empty: "Não há registros publicados para este período.",
@@ -247,7 +245,6 @@ const content = {
     updated: "Fecha del registro",
     nextUpdate: "Próxima actualización diaria",
     notice: "Datos ilustrativos del flujo, mostrando los 100 pedidos más recientes.",
-    recordedOrder: "Pedido registrado",
     loading: "Cargando registros…",
     error: "Los registros no están disponibles temporalmente.",
     empty: "No hay registros publicados para este período.",
@@ -301,7 +298,6 @@ const content = {
     updated: "Date du registre",
     nextUpdate: "Prochaine mise à jour quotidienne",
     notice: "Données illustratives du flux, présentant les 100 commandes les plus récentes.",
-    recordedOrder: "Commande enregistrée",
     loading: "Chargement des enregistrements…",
     error: "Les enregistrements sont temporairement indisponibles.",
     empty: "Aucun enregistrement publié pour cette période.",
@@ -355,7 +351,6 @@ const content = {
     updated: "台账日期",
     nextUpdate: "下次每日更新",
     notice: "示例履约流程数据，仅展示近100条新订单",
-    recordedOrder: "已登记订单",
     loading: "正在读取近期记录…",
     error: "近期记录暂时无法加载。",
     empty: "该时间范围内暂无记录。",
@@ -555,11 +550,6 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                     </td>
                     <td data-label={t.headers[1]}>
                       <code>{record.reference}</code>
-                      {!record.isSample && (
-                        <span className="case-recorded-badge">
-                          {t.recordedOrder}
-                        </span>
-                      )}
                     </td>
                     <td data-label={t.headers[2]}>
                       {t.markets[record.destination]}
@@ -584,39 +574,35 @@ export default function FulfillmentCases({ locale }: { locale: Locale }) {
                       <strong>
                         {amountFormatter.format(record.amountUsdCents / 100)}
                       </strong>
-                      {record.isSample ? (
-                        <small className="case-price-breakdown">
-                          <span>
-                            {t.quoteRetail}{" "}
-                            {amountFormatter.format(
-                              record.retailUnitPriceUsdCents / 100,
-                            )}
-                            /{t.perBox}
-                            {record.discountBps > 0 && (
-                              <>
-                                {" · "}
-                                {t.volumeDiscount}{" "}
-                                {(record.discountBps / 100).toFixed(0)}%
-                              </>
-                            )}
-                          </span>
-                          <span>
-                            {t.settledUnit}{" "}
-                            {amountFormatter.format(
-                              record.unitPriceUsdCents / 100,
-                            )}
-                            /{t.perBox}
-                            {fees > 0 && (
-                              <>
-                                {" · "}
-                                {amountFormatter.format(fees / 100)} {t.fees}
-                              </>
-                            )}
-                          </span>
-                        </small>
-                      ) : (
-                        <small>{t.recordedOrder}</small>
-                      )}
+                      <small className="case-price-breakdown">
+                        <span>
+                          {t.quoteRetail}{" "}
+                          {amountFormatter.format(
+                            record.retailUnitPriceUsdCents / 100,
+                          )}
+                          /{t.perBox}
+                          {record.discountBps > 0 && (
+                            <>
+                              {" · "}
+                              {t.volumeDiscount}{" "}
+                              {(record.discountBps / 100).toFixed(0)}%
+                            </>
+                          )}
+                        </span>
+                        <span>
+                          {t.settledUnit}{" "}
+                          {amountFormatter.format(
+                            record.unitPriceUsdCents / 100,
+                          )}
+                          /{t.perBox}
+                          {fees > 0 && (
+                            <>
+                              {" · "}
+                              {amountFormatter.format(fees / 100)} {t.fees}
+                            </>
+                          )}
+                        </span>
+                      </small>
                     </td>
                     <td data-label={t.headers[7]}>
                       <span

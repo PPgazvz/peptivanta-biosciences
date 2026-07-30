@@ -210,7 +210,7 @@ async function readOrders() {
          created_at AS createdAt,
          updated_at AS updatedAt
        FROM manual_fulfillment_orders
-       ORDER BY occurred_at DESC, id DESC
+       ORDER BY created_at DESC, id DESC
        LIMIT 200`,
     )
     .all();
@@ -372,6 +372,48 @@ export async function PATCH(request: Request) {
     return Response.json(
       { error: status === 409 ? "That order reference already exists." : message },
       { status, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  const unauthorized = await requireFulfillmentAdmin(request);
+  if (unauthorized) return unauthorized;
+
+  try {
+    await ensureFulfillmentSchema();
+    const body = (await request.json()) as { id?: unknown };
+    const id = Number(body.id);
+    if (!Number.isSafeInteger(id) || id < 1) {
+      return Response.json(
+        { error: "Order id is invalid." },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
+    const d1 = await getD1();
+    const result = await d1
+      .prepare("DELETE FROM manual_fulfillment_orders WHERE id = ?")
+      .bind(id)
+      .run();
+
+    if (!result.meta.changes) {
+      return Response.json(
+        { error: "Order not found." },
+        { status: 404, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
+    return Response.json(
+      { ok: true, orders: await readOrders() },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to delete order.";
+    return Response.json(
+      { error: message },
+      { status: 400, headers: { "Cache-Control": "no-store" } },
     );
   }
 }

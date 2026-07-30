@@ -88,6 +88,7 @@ test("includes complete multilingual ledger content", async () => {
   assert.match(ledger, /Taille de commande/);
   assert.match(ledger, /Quote retail/);
   assert.match(ledger, /volume discount/);
+  assert.doesNotMatch(ledger, /Recorded order|已登记订单|recordedOrder/);
   assert.match(ledger, /订单规模/);
   assert.doesNotMatch(ledger, /准确数量/);
   assert.match(ledger, /文件审核中/);
@@ -139,6 +140,8 @@ test("configures a durable daily incremental ledger", async () => {
   assert.match(route, /LAST_GENERATED_KEY/);
   assert.match(route, /DELETE FROM fulfillment_cases WHERE is_sample = 1/);
   assert.match(route, /manualFulfillmentOrders/);
+  assert.match(route, /\[\.\.\.manualRecords, \.\.\.sampleRecords\]/);
+  assert.match(route, /desc\(manualFulfillmentOrders\.createdAt\)/);
   assert.match(route, /dataMode: "mixed_workflow"/);
   assert.match(route, /onConflictDoNothing/);
   assert.doesNotMatch(route, /\.update\(fulfillmentCases\)/);
@@ -197,11 +200,16 @@ test("renders the private real-order administration page", async () => {
   assert.match(adminPage, /自动计算总额/);
   assert.match(adminPage, /目录产品仅计算产品金额/);
   assert.match(adminPage, /disabled=\{catalogueDraft\}/);
+  assert.match(adminPage, /window\.confirm/);
+  assert.match(adminPage, /删除订单/);
   assert.match(adminRoute, /manual_fulfillment_orders/);
   assert.doesNotMatch(adminRoute, /fulfillmentCases/);
   assert.match(adminRoute, /findCatalogVariant/);
   assert.match(adminRoute, /calculateOrderPricing/);
   assert.match(adminRoute, /service === "catalogue" \? 0/);
+  assert.match(adminRoute, /export async function DELETE/);
+  assert.match(adminRoute, /DELETE FROM manual_fulfillment_orders WHERE id = \?/);
+  assert.match(adminRoute, /ORDER BY created_at DESC, id DESC/);
   assert.match(auth, /FULFILLMENT_ADMIN_KEY/);
   assert.match(auth, /Bearer/);
   assert.equal((catalogue.match(/\{ sku:/g) ?? []).length, 96);

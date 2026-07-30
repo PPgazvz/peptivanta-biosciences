@@ -167,7 +167,7 @@ export default function AdminOrdersPage() {
   );
 
   async function adminRequest(
-    method: "GET" | "POST" | "PATCH",
+    method: "GET" | "POST" | "PATCH" | "DELETE",
     body?: unknown,
     key = adminKey,
   ) {
@@ -277,6 +277,25 @@ export default function AdminOrdersPage() {
     }
     updateLocalOrder(order.id, { status: next.value });
     void saveOrder(order, next.value);
+  }
+
+  async function deleteOrder(order: ManualOrder) {
+    const confirmed = window.confirm(
+      `确定永久删除订单 ${order.reference} 吗？\n\n删除后无法恢复，并会立即从公开履约页面移除。`,
+    );
+    if (!confirmed) return;
+
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      await adminRequest("DELETE", { id: order.id });
+      setMessage(`${order.reference} 已永久删除。`);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "订单删除失败。");
+    } finally {
+      setBusy(false);
+    }
   }
 
   function signOut() {
@@ -707,6 +726,14 @@ export default function AdminOrdersPage() {
                       disabled={busy || order.status === "delivered"}
                     >
                       推进下一阶段
+                    </button>
+                    <button
+                      className="admin-delete"
+                      type="button"
+                      onClick={() => void deleteOrder(order)}
+                      disabled={busy}
+                    >
+                      删除订单
                     </button>
                   </div>
                 </article>

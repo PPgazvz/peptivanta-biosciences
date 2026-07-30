@@ -454,7 +454,7 @@
 
 .admin-order-controls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 150px 130px 145px;
+  grid-template-columns: minmax(220px, 1fr) 150px 130px 145px 110px;
   align-items: end;
   gap: 10px;
 }
@@ -476,6 +476,17 @@
   border-color: var(--ink);
   background: var(--ink);
   color: white;
+}
+
+.admin-order-controls .admin-delete {
+  border-color: rgba(188, 55, 55, 0.3);
+  background: rgba(188, 55, 55, 0.06);
+  color: #9c2929;
+}
+
+.admin-order-controls .admin-delete:hover:not(:disabled) {
+  border-color: rgba(188, 55, 55, 0.62);
+  background: rgba(188, 55, 55, 0.12);
 }
 
 @media (max-width: 900px) {
